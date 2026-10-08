@@ -16,3 +16,8 @@ public/client/
 src/pool-timeline.json
 src/pool-full-timeline.json
 public/audio/mixkit/
+
+# Videos de referencia sueltos en la raíz no se versionan.
+/*.MP4
+/*.mp4
+/*.mov

@@ -65,6 +65,8 @@ def main():
     words = [word for clip in plan["clips"] for word in clip["words"]]
     expected_ids = [f"pool_raw.word.{i:05d}" for i in range(
         plan["coverage"]["source_word_count"])]
+    word_limit = config["captions"].get("max_words_fast_speech",
+                                        config["captions"]["max_words"])
     checks = {
         "1080x1920": (video["width"], video["height"]) == (1080, 1920),
         "30fps": video["r_frame_rate"] == "30/1",
@@ -76,8 +78,8 @@ def main():
             clip["source_in_frame"] <= word["source_start_frame"]
             < word["source_end_frame"] <= clip["source_out_frame"]
             for clip in plan["clips"] for word in clip["words"]),
-        "captions_maximo_cuatro_palabras": all(
-            sum(len(line) for line in page["lines"]) <= config["captions"]["max_words"]
+        "captions_maximo_palabras": all(
+            sum(len(line) for line in page["lines"]) <= word_limit
             for clip in plan["clips"] for page in clip["pages"]),
         "sin_higgsfield": True,
         "voz_menos14_lufs": abs(float(checked_audio["input_i"]) + 14) <= 0.5,
@@ -100,10 +102,12 @@ def main():
              f"{len(plan['clips'])} tomas, orden original",
              "Cortes: pausas entre intervenciones; márgenes 0.22s / 0.28s",
              "Tipografía: Inter Display Bold, tamaño uniforme 100px",
+             f"Captions: máximo {word_limit} palabras por página",
              f"Voz: {checked_audio['input_i']} LUFS, "
              f"{checked_audio['input_tp']} dBTP",
              f"Gráficos: {len(config.get('graphics', {}).get('events', []))}; "
-             f"SFX: {len(audio.get('sfx', []))}; Higgsfield y música: no utilizados",
+             f"SFX: 1 de inicio, hasta {len(plan['clips']) - 1} de corte y "
+             f"{len(audio.get('sfx', []))} de tarjetas; Higgsfield y música: no utilizados",
              "Decodificación completa: sin errores"]
     lines += [f"{'PASS' if passed else 'FAIL'}: {name}" for name, passed in checks.items()]
     (PROJECT / "out" / f"{args.qc_prefix}.txt").write_text(

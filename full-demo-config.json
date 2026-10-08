@@ -7,7 +7,18 @@
     "speech_padding_before_seconds": 0.22,
     "speech_padding_after_seconds": 0.28,
     "minimum_pause_to_remove_seconds": 0.8,
-    "alignment_window_padding_seconds": 0.6
+    "alignment_window_padding_seconds": 0.6,
+    "clip_labels": [
+      "01 Inicio",
+      "02 Sensación y enfermedad",
+      "03 Uno de cada cuatro",
+      "04 Efectos del estrés",
+      "05 Modo de emergencia",
+      "06 Enfermar y sanar",
+      "07 Estudios y diabetes",
+      "08 Reflexión completa",
+      "09 Consecuencia y despedida"
+    ]
   },
   "captions": {
     "font_family": "InterDisplay",
@@ -18,7 +29,9 @@
     "word_gap": 18,
     "max_width": 864,
     "max_words": 4,
+    "max_words_fast_speech": 5,
     "max_lines": 2,
+    "min_last_word_frames": 8,
     "line_height": 112,
     "top": 1190,
     "color": "#ffffff",
@@ -26,29 +39,144 @@
     "reveal_frames": 5,
     "lift_pixels": 8
   },
+  "themes": {
+    "base": {
+      "accent": "#1f5fc4",
+      "light": "#6aa6ff",
+      "dark": "#174a9c"
+    },
+    "health": {
+      "accent": "#1f9d57",
+      "light": "#6ad79a",
+      "dark": "#157a43"
+    },
+    "stress": {
+      "accent": "#d63a3a",
+      "light": "#ff8a80",
+      "dark": "#a82424"
+    }
+  },
+  "intro_blur": {
+    "pixels": 22,
+    "hold_frames": 18,
+    "release_frames": 24
+  },
+  "background": {
+    "dim": "rgba(8,22,56,0.46)",
+    "saturate": 0.55,
+    "blur": 5,
+    "points": 64,
+    "link_distance": 190,
+    "fade_frames": 10,
+    "events": [
+      {"id": "emergency_bg", "theme": "stress", "label": "emergencia", "motif": "rings", "anchor_word_id": "pool_raw.word.00069", "offset_frames": 0, "sample_frame": 708, "duration_frames": 77},
+      {"id": "sick_bg", "theme": "health", "label": "te enfermas más seguido", "motif": "crosses", "anchor_word_id": "pool_raw.word.00078", "offset_frames": 0, "sample_frame": 801, "duration_frames": 96},
+      {"id": "risk_bg", "theme": "stress", "label": "duplica", "motif": "network", "anchor_word_id": "pool_raw.word.00098", "offset_frames": 0, "sample_frame": 1022, "duration_frames": 66}
+    ]
+  },
+  "cuts": {
+    "paper": {
+      "background": "linear-gradient(118deg, #eef2f8 0%, #ffffff 34%, #e6ecf6 62%, #f8fafd 100%)",
+      "ink": "#1f5fc4",
+      "muted": "#9db1cf"
+    },
+    "solid": {
+      "background": "linear-gradient(150deg, #174a9c 0%, #1f5fc4 55%, #3b82e6 100%)",
+      "ink": "#ffffff",
+      "muted": "rgba(255,255,255,0.42)"
+    },
+    "events": [
+      {"id": "investigate", "theme": "base", "label": "me puse a investigar", "style": "paper", "anchor_word_id": "pool_raw.word.00011", "offset_frames": 0, "sample_frame": 132, "last_word_id": "pool_raw.word.00015", "duration_frames": 34},
+      {"id": "illness", "theme": "stress", "label": "enfermedad", "style": "solid", "anchor_word_id": "pool_raw.word.00025", "offset_frames": 0, "sample_frame": 271, "last_word_id": "pool_raw.word.00025", "duration_frames": 25},
+      {"id": "doctor", "theme": "health", "label": "van al doctor", "style": "paper", "anchor_word_id": "pool_raw.word.00033", "offset_frames": 0, "sample_frame": 382, "last_word_id": "pool_raw.word.00040", "duration_frames": 73},
+      {"id": "designed", "theme": "stress", "label": "no fue diseñado", "style": "solid", "anchor_word_id": "pool_raw.word.00135", "offset_frames": 0, "sample_frame": 1395, "last_word_id": "pool_raw.word.00143", "duration_frames": 73}
+    ]
+  },
   "audio": {
     "integrated_lufs": -14,
     "true_peak_dbtp": -1.5,
     "loudness_range": 11,
     "music": null,
+    "intro_sfx": {
+      "file": "audio/mixkit/air-zoom-2608.wav",
+      "gain_db": -12,
+      "trim_before_frames": 10,
+      "duration_frames": 24
+    },
+    "cut_sfx": {
+      "gain_db": -12,
+      "skip_near_card_frames": 6,
+      "sounds": [
+        {
+          "file": "audio/mixkit/sweep-166.wav",
+          "peak_frames": 9,
+          "duration_frames": 23
+        },
+        {
+          "file": "audio/mixkit/swoosh-3115.wav",
+          "peak_frames": 4,
+          "duration_frames": 17
+        }
+      ]
+    },
     "sfx": [
-      {"id": "patients_enter", "frame": 339, "duration_frames": 40, "file": "audio/mixkit/whoosh-soft.wav", "gain_db": -15},
-      {"id": "patients_highlight", "frame": 360, "duration_frames": 10, "file": "audio/kenney/tick_001.ogg", "gain_db": -22},
-      {"id": "emergency_enter", "frame": 708, "duration_frames": 40, "file": "audio/mixkit/whoosh-soft.wav", "gain_db": -16},
-      {"id": "pressure_rise", "frame": 757, "duration_frames": 14, "file": "audio/kenney/switch_001.ogg", "gain_db": -24},
-      {"id": "risk_enter", "frame": 1022, "duration_frames": 40, "file": "audio/mixkit/whoosh-soft.wav", "gain_db": -15},
-      {"id": "risk_double", "frame": 1041, "duration_frames": 10, "file": "audio/kenney/tick_001.ogg", "gain_db": -22}
+      {"id": "patients_enter", "label": "entra uno de cuatro", "anchor_word_id": "pool_raw.word.00028", "offset_frames": 0, "sample_frame": 339, "duration_frames": 10, "file": "audio/kenney/glass_001.ogg", "gain_db": -14},
+      {"id": "patients_beat", "label": "énfasis uno de cuatro", "anchor_word_id": "pool_raw.word.00031", "offset_frames": 0, "sample_frame": 360, "duration_frames": 8, "file": "audio/kenney/glass_005.ogg", "gain_db": -16},
+      {"id": "body_enter", "label": "entra de la cabeza al cuerpo", "anchor_word_id": "pool_raw.word.00055", "offset_frames": 0, "sample_frame": 578, "duration_frames": 10, "file": "audio/kenney/glass_001.ogg", "gain_db": -14},
+      {"id": "body_beat", "label": "énfasis de la cabeza al cuerpo", "anchor_word_id": "pool_raw.word.00066", "offset_frames": 0, "sample_frame": 686, "duration_frames": 8, "file": "audio/kenney/glass_005.ogg", "gain_db": -16},
+      {"id": "emergency_enter", "label": "entra emergencia", "anchor_word_id": "pool_raw.word.00069", "offset_frames": 0, "sample_frame": 708, "duration_frames": 10, "file": "audio/kenney/glass_001.ogg", "gain_db": -14},
+      {"id": "emergency_beat", "label": "énfasis emergencia", "anchor_word_id": "pool_raw.word.00075", "offset_frames": 0, "sample_frame": 757, "duration_frames": 8, "file": "audio/kenney/glass_005.ogg", "gain_db": -16},
+      {"id": "healing_enter", "label": "entra tardas más en sanar", "anchor_word_id": "pool_raw.word.00082", "offset_frames": 0, "sample_frame": 843, "duration_frames": 10, "file": "audio/kenney/glass_001.ogg", "gain_db": -14},
+      {"id": "risk_enter", "label": "entra duplica", "anchor_word_id": "pool_raw.word.00098", "offset_frames": 0, "sample_frame": 1022, "duration_frames": 10, "file": "audio/kenney/glass_001.ogg", "gain_db": -14},
+      {"id": "risk_beat", "label": "énfasis duplica", "anchor_word_id": "pool_raw.word.00100", "offset_frames": 2, "sample_frame": 1041, "duration_frames": 8, "file": "audio/kenney/glass_005.ogg", "gain_db": -16},
+      {"id": "bill_enter", "label": "entra cobrar la factura", "anchor_word_id": "pool_raw.word.00150", "offset_frames": 0, "sample_frame": 1529, "duration_frames": 10, "file": "audio/kenney/glass_001.ogg", "gain_db": -14},
+      {"id": "bill_beat", "label": "énfasis cobrar la factura", "anchor_word_id": "pool_raw.word.00155", "offset_frames": 0, "sample_frame": 1550, "duration_frames": 8, "file": "audio/kenney/glass_005.ogg", "gain_db": -16},
+      {"id": "investigate_cut", "label": "corte de color me puse a investigar", "anchor_word_id": "pool_raw.word.00011", "offset_frames": -4, "sample_frame": 128, "duration_frames": 17, "file": "audio/mixkit/swoosh-3115.wav", "gain_db": -12},
+      {"id": "illness_cut", "label": "corte de color enfermedad", "anchor_word_id": "pool_raw.word.00025", "offset_frames": -4, "sample_frame": 267, "duration_frames": 17, "file": "audio/mixkit/swoosh-3115.wav", "gain_db": -12},
+      {"id": "doctor_cut", "label": "corte de color van al doctor", "anchor_word_id": "pool_raw.word.00033", "offset_frames": -4, "sample_frame": 378, "duration_frames": 17, "file": "audio/mixkit/swoosh-3115.wav", "gain_db": -12},
+      {"id": "designed_cut", "label": "corte de color no fue diseñado", "anchor_word_id": "pool_raw.word.00135", "offset_frames": -4, "sample_frame": 1391, "duration_frames": 17, "file": "audio/mixkit/swoosh-3115.wav", "gain_db": -12}
     ]
   },
   "graphics": {
-    "left": 108, "top": 1452, "width": 864, "height": 246,
-    "radius": 34, "background": "#faf7f4", "ink": "#241e1c",
-    "accent": "#db705c", "muted": "#d6cbc4", "line": "#e8ddd5",
-    "enter_frames": 14, "exit_frames": 10, "enter_offset": 34,
+    "left": 190,
+    "width": 700,
+    "height": 250,
+    "radius": 62,
+    "ink": "#ffffff",
+    "muted": "rgba(255,255,255,0.36)",
+    "enter_frames": 12,
+    "exit_frames": 9,
+    "enter_offset": 26,
+    "glass": {
+      "blur": 9,
+      "saturate": 1.7,
+      "brightness": 1.05,
+      "tint": "rgba(18,20,26,0.32)",
+      "refraction": 72,
+      "rim_pixels": 46,
+      "halo": 0.3,
+      "halo_pixels": 38,
+      "sheen_frames": 16
+    },
     "events": [
-      {"id": "patients", "frame": 339, "duration_frames": 160, "meaning": "Un paciente resaltado entre cuatro: cifra citada por el hablante"},
-      {"id": "emergency", "frame": 708, "duration_frames": 77, "meaning": "Modo de emergencia y flecha al mencionar que la presión sube"},
-      {"id": "risk", "frame": 1022, "duration_frames": 66, "meaning": "Dos barras con proporción 1:2 para la palabra duplica; no es una gráfica clínica"}
+      {"id": "patients", "kind": "patients", "theme": "health", "top": 295, "label": "uno de cuatro", "anchor_word_id": "pool_raw.word.00028", "offset_frames": 0, "sample_frame": 339, "duration_frames": 43, "beat": {"anchor_word_id": "pool_raw.word.00031", "offset_frames": 0, "sample_frame": 360},
+        "meaning": "Un paciente resaltado entre cuatro: cifra citada por el hablante"
+      },
+      {"id": "body", "kind": "body", "theme": "stress", "top": 304, "label": "de la cabeza al cuerpo", "anchor_word_id": "pool_raw.word.00055", "offset_frames": 0, "sample_frame": 578, "duration_frames": 122, "beat": {"anchor_word_id": "pool_raw.word.00066", "offset_frames": 0, "sample_frame": 686},
+        "meaning": "La cabeza encendida y, al decir cuerpo, el cuerpo que se llena"
+      },
+      {"id": "emergency", "kind": "emergency", "theme": "stress", "top": 313, "label": "emergencia", "anchor_word_id": "pool_raw.word.00069", "offset_frames": 0, "sample_frame": 708, "duration_frames": 77, "beat": {"anchor_word_id": "pool_raw.word.00075", "offset_frames": 0, "sample_frame": 757},
+        "meaning": "Alerta y una columna que sube al mencionar la presión; sin escala"
+      },
+      {"id": "healing", "kind": "healing", "theme": "health", "top": 350, "label": "tardas más en sanar", "anchor_word_id": "pool_raw.word.00082", "offset_frames": 0, "sample_frame": 843, "duration_frames": 54, "beat": {"anchor_word_id": "pool_raw.word.00087", "offset_frames": 0, "sample_frame": 880},
+        "meaning": "Un anillo que se completa pronto y otro que avanza despacio; sin cifras"
+      },
+      {"id": "risk", "kind": "risk", "theme": "stress", "top": 332, "label": "duplica", "anchor_word_id": "pool_raw.word.00098", "offset_frames": 0, "sample_frame": 1022, "duration_frames": 66, "beat": {"anchor_word_id": "pool_raw.word.00100", "offset_frames": 2, "sample_frame": 1041},
+        "meaning": "Dos barras con proporción 1:2 para la palabra duplica; no es una gráfica clínica"
+      },
+      {"id": "bill", "kind": "bill", "theme": "base", "top": 241, "label": "cobrar la factura", "anchor_word_id": "pool_raw.word.00150", "offset_frames": 0, "sample_frame": 1529, "duration_frames": 44, "beat": {"anchor_word_id": "pool_raw.word.00155", "offset_frames": 0, "sample_frame": 1550},
+        "meaning": "Un recibo que se despliega y su total al decir factura; sin importes"
+      }
     ]
   }
 }

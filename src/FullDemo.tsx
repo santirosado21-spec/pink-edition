@@ -2,6 +2,7 @@ import { Video } from "@remotion/media";
 import type { Caption } from "@remotion/captions";
 import {
   Composition,
+  OffthreadVideo,
   Easing,
   Series,
   interpolate,
@@ -9,25 +10,14 @@ import {
   useCurrentFrame,
   useVideoConfig,
 } from "remotion";
-import timeline from "./pool-full-timeline.json";
 import config from "../full-demo-config.json";
+import { BackgroundEffects } from "./BackgroundEffects";
+import { ColorCuts } from "./ColorCuts";
 import { EditorialGraphics } from "./EditorialGraphics";
-
-type AlignedWord = {
-  id: string;
-  text: string;
-  source_start_frame: number;
-  source_end_frame: number;
-  alignment_score: number | null;
-};
-type CaptionPage = {
-  start_frame: number;
-  end_frame: number;
-  lines: AlignedWord[][];
-};
+import { SoundDesign } from "./SoundDesign";
+import { clips, durationFrames, isSample, type CaptionPage } from "./timeline";
 
 const settings = config.captions;
-const isSample = (timeline as { is_sample?: boolean }).is_sample === true;
 
 const FullCaptions: React.FC<{ pages: CaptionPage[] }> = ({ pages }) => {
   // El tiempo heredado del grupo corresponde al raw, junto con su video.
@@ -111,66 +101,73 @@ const FullCaptions: React.FC<{ pages: CaptionPage[] }> = ({ pages }) => {
   );
 };
 
-const SpeechContent: React.FC<{ clipIndex: number }> = ({ clipIndex }) => {
+// Tres capas por toma comparten trim: fondo, persona recortada y captions.
+const ClipSeries: React.FC<{ label: string; render: (index: number) => React.ReactNode }> = ({ label, render }) => {
   const { fps } = useVideoConfig();
   return (
-    <>
-      {isSample ? <div style={{position: "absolute", inset: 0, background: "#272323"}} /> : <Video
-        name="Imagen y voz originales"
-        src={staticFile("client/pool-raw-full.mp4")}
-        premountFor={fps}
-        objectFit="cover"
-        style={{ width: "100%", height: "100%" }}
-      />}
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          background:
-            "linear-gradient(180deg, transparent 47%, rgba(0,0,0,.07) 68%, rgba(0,0,0,.32) 100%)",
-          pointerEvents: "none",
-        }}
-      />
-      <FullCaptions pages={timeline.clips[clipIndex].pages} />
-    </>
+    <Series>
+      {clips.map((clip, index) => (
+        <Series.Sequence
+          key={clip.id}
+          name={`${label}: ${config.edit.clip_labels[index] ?? clip.id}`}
+          trimBefore={clip.source_in_frame}
+          durationInFrames={clip.duration_frames}
+          premountFor={fps}
+        >
+          {render(index)}
+        </Series.Sequence>
+      ))}
+    </Series>
   );
 };
 
+const fill = { position: "absolute", inset: 0 } as const;
+const video = { width: "100%", height: "100%" } as const;
+
 const PoolFullDemo: React.FC = () => {
+  const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
-  // Cada toma es un nodo editable; su trim mueve video, voz y captions juntos.
+  const intro = config.intro_blur;
+  const blur = interpolate(frame, [intro.hold_frames, intro.hold_frames + intro.release_frames], [intro.pixels, 0], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+    easing: Easing.bezier(0.22, 1, 0.36, 1),
+  });
   return (
     <>
-    <Series>
-      <Series.Sequence name="01 Inicio" trimBefore={56} durationInFrames={166} premountFor={fps}>
-        <SpeechContent clipIndex={0} />
-      </Series.Sequence>
-      <Series.Sequence name="02 Sensación y enfermedad" trimBefore={452} durationInFrames={130} premountFor={fps}>
-        <SpeechContent clipIndex={1} />
-      </Series.Sequence>
-      <Series.Sequence name="03 Uno de cada cuatro" trimBefore={763} durationInFrames={203} premountFor={fps}>
-        <SpeechContent clipIndex={2} />
-      </Series.Sequence>
-      <Series.Sequence name="04 Efectos del estrés" trimBefore={1119} durationInFrames={131} premountFor={fps}>
-        <SpeechContent clipIndex={3} />
-      </Series.Sequence>
-      <Series.Sequence name="05 Modo de emergencia" trimBefore={1428} durationInFrames={155} premountFor={fps}>
-        <SpeechContent clipIndex={4} />
-      </Series.Sequence>
-      <Series.Sequence name="06 Enfermar y sanar" trimBefore={1731} durationInFrames={114} premountFor={fps}>
-        <SpeechContent clipIndex={5} />
-      </Series.Sequence>
-      <Series.Sequence name="07 Estudios y diabetes" trimBefore={2022} durationInFrames={189} premountFor={fps}>
-        <SpeechContent clipIndex={6} />
-      </Series.Sequence>
-      <Series.Sequence name="08 Reflexión completa" trimBefore={2407} durationInFrames={380} premountFor={fps}>
-        <SpeechContent clipIndex={7} />
-      </Series.Sequence>
-      <Series.Sequence name="09 Consecuencia y despedida" trimBefore={2929} durationInFrames={131} premountFor={fps}>
-        <SpeechContent clipIndex={8} />
-      </Series.Sequence>
-    </Series>
-    <EditorialGraphics />
+      {/* El filtro sólo existe mientras desenfoca: después apagaría el vidrio de las tarjetas. */}
+      <div style={{ ...fill, filter: blur > 0 ? `blur(${blur}px)` : undefined, scale: String(1 + blur / 400) }}>
+        <ClipSeries
+          label="Fondo"
+          render={() =>
+            isSample ? (
+              <div style={{ ...fill, background: "#272323" }} />
+            ) : (
+              <Video name="Imagen y voz originales" src={staticFile("client/pool-raw-full.mp4")} premountFor={fps} objectFit="cover" style={video} />
+            )
+          }
+        />
+        <BackgroundEffects />
+        <EditorialGraphics />
+        {/* La persona recortada vuelve a ir encima: los gráficos quedan detrás de ella. */}
+        {isSample ? null : (
+          <ClipSeries
+            label="Persona"
+            render={() => <OffthreadVideo transparent muted src={staticFile("client/pool-person.webm")} style={{ ...video, objectFit: "cover" }} />}
+          />
+        )}
+      </div>
+      <ClipSeries
+        label="Captions"
+        render={(index) => (
+          <>
+            <div style={{ ...fill, background: "linear-gradient(180deg, transparent 47%, rgba(0,0,0,.07) 68%, rgba(0,0,0,.32) 100%)" }} />
+            <FullCaptions pages={clips[index].pages} />
+          </>
+        )}
+      />
+      <ColorCuts />
+      <SoundDesign />
     </>
   );
 };
@@ -179,7 +176,7 @@ export const FullDemoComposition = () => (
   <Composition
     id="PoolFullDemo"
     component={PoolFullDemo}
-    durationInFrames={1599}
+    durationInFrames={durationFrames}
     fps={30}
     width={1080}
     height={1920}
