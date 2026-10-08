@@ -26,3 +26,8 @@ public/audio/mixkit/
 .venv-asr/
 work/
 public/work/
+
+# Web (Next.js).
+.next/
+next-env.d.ts
+*.tsbuildinfo

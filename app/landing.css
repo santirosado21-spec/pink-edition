@@ -1,0 +1,77 @@
+/* Landing: tema claro, propio de esta página. */
+.landing {
+  --ink: #1b1320; --soft: #6d6472; --pink: #ef5c8a; --pink-dark: #d9457a; --blush: #fde7ef; --paper: #fffafc; --line: #f1dfe7;
+  background: var(--paper); color: var(--ink); min-height: 100vh;
+  font: 16px/1.55 -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif;
+}
+.landing .wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+.landing nav { position: sticky; top: 0; z-index: 5; background: rgba(255, 250, 252, 0.86); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+.landing nav .wrap { display: flex; align-items: center; gap: 28px; height: 66px; }
+.landing .logo { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 20px; letter-spacing: -0.02em; }
+.landing .logo img { width: 36px; height: 36px; }
+.landing .logo span { color: var(--pink); }
+.landing nav a.link { color: var(--soft); font-size: 15px; }
+.landing nav a.link:hover { color: var(--ink); }
+.landing .grow { flex: 1; }
+.landing .cta { display: inline-block; background: var(--pink); color: #fff; font-weight: 700; padding: 13px 24px; border-radius: 999px; box-shadow: 0 10px 26px rgba(239, 92, 138, 0.32); transition: transform 0.15s, background 0.15s; }
+.landing .cta:hover { background: var(--pink-dark); transform: translateY(-1px); }
+.landing .cta.small { padding: 9px 18px; box-shadow: none; }
+.landing .cta.ghost { background: transparent; color: var(--ink); box-shadow: none; border: 1.5px solid var(--line); }
+
+.landing .hero { text-align: center; padding: 76px 0 30px; }
+.landing .hero img.bird { width: 132px; height: 132px; }
+.landing .pill { display: inline-block; background: var(--blush); color: var(--pink-dark); font-weight: 600; font-size: 13px; padding: 6px 14px; border-radius: 999px; margin: 14px 0 18px; }
+.landing h1 { font-size: clamp(40px, 6.4vw, 76px); line-height: 1.02; letter-spacing: -0.045em; margin: 0 auto 20px; max-width: 880px; }
+.landing h1 em { font-style: normal; color: var(--pink); }
+.landing .lead { font-size: 20px; color: var(--soft); max-width: 640px; margin: 0 auto 30px; }
+.landing .actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+/* Maqueta del editor: ilustración, no una captura de un video real. */
+.landing .mock { margin: 54px auto 0; max-width: 980px; border-radius: 22px; background: #15131a; padding: 14px; box-shadow: 0 40px 90px rgba(120, 40, 80, 0.22); display: grid; grid-template-columns: 250px 1fr 250px; gap: 14px; text-align: left; }
+.landing .phone { aspect-ratio: 9 / 16; border-radius: 14px; background: linear-gradient(180deg, #8fd0f2 0%, #bfe6f7 46%, #e9dccd 47%, #cbb9a6 100%); position: relative; overflow: hidden; }
+.landing .phone .person { position: absolute; left: 50%; bottom: 0; width: 46%; height: 52%; translate: -50% 0; background: #d79a78; border-radius: 46% 46% 0 0 / 30% 30% 0 0; }
+.landing .phone .head { position: absolute; left: 50%; bottom: 50%; width: 22%; aspect-ratio: 1; translate: -50% 0; background: #d79a78; border-radius: 50%; box-shadow: 0 -8px 0 #3a2a2a; }
+.landing .phone .glass { position: absolute; left: 14%; right: 14%; top: 13%; height: 13%; border-radius: 16px; background: rgba(255, 255, 255, 0.28); border: 1px solid rgba(255, 255, 255, 0.8); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; gap: 8px; }
+.landing .phone .glass i { width: 18px; height: 18px; border-radius: 50%; background: rgba(255, 255, 255, 0.6); }
+.landing .phone .glass i:first-child { background: var(--pink); }
+.landing .phone .caption { position: absolute; left: 0; right: 0; top: 60%; text-align: center; color: #fff; font-weight: 800; font-size: 19px; letter-spacing: -0.04em; text-shadow: 0 2px 10px rgba(0, 0, 0, 0.35); }
+.landing .mock .pane { background: #1e1b25; border-radius: 14px; padding: 16px; color: #e9e6ee; font-size: 14px; }
+.landing .mock .pane h5 { margin: 0 0 8px; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: #8c8798; }
+.landing .mock .pane p { margin: 0 0 14px; line-height: 1.9; }
+.landing .mock mark { background: linear-gradient(transparent 62%, rgba(239, 92, 138, 0.5) 62%); color: inherit; }
+.landing .mock u { text-decoration-color: #6aa6ff; text-decoration-thickness: 2px; text-underline-offset: 4px; }
+.landing .mock .el { border-left: 4px solid var(--pink); background: #26222f; border-radius: 10px; padding: 9px 11px; margin-bottom: 9px; }
+.landing .mock .el.blue { border-left-color: #6aa6ff; } .landing .mock .el.green { border-left-color: #5fd79a; }
+.landing .mock .el small { display: block; color: #8c8798; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; }
+
+.landing section { padding: 84px 0; }
+.landing h2 { font-size: clamp(30px, 4vw, 46px); letter-spacing: -0.035em; line-height: 1.08; margin: 0 0 14px; text-align: center; }
+.landing .sub { text-align: center; color: var(--soft); max-width: 600px; margin: 0 auto 44px; font-size: 18px; }
+.landing .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+.landing .card { background: #fff; border: 1px solid var(--line); border-radius: 20px; padding: 26px; }
+.landing .card .ico { width: 46px; height: 46px; border-radius: 14px; background: var(--blush); display: grid; place-items: center; font-size: 22px; margin-bottom: 16px; }
+.landing .card h3 { margin: 0 0 6px; font-size: 19px; letter-spacing: -0.02em; }
+.landing .card p { margin: 0; color: var(--soft); font-size: 15px; }
+.landing .band { background: #fff; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.landing .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; counter-reset: step; }
+.landing .step { counter-increment: step; }
+.landing .step::before { content: counter(step); display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: var(--pink); color: #fff; font-weight: 800; margin-bottom: 14px; }
+.landing .step h3 { margin: 0 0 6px; font-size: 20px; } .landing .step p { margin: 0; color: var(--soft); }
+.landing .split { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: center; margin-bottom: 70px; }
+.landing .split:last-child { margin-bottom: 0; }
+.landing .split h3 { font-size: 30px; letter-spacing: -0.03em; margin: 0 0 10px; line-height: 1.12; }
+.landing .split p { color: var(--soft); margin: 0; font-size: 17px; }
+.landing .panel { border-radius: 22px; background: linear-gradient(135deg, var(--blush), #fff); border: 1px solid var(--line); padding: 30px; min-height: 230px; display: flex; flex-direction: column; justify-content: center; gap: 12px; }
+.landing .panel .line { font-size: 20px; line-height: 1.9; }
+.landing .swatch { height: 64px; border-radius: 16px; display: grid; place-items: center; color: #fff; font-weight: 800; letter-spacing: -0.02em; }
+.landing details { background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 18px 22px; margin: 0 auto 12px; max-width: 760px; }
+.landing summary { font-weight: 700; cursor: pointer; font-size: 17px; }
+.landing details p { color: var(--soft); margin: 10px 0 0; }
+.landing .final { text-align: center; background: linear-gradient(180deg, var(--paper), var(--blush)); }
+.landing footer { padding: 28px 0 40px; color: var(--soft); font-size: 14px; border-top: 1px solid var(--line); }
+.landing footer .wrap { display: flex; align-items: center; gap: 16px; }
+@media (max-width: 860px) {
+  .landing .cards, .landing .steps, .landing .split { grid-template-columns: 1fr; }
+  .landing .mock { grid-template-columns: 1fr; } .landing .mock .phone { max-width: 240px; margin: 0 auto; }
+  .landing nav a.link { display: none; } .landing section { padding: 60px 0; }
+}

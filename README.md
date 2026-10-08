@@ -46,6 +46,23 @@ STYLE los sonidos de inicio, fronteras de toma, entradas y énfasis de tarjetas 
 cortes de color; el PLAN no enumera SFX. La música es `null` por defecto. No se
 deben incrustar canciones con derechos en entregas para clientes sin autorización.
 
+## Web
+
+```sh
+npm run web   # http://localhost:3000
+```
+
+- **Inicio:** subir un video y ver en qué paso va cada trabajo.
+- **Editor:** vista previa en vivo con la misma composición `PinkEdit`,
+  transcripción clicable y, por frase, cortes de color, tarjetas y fondos con su
+  color. Guardar crea una versión del plan y recoloca las tarjetas sobre la
+  persona; renderizar lanza `scripts/pink_edit.py`.
+- **Proponer con IA:** pide el plan a la API de Claude a partir de la
+  transcripción. Requiere `ANTHROPIC_API_KEY` en `.env.local`.
+
+La web (`app/`, Next.js) corre en la misma máquina que el motor, procesa un video
+a la vez y lee y escribe `work/<id>/`. Todavía no usa Supabase ni cuentas.
+
 ## Editar un video
 
 ```sh

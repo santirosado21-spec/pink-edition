@@ -105,6 +105,16 @@ de temas de color más amplia (dinero, salud, peligro, tecnología).
 
 ## Siguiente paso
 
-Los puntos 2 y 3: que Claude proponga el plan a partir del transcript, y un
-catálogo de tarjetas que sirva para cualquier tema. Hasta entonces un video nuevo
-sale sólo con captions y sonidos de corte, o con un plan escrito a mano.
+Hecho en local, sin Supabase: la web (`npm run web`) con subida, estado, editor
+con vista previa en vivo, guardado por versiones, render y descarga. La propuesta
+automática (punto 2) está escrita pero sin probar contra la API: falta la clave.
+
+Pendiente, en orden:
+
+1. Probar la propuesta automática con la clave y ajustar el prompt con videos
+   reales.
+2. Catálogo de tarjetas genéricas (punto 3): las siete actuales son del tema de
+   estrés.
+3. Conectar la web a Supabase (cuentas, `videos`, `edit_plans`, `jobs`, buckets)
+   y convertir el lanzador local en el procesador que toma trabajos de la cola.
+4. Desplegar la web en el VPS.
