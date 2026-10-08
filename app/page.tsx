@@ -1,45 +1,295 @@
-import Link from "next/link";
-import LandingDemo, { LandingRings, LandingSpeaker } from "./_components/LandingDemo";
+import type { Metadata } from "next";
+import {
+  Badge,
+  Brand,
+  PrimaryAction,
+  SectionHeading,
+} from "./_landing/Elements";
+import ProductPreview from "./_landing/ProductPreview";
+import DemoComparison from "./_landing/DemoComparison";
+import Plans from "./_landing/Plans";
+import Faq from "./_landing/Faq";
+import { landingConfig } from "./_landing/config";
 import "./landing.css";
 
-function Arrow({ diagonal = false }: { diagonal?: boolean }) {
-  return <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d={diagonal ? "M6 18L18 6M6 6h12v12" : "M4 12h15M13 6l6 6-6 6"} stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/></svg>;
-}
-function Wave({ compact = false }: { compact?: boolean }) {
-  return <div className={`audio-wave ${compact ? "compact-wave" : ""}`} aria-hidden="true">{Array.from({ length: 52 }, (_, i) => <i key={i} style={{ height: `${14 + ((i * 17 + i * i * 3) % 49)}%` }}/>)}</div>;
-}
-const FAQ = [
-  ["¿Qué videos puedo subir?", "Videos verticales de una persona hablando a cámara, en español: el formato de tus reels y TikToks. Hoy no trabajamos con video horizontal ni otros idiomas. La descarga es un MP4 de 1080 × 1920."],
-  ["¿Cuánto tarda en estar listo?", "El análisis de un video de un minuto toma alrededor de cinco minutos. A eso se suma el tiempo de render, que depende de la edición. Hoy procesamos un video a la vez."],
-  ["¿La edición se decide sola?", "Pink.ai corta los silencios y sincroniza los captions. Tú eliges las frases que llevan cortes de color, tarjetas o fondos; hoy no hay una propuesta automática de edición con IA. Puedes cambiar todo en el editor, revisar la vista previa y guardar versiones antes de renderizar."],
-  ["¿Puedo usar mi canción favorita?", "Las canciones con derechos no se incluyen en el archivo. Agrégalas desde la biblioteca de Instagram o TikTok cuando publiques. Pink.ai sí incorpora efectos de sonido al inicio, en los cambios de toma y en los gráficos."],
-  ["¿Dónde se procesa mi video?", "El procesamiento se realiza en nuestro propio equipo. Tu video no se envía a generadores de video externos."],
+export const metadata: Metadata = {
+  title: "Pink.ai — Tu próximo Reel empieza con tu video",
+  description:
+    "Edición de grabaciones reales para contenido corto. Conoce Pink.ai: ritmo, subtítulos, gráficos y sonido. Acceso por invitación.",
+};
+
+const steps = [
+  [
+    "Sube tu grabación.",
+    "Empieza con tu voz y tu material real, hablando a cámara.",
+    "Disponible solo en local",
+  ],
+  [
+    "Recibe la primera edición.",
+    "La idea: recibir una propuesta de IA que puedas revisar y hacer tuya.",
+    "Próximamente · IA sin validar",
+  ],
+  [
+    "Pide cambios con tus palabras.",
+    "Explica qué quieres ajustar sin aprender las herramientas de un editor.",
+    "Próximamente",
+  ],
+  [
+    "Descarga y publica.",
+    "Revisa el resultado y exporta tu video vertical en MP4.",
+    "Disponible solo en local",
+  ],
+];
+const features = [
+  [
+    "01",
+    "Ritmo sin perder tu voz.",
+    "Cortes para quitar momentos sin habla, conservando tus palabras y su orden.",
+  ],
+  [
+    "Aa",
+    "Cada palabra, a tiempo.",
+    "Subtítulos sincronizados con la voz, con una tipografía consistente y legible.",
+  ],
+  [
+    "▧",
+    "Gráficos con sentido.",
+    "Cortes de color, tarjetas de vidrio y fondos temáticos elegidos por frase en el editor.",
+  ],
+  [
+    "↗",
+    "Sonido que acompaña.",
+    "Efectos de sonido para acompañar los cortes y los elementos de la edición.",
+  ],
+  [
+    "9:16",
+    "Pensado en vertical.",
+    "Contenido corto, listo para exportar en MP4 de 1080 × 1920 desde el sistema local.",
+  ],
 ];
 
 export default function Landing() {
   return (
     <div className="landing">
-      <a className="skip-link" href="#contenido">Ir al contenido</a>
-      <nav className="landing-nav" aria-label="Navegación principal"><div className="wrap nav-inner"><Link href="/" className="brand-link" aria-label="Pink.ai, inicio"><img src="/logo.png" alt="" width="52" height="52"/><span>Pink.ai<span className="brand-period">●</span></span></Link><div className="nav-links"><a href="#funciones">Lo que puedes hacer</a><a href="#como">Cómo funciona</a><a href="#preguntas">Preguntas</a></div><Link className="nav-entry" href="/app">Entrar <Arrow diagonal/></Link></div></nav>
-      <main id="contenido">
-        <header className="hero"><div className="wrap hero-copy"><div className="eyebrow"><span/> PARA QUIENES TIENEN ALGO QUE CONTAR</div><h1>Tu voz.<br className="mobile-break"/> Un poco más <span className="hero-pink">alto.<svg viewBox="0 0 300 24" fill="none" aria-hidden="true"><path d="M4 18Q143-3 294 10M28 22Q175 8 266 17" stroke="currentColor" strokeWidth="4" strokeLinecap="round"/></svg></span></h1><p className="hero-lead">Convierte tu video hablando a cámara en un reel con ritmo,<br className="desktop-break"/> captions y carácter. Cada palabra sigue siendo tuya.</p><div className="hero-actions"><Link className="primary-cta" href="/app">Empezar a editar <Arrow/></Link><a className="text-link" href="#demo">Míralo en acción <span aria-hidden="true">↘</span></a></div><p className="hero-note">Tu grabación. En español. En vertical.</p></div><div className="hero-stage wrap" id="demo"><div className="stage-note"><svg viewBox="0 0 80 65" fill="none" aria-hidden="true"><path d="M2 6Q72-8 60 38Q57 51 33 50M43 40L32 50l14 7" stroke="currentColor" strokeWidth="1.5"/></svg><span>Menos pausas.<br/>Más tú.</span></div><LandingDemo/><div className="stage-bottom"><span><i/> Así se ve una idea con intención.</span><span>Ilustración interactiva del producto</span></div></div></header>
-        <section className="promise-strip" aria-label="Características del formato"><div className="wrap"><span>HECHO PARA TU VOZ</span><span>Vertical 9:16</span><span>En español</span><span>Todo lo que dijiste</span><span>MP4 · 1080 × 1920</span></div></section>
-        <section className="features wrap" id="funciones"><div className="section-intro"><p className="eyebrow">LA EDICIÓN SE NOTA. TÚ TE RECONOCES.</p><h2>Que se queden<br/>por lo que cuentas.</h2><p>Quita lo que frena. Dale espacio a lo que importa.<br/>Y ponle tu intención a cada frase.</p></div>
-          <div className="feature-pair">
-            <article className="feature-card rhythm-card"><div className="feature-copy"><span className="feature-number">01 / RITMO</span><h3>Fuera silencios.<br/>Dentro, cada palabra.</h3><p>Recorta las pausas entre tomas habladas. Conserva toda tu voz, en el orden en que la grabaste.</p></div><div className="silence-demo" role="img" aria-label="Una pausa entre dos tomas desaparece; las dos frases habladas se conservan."><div className="wave-label"><span>TU GRABACIÓN</span><span>Con pausas</span></div><div className="wave-before"><Wave compact/><div className="silence-gap"><span>silencio</span><i/></div><Wave compact/></div><div className="cut-connector"><svg viewBox="0 0 20 24" fill="none" aria-hidden="true"><path d="M10 2v18M4 14l6 6 6-6" stroke="currentColor" strokeWidth="1.5"/></svg><span>Solo se va la pausa</span></div><div className="wave-label"><span>CON PINK.AI</span><span>La misma voz</span></div><div className="wave-after"><Wave/><span className="splice"/></div><div className="spoken-phrases"><span>“Tengo una idea.”</span><span>“Te la cuento.”</span></div></div></article>
-            <article className="feature-card captions-card"><div className="feature-copy"><span className="feature-number">02 / CAPTIONS</span><h3>Tu voz también<br/>entra por los ojos.</h3><p>Palabra por palabra. Grandes, blancos y sincronizados. En páginas que dan tiempo de leer.</p></div><div className="caption-demo" role="img" aria-label="Caption grande sobre fondo oscuro: tienes algo que contar. Palabras organizadas en páginas."><div className="caption-orbit"/><span className="caption-timestamp">CAPTIONS / INTER DISPLAY BOLD</span><div className="caption-example">tienes algo<br/>que <span>contar.</span></div><div className="caption-pages"><span>Página 01 <b>tienes algo que contar.</b></span><span>Página 02 <b>dale tu propio ritmo.</b></span></div></div></article>
+      <a className="skip-link" href="#contenido">
+        Ir al contenido
+      </a>
+      <nav className="landing-nav" aria-label="Navegación principal">
+        <div className="wrap nav-inner">
+          <Brand />
+          <div className="nav-links">
+            <a href="#demo">Demo</a>
+            <a href="#como">Cómo funciona</a>
+            <a href="#planes">Planes</a>
+            <a href="#preguntas">Preguntas</a>
           </div>
-          <article className="color-feature"><div className="color-copy"><span className="feature-number">03 / CORTES DE COLOR</span><h3>Algunas frases<br/>merecen toda<br/>la pantalla.</h3><p>Elige una frase y conviértela en un corte de color o papel. La palabra que suena lleva el énfasis.</p><span className="small-note">El color acompaña el tema. Tú decides.</span></div><div className="color-posters" role="img" aria-label="Tres ejemplos de cortes a pantalla completa: azul base, verde salud y rojo estrés."><div className="color-poster poster-blue"><span>01 — BASE</span><strong>DALE<br/>ESPACIO<br/>A TUS<br/><em>IDEAS.</em></strong><span className="poster-foot">Una frase. Todo el foco. <Arrow diagonal/></span></div><div className="color-poster poster-green"><span>02 — SALUD</span><svg className="poster-cross" viewBox="0 0 80 80" aria-hidden="true"><path d="M26 0h28v26h26v28H54v26H26V54H0V26h26z" fill="currentColor"/></svg><strong>HABLEMOS<br/>DE<br/><em>SALUD.</em></strong><span className="poster-foot">Un tema, otro color. <Arrow diagonal/></span></div><div className="color-poster poster-red"><span>03 — ESTRÉS</span><strong>BAJA<br/>EL<br/><em>RUIDO.</em></strong><div className="poster-lines"/><span className="poster-foot">Dale una pausa al estrés. <Arrow diagonal/></span></div></div></article>
+          <a className="nav-entry" href="/app">
+            Entrar <span aria-hidden="true">↗</span>
+          </a>
+        </div>
+      </nav>
+      <main id="contenido">
+        <section className="hero" aria-labelledby="hero-title">
+          <div className="wrap hero-grid">
+            <div className="hero-copy">
+              <p className="eyebrow">
+                TU MATERIAL. TU VOZ. TU FORMA DE CONTAR.
+              </p>
+              <h1 id="hero-title">
+                Tu próximo Reel empieza con <span>tu video.</span>
+              </h1>
+              <p className="hero-lead">
+                Dale ritmo a tu grabación con subtítulos, gráficos y sonido. Tú
+                pones lo que tienes que contar.
+              </p>
+              <p className="future-copy">
+                <Badge>Próximamente</Badge> Una primera edición con IA y cambios
+                pedidos con tus propias palabras.
+              </p>
+              <div className="hero-actions">
+                <PrimaryAction />
+                <a className="text-link" href="#demo">
+                  Ver una demo <span aria-hidden="true">↓</span>
+                </a>
+              </div>
+              <p className="hero-note">Hecho para Reels, TikTok y Shorts.</p>
+              <p className="availability">
+                Por ahora, el editor funciona solo en el equipo del propietario.
+                El flujo público aún no está conectado.
+              </p>
+            </div>
+            <ProductPreview />
+          </div>
+          <div className="wrap hero-foot">
+            <span>GRABACIONES REALES, IDEAS PROPIAS</span>
+            <span>Para creadores, emprendedores y marcas personales.</span>
+          </div>
         </section>
-        <section className="layers-section"><div className="wrap layers-layout"><div className="layers-visual" role="img" aria-label="Ilustración por capas: anillos y una tarjeta de vidrio detrás de la silueta; captions delante."><div className="layer-back"><LandingRings/><span>01 / FONDO</span></div><div className="layer-middle"><svg viewBox="0 0 64 64" fill="none" aria-hidden="true"><circle cx="32" cy="32" r="21" stroke="currentColor" strokeWidth="2"/><path d="M20 32l8 8 17-18" stroke="currentColor" strokeWidth="3" strokeLinecap="round"/></svg><span>Tu idea,<br/><b>en primer plano.</b></span></div><div className="layer-front"><LandingSpeaker/><div className="layer-caption">el foco<br/>eres tú.</div></div><span className="layer-tag tag-background">Fondos con contexto</span><span className="layer-tag tag-person">Tu silueta, al frente</span><span className="layer-tag tag-caption">Captions siempre libres</span></div><div className="layers-copy"><span className="feature-number">04 / GRÁFICOS CON PROFUNDIDAD</span><h2>Detrás de ti.<br/>A favor de<br/><em>tu historia.</em></h2><p>Tu silueta separa los planos. Tarjetas de vidrio, pictogramas y fondos se colocan detrás de ti, sin tapar tu rostro ni tus captions.</p><div className="background-options"><span><svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><ellipse cx="16" cy="16" rx="14" ry="6" transform="rotate(-40 16 16)" stroke="currentColor"/><circle cx="16" cy="16" r="10" stroke="currentColor"/></svg>Anillos</span><span><svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M12 5h8v7h7v8h-7v7h-8v-7H5v-8h7z" stroke="currentColor"/></svg>Cruces</span><span><svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M6 8l19 6-12 12L6 8" stroke="currentColor"/><circle cx="6" cy="8" r="3" fill="currentColor"/><circle cx="25" cy="14" r="3" fill="currentColor"/><circle cx="13" cy="26" r="3" fill="currentColor"/></svg>Red de puntos</span></div></div></div></section>
-        <section className="control-section wrap"><div className="control-layout"><div className="control-copy"><span className="feature-number">05 / TÚ TIENES LA ÚLTIMA PALABRA</span><h2>Si puedes<br/>seleccionar texto,<br/>puedes darle estilo.</h2><p>Haz clic en una palabra para ir a ese instante. Selecciona una frase y añade un corte, una tarjeta o un fondo. Revísalo en vivo y guarda tus versiones.</p><Link className="text-link" href="/app">Abre tu próximo proyecto <Arrow/></Link></div><div className="document-demo" role="img" aria-label="Una frase seleccionada en la transcripción se convierte en un corte de color."><div className="document-header"><span>TRANSCRIPCIÓN</span><span>Versión 02</span></div><p>Hay ideas que necesitan<br/>un poco más de espacio.</p><div className="selection-toolbar"><span>Corte de color</span><span>Tarjeta</span><span>Fondo</span></div><p><mark>Dale espacio a tus ideas.</mark></p><div className="document-transform"><span className="transform-line"/><div className="document-element"><span className="element-letter">T</span><div><small>CORTE DE COLOR</small><strong>Dale espacio a tus ideas.</strong></div><span className="element-dot"/></div></div><div className="document-bottom"><span><i/> Vista previa en vivo</span><span>Versiones guardadas</span></div></div></div>
-          <article className="sound-feature"><div><span className="feature-number">06 / DISEÑO SONORO</span><h3>El ritmo también se escucha.</h3><p>Un efecto al inicio, en cada cambio de toma y en cada gráfico.<br className="desktop-break"/> Pequeños acentos para acompañar lo que dices.</p></div><div className="sound-demo" role="img" aria-label="Onda de voz continua con efectos marcados en el inicio, cambio de toma y gráfico."><div className="sound-markers"><span>Inicio</span><span>Cambio de toma</span><span>Gráfico</span></div><Wave/><div className="sound-pins"><i/><i/><i/></div><span className="sound-note">ILUSTRACIÓN DE AUDIO · SIN REPRODUCCIÓN</span></div></article>
+        <section className="section wrap" id="demo">
+          <SectionHeading
+            number="02"
+            title="La misma historia. Otra forma de verla."
+          >
+            Un espacio para comparar el original con su edición, sin cambiar
+            quién está detrás de la cámara.
+          </SectionHeading>
+          <DemoComparison />
         </section>
-        <section className="how-section" id="como"><div className="wrap"><div className="how-heading"><div><span className="eyebrow">DE TU CÁMARA A TU FEED</span><h2>Una buena toma.<br/>Tres pasos.</h2></div><p>Trabaja sobre lo que ya grabaste.<br/>La historia empieza contigo.</p></div><div className="steps"><article><span className="step-index">01 <svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M16 23V5M9 12l7-7 7 7M6 23v5h20v-5" stroke="currentColor" strokeWidth="1.5"/></svg></span><h3>Sube tu video.</h3><p>Una persona hablando a cámara, en español y en vertical. Pink.ai analiza la grabación y prepara el material.</p></article><article><span className="step-index">02 <svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M6 8h20M6 16h20M6 24h20M12 4v8M22 12v8M11 20v8" stroke="currentColor" strokeWidth="1.5"/></svg></span><h3>Hazlo tuyo.</h3><p>Elige tus frases clave, añade gráficos y ajusta los colores. Mira los cambios en la vista previa.</p></article><article><span className="step-index">03 <svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M16 4v18M9 15l7 7 7-7M6 23v5h20v-5" stroke="currentColor" strokeWidth="1.5"/></svg></span><h3>Descarga y publica.</h3><p>Renderiza tu versión y descarga el MP4 vertical en 1080 × 1920. Listo para llevarlo a tus redes.</p></article></div></div></section>
-        <section className="faq-section wrap" id="preguntas"><div><span className="eyebrow">SIN LETRA CHIQUITA</span><h2>Antes de<br/>darle play.</h2><p>Lo que Pink.ai hace hoy.<br/>Y lo que todavía no.</p></div><div className="faq-list">{FAQ.map(([question, answer]) => <details key={question}><summary>{question}<span aria-hidden="true"/></summary><p>{answer}</p></details>)}</div></section>
-        <section className="final-section"><div className="wrap final-inner"><img src="/logo.png" alt="Paloma rosa de Pink.ai con un botón de play en el ala" width="190" height="190"/><span className="eyebrow">DALE ALGO TUYO AL FEED</span><h2>Tú tienes la historia.<br/>Dale play.</h2><Link className="primary-cta" href="/app">Empezar a editar <Arrow/></Link><p>Tu voz. Tu estilo. Pink.ai.</p><span className="final-orbit orbit-one"/><span className="final-orbit orbit-two"/></div></section>
+        <section className="how-section" id="como">
+          <div className="wrap section">
+            <SectionHeading
+              number="03"
+              title="De tu cámara a tu próxima publicación."
+            >
+              Este es el flujo que estamos construyendo. La edición pública
+              todavía no está disponible.
+            </SectionHeading>
+            <ol className="steps">
+              {steps.map(([title, description, status], index) => (
+                <li key={title}>
+                  <span className="step-number">0{index + 1}</span>
+                  <h3>{title}</h3>
+                  <p>{description}</p>
+                  <Badge>{status}</Badge>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </section>
+        <section className="section wrap" id="incluye">
+          <SectionHeading
+            number="04"
+            title="La edición se nota. Tú te reconoces."
+          >
+            Estas herramientas ya funcionan en el editor local. Editamos lo que
+            grabas, sin sustituirte por un personaje artificial.
+          </SectionHeading>
+          <div className="features-grid">
+            {features.map(([symbol, title, description]) => (
+              <article className="feature-card" key={title}>
+                <span className="feature-symbol" aria-hidden="true">
+                  {symbol}
+                </span>
+                <h3>{title}</h3>
+                <p>{description}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+        <section className="conversation-section" id="correcciones">
+          <div className="wrap section split-section">
+            <div>
+              <Badge>Próximamente</Badge>
+              <SectionHeading
+                number="05"
+                title="Menos botones. Más tus palabras."
+              >
+                No necesitas saber cómo editar. Solo explicar qué quieres
+                cambiar.
+              </SectionHeading>
+              <p>
+                Así imaginamos las correcciones conversacionales: tú describes
+                el cambio y revisas la nueva versión. Esta función aún no está
+                conectada.
+              </p>
+            </div>
+            <div className="conversation">
+              <div className="conversation-top">
+                <span>Tu intención, por escrito</span>
+                <Badge>Demostración</Badge>
+              </div>
+              <p className="conversation-note">
+                Ejemplos de instrucciones · no es un chat activo
+              </p>
+              {[
+                "Baja los efectos de sonido.",
+                "Quita ese gráfico.",
+                "Mantén todo lo que digo y corta solo las pausas.",
+                "Usa la misma tipografía en todo el video.",
+              ].map((text) => (
+                <blockquote key={text}>{text}</blockquote>
+              ))}
+              <p className="conversation-bottom">Tu video sigue siendo tuyo.</p>
+            </div>
+          </div>
+        </section>
+        <section className="section wrap" id="planes">
+          <SectionHeading number="06" title="A tu ritmo de publicación.">
+            Pago por video o paquetes de créditos: opciones previstas para
+            distintas formas de crear. Condiciones por definir.
+          </SectionHeading>
+          <Plans />
+        </section>
+        <section className="voice-section">
+          <div className="wrap voice-inner">
+            <div className="voice-art" aria-hidden="true">
+              <svg viewBox="0 0 100 100" fill="none">
+                <rect
+                  x="39"
+                  y="15"
+                  width="22"
+                  height="42"
+                  rx="11"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                />
+                <path
+                  d="M28 45v4a22 22 0 0 0 44 0v-4M50 71v15M37 86h26"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                />
+              </svg>
+            </div>
+            <div>
+              <Badge>Próximamente</Badge>
+              <p className="eyebrow">07 / DICTADO POR VOZ</p>
+              <h2>También podrás decirlo en voz alta.</h2>
+              <p>
+                La idea es dictar instrucciones y correcciones para tu video.
+                Por ahora, no hay dictado disponible.
+              </p>
+            </div>
+          </div>
+        </section>
+        <section className="section wrap faq-section" id="preguntas">
+          <SectionHeading number="08" title="Antes de darle rec.">
+            Lo que puedes esperar hoy y lo que todavía estamos preparando.
+          </SectionHeading>
+          <Faq />
+        </section>
+        <section className="closing" aria-labelledby="closing-title">
+          <div className="wrap">
+            <img src="/logo.png" width="100" height="100" alt="" />
+            <p className="eyebrow">09 / TU PRÓXIMA HISTORIA</p>
+            <h2 id="closing-title">
+              Tú tienes algo que contar.
+              <br />
+              <span>Pink.ai te ayuda a publicarlo.</span>
+            </h2>
+            <PrimaryAction />
+            <div id="acceso" className="access-block">
+              <h3>Acceso por invitación, por ahora.</h3>
+              <p>El registro público todavía no está abierto.</p>
+              {landingConfig.accessEmail ? (
+                <a
+                  className="text-link"
+                  href={`mailto:${landingConfig.accessEmail}`}
+                >
+                  {landingConfig.accessEmail}
+                </a>
+              ) : (
+                <p>El canal para solicitar una invitación se anunciará aquí.</p>
+              )}
+            </div>
+          </div>
+        </section>
       </main>
-      <footer className="landing-footer"><div className="wrap"><Link href="/" className="brand-link"><img src="/logo.png" alt="" width="42" height="42"/><span>Pink.ai</span></Link><span>Hecho para quienes tienen algo que contar.</span><a href="#contenido">Volver arriba ↑</a></div></footer>
+      <footer className="landing-footer wrap">
+        <Brand />
+        <p>Tu voz siempre es el punto de partida.</p>
+        <a href="#contenido">Volver arriba ↑</a>
+      </footer>
     </div>
   );
 }
