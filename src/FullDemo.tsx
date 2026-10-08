@@ -10,19 +10,21 @@ import {
   useCurrentFrame,
   useVideoConfig,
 } from "remotion";
-import config from "../full-demo-config.json";
+import defaultPlan from "../projects/piscina/plan.json";
+import defaultStyle from "../style/pink-demo-v1.json";
+import defaultTimeline from "./pool-full-timeline.json";
 import { BackgroundEffects } from "./BackgroundEffects";
 import { ColorCuts } from "./ColorCuts";
 import { EditorialGraphics } from "./EditorialGraphics";
 import { SoundDesign } from "./SoundDesign";
-import { clips, durationFrames, isSample, type CaptionPage } from "./timeline";
-
-const settings = config.captions;
+import { EditContext, buildEdit, useEdit, type CaptionPage, type EditProps, type Plan, type Timeline } from "./edit";
 
 const FullCaptions: React.FC<{ pages: CaptionPage[] }> = ({ pages }) => {
   // El tiempo heredado del grupo corresponde al raw, junto con su video.
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
+  const { style } = useEdit();
+  const settings = style.captions;
   const page = pages.find(
     (candidate) => frame >= candidate.start_frame && frame < candidate.end_frame,
   );
@@ -33,7 +35,7 @@ const FullCaptions: React.FC<{ pages: CaptionPage[] }> = ({ pages }) => {
       style={{
         position: "absolute",
         top: settings.top,
-        left: (config.width - settings.max_width) / 2,
+        left: (style.width - settings.max_width) / 2,
         width: settings.max_width,
         fontFamily: settings.font_family,
         fontSize: settings.font_size,
@@ -104,12 +106,13 @@ const FullCaptions: React.FC<{ pages: CaptionPage[] }> = ({ pages }) => {
 // Tres capas por toma comparten trim: fondo, persona recortada y captions.
 const ClipSeries: React.FC<{ label: string; render: (index: number) => React.ReactNode }> = ({ label, render }) => {
   const { fps } = useVideoConfig();
+  const { plan, clips } = useEdit();
   return (
     <Series>
       {clips.map((clip, index) => (
         <Series.Sequence
           key={clip.id}
-          name={`${label}: ${config.edit.clip_labels[index] ?? clip.id}`}
+          name={`${label}: ${plan.clip_labels?.[index] ?? clip.id}`}
           trimBefore={clip.source_in_frame}
           durationInFrames={clip.duration_frames}
           premountFor={fps}
@@ -124,17 +127,20 @@ const ClipSeries: React.FC<{ label: string; render: (index: number) => React.Rea
 const fill = { position: "absolute", inset: 0 } as const;
 const video = { width: "100%", height: "100%" } as const;
 
-const PoolFullDemo: React.FC = () => {
+// Una edición completa de un video: recibe estilo y plan, montaje y medios.
+const PinkEdit: React.FC<EditProps> = (props) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
-  const intro = config.intro_blur;
+  const edit = buildEdit(props);
+  const { style, plan, clips, isSample, media } = edit;
+  const intro = plan.intro_blur ?? style.intro_blur;
   const blur = interpolate(frame, [intro.hold_frames, intro.hold_frames + intro.release_frames], [intro.pixels, 0], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
     easing: Easing.bezier(0.22, 1, 0.36, 1),
   });
   return (
-    <>
+    <EditContext.Provider value={edit}>
       {/* El filtro sólo existe mientras desenfoca: después apagaría el vidrio de las tarjetas. */}
       <div style={{ ...fill, filter: blur > 0 ? `blur(${blur}px)` : undefined, scale: String(1 + blur / 400) }}>
         <ClipSeries
@@ -143,17 +149,17 @@ const PoolFullDemo: React.FC = () => {
             isSample ? (
               <div style={{ ...fill, background: "#272323" }} />
             ) : (
-              <Video name="Imagen y voz originales" src={staticFile("client/pool-raw-full.mp4")} premountFor={fps} objectFit="cover" style={video} />
+              <Video name="Imagen y voz originales" src={staticFile(media.source)} premountFor={fps} objectFit="cover" style={video} />
             )
           }
         />
         <BackgroundEffects />
         <EditorialGraphics />
         {/* La persona recortada vuelve a ir encima: los gráficos quedan detrás de ella. */}
-        {isSample ? null : (
+        {isSample || !media.person ? null : (
           <ClipSeries
             label="Persona"
-            render={() => <OffthreadVideo transparent muted src={staticFile("client/pool-person.webm")} style={{ ...video, objectFit: "cover" }} />}
+            render={() => <OffthreadVideo transparent muted src={staticFile(media.person as string)} style={{ ...video, objectFit: "cover" }} />}
           />
         )}
       </div>
@@ -168,17 +174,33 @@ const PoolFullDemo: React.FC = () => {
       />
       <ColorCuts />
       <SoundDesign />
-    </>
+    </EditContext.Provider>
   );
 };
 
+const poolDefaults: EditProps = {
+  style: defaultStyle,
+  plan: defaultPlan as unknown as Plan,
+  timeline: defaultTimeline as unknown as Timeline,
+  media: { source: "client/pool-raw-full.mp4", person: "client/pool-person.webm" },
+};
+
+// `PinkEdit` edita cualquier video con `--props`; `PoolFullDemo` es la demo de piscina.
 export const FullDemoComposition = () => (
-  <Composition
-    id="PoolFullDemo"
-    component={PoolFullDemo}
-    durationInFrames={durationFrames}
-    fps={30}
-    width={1080}
-    height={1920}
-  />
+  <>
+    {["PinkEdit", "PoolFullDemo"].map((id) => (
+      <Composition
+        key={id}
+        id={id}
+        component={PinkEdit}
+        defaultProps={poolDefaults}
+        calculateMetadata={({ props }) => ({
+          durationInFrames: props.timeline.duration_frames,
+          fps: props.style.fps,
+          width: props.style.width,
+          height: props.style.height,
+        })}
+      />
+    ))}
+  </>
 );

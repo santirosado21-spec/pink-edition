@@ -1,12 +1,12 @@
 import { Easing, interpolate, useCurrentFrame } from "remotion";
-import config from "../../full-demo-config.json";
-import { useTheme } from "../theme";
+import { useEdit, useTheme } from "../edit";
 
-const style = config.graphics;
-const W = style.width;
-const H = style.height;
-const ink = style.ink;
-const muted = style.muted;
+// Medidas y tintas de la tarjeta, del estilo de la edición en curso.
+const useCard = () => {
+  const { style } = useEdit();
+  const card = style.graphics;
+  return { W: card.width, H: card.height, ink: card.ink, muted: card.muted, lineHeight: style.captions.line_height };
+};
 const ease = Easing.bezier(0.16, 1, 0.3, 1);
 const clamp = { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: ease } as const;
 
@@ -15,6 +15,7 @@ export type CardProps = { duration: number; beat: number };
 
 const Canvas: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const theme = useTheme();
+  const { W, H } = useCard();
   return (
   <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} style={{ position: "absolute", inset: 0 }}>
     <defs>
@@ -29,6 +30,7 @@ const Canvas: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 };
 
 const Patients: React.FC<CardProps> = ({ beat }) => {
+  const { W, H, ink, muted } = useCard();
   const frame = useCurrentFrame();
   const highlight = interpolate(frame, [beat, beat + 14], [0, 1], clamp);
   return (
@@ -51,6 +53,7 @@ const Patients: React.FC<CardProps> = ({ beat }) => {
 };
 
 const Emergency: React.FC<CardProps> = ({ beat }) => {
+  const { W, H, ink, muted } = useCard();
   const frame = useCurrentFrame();
   const draw = interpolate(frame, [2, 18], [0, 1], clamp);
   const rise = interpolate(frame, [beat, beat + 12], [0, 1], clamp);
@@ -72,6 +75,7 @@ const Emergency: React.FC<CardProps> = ({ beat }) => {
 };
 
 const Risk: React.FC<CardProps> = ({ beat }) => {
+  const { H, ink, muted, lineHeight } = useCard();
   const frame = useCurrentFrame();
   const grow = interpolate(frame, [beat, beat + 14], [0, 1], clamp);
   const base = 180;
@@ -82,12 +86,13 @@ const Risk: React.FC<CardProps> = ({ beat }) => {
         <rect x="290" y={H / 2 + 12} width={base + grow * base} height="40" rx="20" fill="url(#card-accent)" />
         <circle cx={290 + base + grow * base - 20} cy={H / 2 + 32} r="8" fill={ink} />
       </Canvas>
-      <div style={{ position: "absolute", left: 64, top: (H - config.captions.line_height) / 2, lineHeight: `${config.captions.line_height}px` }}>2×</div>
+      <div style={{ position: "absolute", left: 64, top: (H - lineHeight) / 2, lineHeight: `${lineHeight}px` }}>2×</div>
     </>
   );
 };
 
 const Illness: React.FC<CardProps> = ({ beat }) => {
+  const { W, H, ink } = useCard();
   const frame = useCurrentFrame();
   const cloud = interpolate(frame, [2, 16], [0, 1], clamp);
   const turn = interpolate(frame, [beat, beat + 14], [0, 1], clamp);
@@ -111,6 +116,7 @@ const Illness: React.FC<CardProps> = ({ beat }) => {
 };
 
 const Body: React.FC<CardProps> = ({ beat }) => {
+  const { W, H, ink, muted } = useCard();
   const frame = useCurrentFrame();
   const shown = interpolate(frame, [2, 14], [0, 1], clamp);
   const flow = interpolate(frame, [beat, beat + 18], [0, 1], clamp);
@@ -137,6 +143,7 @@ const Body: React.FC<CardProps> = ({ beat }) => {
 };
 
 const Healing: React.FC<CardProps> = ({ duration }) => {
+  const { W, H, ink, muted } = useCard();
   const frame = useCurrentFrame();
   const shown = interpolate(frame, [2, 12], [0, 1], clamp);
   const quick = interpolate(frame, [6, 22], [0, 1], clamp);
@@ -159,6 +166,7 @@ const Healing: React.FC<CardProps> = ({ duration }) => {
 };
 
 const Bill: React.FC<CardProps> = ({ beat }) => {
+  const { W, ink } = useCard();
   const frame = useCurrentFrame();
   const unroll = interpolate(frame, [2, 18], [0, 1], clamp);
   const total = interpolate(frame, [beat, beat + 10], [0, 1], clamp);

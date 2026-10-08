@@ -8,7 +8,7 @@ sólo para Santiago, con un editor para ajustar la propuesta antes de renderizar
 
 | Pieza | Estado |
 | --- | --- |
-| Estilo de la demo (captions, cortes de color, tarjetas de vidrio, fondos, SFX) | Funciona, pero atado al video de piscina |
+| Estilo de la demo (captions, cortes de color, tarjetas de vidrio, fondos, SFX) | Funciona; el motor `PinkEdit` acepta cualquier video con `scripts/pink_edit.py` (punto 1 hecho) |
 | Repositorio | `santirosado21-spec/pink-edition`, rama `claude/data-driven-review` |
 | Base de datos | Supabase `pink-ai` (`awptxbhlraiddimobwzv`, us-east-2), esquema en `supabase/migrations/` |
 | Servidor | VPS Hostinger KVM 1; Santiago lo actualiza |
@@ -28,22 +28,19 @@ sólo para Santiago, con un editor para ajustar la propuesta antes de renderizar
 
 ## Lo que falta, en orden
 
-### 1. Que el motor edite cualquier video
+### 1. Que el motor edite cualquier video — hecho
 
-Bloquea todo lo demás. Hoy están fijos al video de piscina:
-
-- Rutas (`client/pool-raw-full.mp4`, `client/pool-person.webm`) y el nombre
-  `PoolFullDemo`. Pasar a una composición `PinkEdit` que reciba el plan como
-  `inputProps` y lea los archivos de la carpeta del trabajo.
-- `full-demo-config.json` mezcla estilo (fuente, vidrio, colores) con decisiones
-  de este video (qué palabra lleva tarjeta). Separar en `style` (fijo, es la demo)
-  y `plan` (por video, lo que se guarda en `edit_plans`).
-- IDs `pool_raw.word.*` y el idioma `es` escritos en `prepare_full_demo.py` y
-  `finish_full_demo.py`.
-- La transcripción: el script espera un transcript ya hecho. Falta el paso que lo
-  genera desde el video (WhisperX ya está instalado en `.venv-edit`).
-- Un solo comando `pink edit <video>` que encadene transcribir, alinear, cortar
-  silencios, recortar persona, proponer plan, colocar tarjetas, renderizar y QC.
+- `PinkEdit` recibe `{style, plan, timeline, media}`; ya no hay rutas ni
+  decisiones del video de piscina en el código.
+- El antiguo `full-demo-config.json` quedó partido en `style/pink-demo-v1.json`
+  (el look) y un plan por video que sigue `schema/edit-plan.schema.json`; es lo
+  que se guarda en `edit_plans`. Reglas en `docs/EDITING_GUIDELINES.md`.
+- `scripts/pink_edit.py <video>` encadena transcribir, cortar silencios, recortar
+  a la persona, colocar tarjetas, renderizar y QC en `work/<id>/`.
+- Probado sólo con el raw de piscina: sin plan (captions y sonidos de corte) y con
+  el plan del v9 sin posiciones de tarjeta. La transcripción automática dio las
+  mismas 158 palabras, con una distinta que se arregla con el archivo de
+  correcciones. Falta probarlo con otro video, otra cámara y otro tema.
 
 ### 2. Propuesta editorial automática
 
@@ -108,5 +105,6 @@ de temas de color más amplia (dinero, salud, peligro, tecnología).
 
 ## Siguiente paso
 
-El punto 1. Sin un motor que acepte cualquier video, el editor y la cola no
-tienen nada que mostrar. Para probarlo hace falta un segundo video.
+Los puntos 2 y 3: que Claude proponga el plan a partir del transcript, y un
+catálogo de tarjetas que sirva para cualquier tema. Hasta entonces un video nuevo
+sale sólo con captions y sonidos de corte, o con un plan escrito a mano.

@@ -1,0 +1,144 @@
+{
+  "id": "pink-demo-v1",
+  "fps": 30,
+  "width": 1080,
+  "height": 1920,
+  "edit": {
+    "mode": "all_speech_original_order",
+    "speech_padding_before_seconds": 0.22,
+    "speech_padding_after_seconds": 0.28,
+    "minimum_pause_to_remove_seconds": 0.8,
+    "alignment_window_padding_seconds": 0.6
+  },
+  "captions": {
+    "font_family": "InterDisplay",
+    "font_file": "InterDisplay-Bold.ttf",
+    "font_size": 100,
+    "font_weight": 700,
+    "letter_spacing_em": -0.075,
+    "word_gap": 18,
+    "max_width": 864,
+    "max_words": 4,
+    "max_words_fast_speech": 5,
+    "max_lines": 2,
+    "min_last_word_frames": 8,
+    "line_height": 112,
+    "top": 1190,
+    "color": "#ffffff",
+    "shadow": "0 3px 16px rgba(0,0,0,.38)",
+    "reveal_frames": 5,
+    "lift_pixels": 8
+  },
+  "themes": {
+    "base": {
+      "accent": "#1f5fc4",
+      "light": "#6aa6ff",
+      "dark": "#174a9c"
+    },
+    "health": {
+      "accent": "#1f9d57",
+      "light": "#6ad79a",
+      "dark": "#157a43"
+    },
+    "stress": {
+      "accent": "#d63a3a",
+      "light": "#ff8a80",
+      "dark": "#a82424"
+    }
+  },
+  "intro_blur": {
+    "pixels": 22,
+    "hold_frames": 18,
+    "release_frames": 24
+  },
+  "background": {
+    "dim": "rgba(8,22,56,0.46)",
+    "saturate": 0.55,
+    "blur": 5,
+    "points": 64,
+    "link_distance": 190,
+    "fade_frames": 10
+  },
+  "cuts": {
+    "paper": {
+      "background": "linear-gradient(118deg, #eef2f8 0%, #ffffff 34%, #e6ecf6 62%, #f8fafd 100%)",
+      "ink": "#1f5fc4",
+      "muted": "#9db1cf"
+    },
+    "solid": {
+      "background": "linear-gradient(150deg, #174a9c 0%, #1f5fc4 55%, #3b82e6 100%)",
+      "ink": "#ffffff",
+      "muted": "rgba(255,255,255,0.42)"
+    }
+  },
+  "audio": {
+    "integrated_lufs": -14,
+    "true_peak_dbtp": -1.5,
+    "loudness_range": 11,
+    "intro_sfx": {
+      "file": "audio/mixkit/air-zoom-2608.wav",
+      "gain_db": -12,
+      "trim_before_frames": 10,
+      "duration_frames": 24
+    },
+    "cut_sfx": {
+      "gain_db": -12,
+      "skip_near_card_frames": 6,
+      "sounds": [
+        {
+          "file": "audio/mixkit/sweep-166.wav",
+          "peak_frames": 9,
+          "duration_frames": 23
+        },
+        {
+          "file": "audio/mixkit/swoosh-3115.wav",
+          "peak_frames": 4,
+          "duration_frames": 17
+        }
+      ]
+    },
+    "card_enter_sfx": {
+      "file": "audio/kenney/glass_001.ogg",
+      "gain_db": -14,
+      "duration_frames": 10
+    },
+    "card_beat_sfx": {
+      "file": "audio/kenney/glass_005.ogg",
+      "gain_db": -16,
+      "duration_frames": 8,
+      "silent_kinds": [
+        "healing"
+      ]
+    },
+    "color_cut_sfx": {
+      "file": "audio/mixkit/swoosh-3115.wav",
+      "gain_db": -12,
+      "duration_frames": 17,
+      "lead_frames": 4
+    }
+  },
+  "graphics": {
+    "left": 190,
+    "width": 700,
+    "height": 250,
+    "radius": 62,
+    "ink": "#ffffff",
+    "muted": "rgba(255,255,255,0.36)",
+    "enter_frames": 12,
+    "exit_frames": 9,
+    "enter_offset": 26,
+    "gap_above_person": 70,
+    "minimum_top": 150,
+    "glass": {
+      "blur": 9,
+      "saturate": 1.7,
+      "brightness": 1.05,
+      "tint": "rgba(18,20,26,0.32)",
+      "refraction": 72,
+      "rim_pixels": 46,
+      "halo": 0.3,
+      "halo_pixels": 38,
+      "sheen_frames": 16
+    }
+  }
+}

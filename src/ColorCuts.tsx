@@ -1,14 +1,11 @@
 import { Sequence, useCurrentFrame, useVideoConfig } from "remotion";
-import config from "../full-demo-config.json";
-import { themeOf } from "./theme";
-import { resolveFrame, wordsBetween } from "./timeline";
-
-const settings = config.cuts;
-const captions = config.captions;
+import { useEdit } from "./edit";
 
 // Corte a pantalla completa: tapa el video y deja sólo la frase que se está diciendo.
 const Cut: React.FC<{ from: number; firstId: string; lastId: string; look: { background: string; ink: string; muted: string } }> = ({ from, firstId, lastId, look }) => {
   const frame = useCurrentFrame() + from;
+  const { style, wordsBetween } = useEdit();
+  const captions = style.captions;
   const words = wordsBetween(firstId, lastId);
   const current = words.reduce((found, word, index) => (word.frame <= frame ? index : found), 0);
   return (
@@ -40,10 +37,12 @@ const Cut: React.FC<{ from: number; firstId: string; lastId: string; look: { bac
 
 export const ColorCuts: React.FC = () => {
   const { fps } = useVideoConfig();
+  const { style, plan, resolveFrame, themeOf } = useEdit();
+  const settings = style.cuts;
   return (
     <>
-      {settings.events.map((event) => {
-        const from = resolveFrame(event);
+      {plan.cuts.map((event) => {
+        const from = resolveFrame(event, event.id);
         const theme = themeOf(event.theme);
         // El color del corte sigue el tema: fondo de color o papel con tinta de color.
         const look =

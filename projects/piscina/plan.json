@@ -1,0 +1,35 @@
+{
+  "style": "pink-demo-v1",
+  "version": 1,
+  "clip_labels": [
+    "01 Inicio",
+    "02 Sensación y enfermedad",
+    "03 Uno de cada cuatro",
+    "04 Efectos del estrés",
+    "05 Modo de emergencia",
+    "06 Enfermar y sanar",
+    "07 Estudios y diabetes",
+    "08 Reflexión completa",
+    "09 Consecuencia y despedida"
+  ],
+  "cuts": [
+    {"id": "investigate", "label": "me puse a investigar", "theme": "base", "style": "paper", "anchor_word_id": "pool_raw.word.00011", "offset_frames": 0, "sample_frame": 132, "duration_frames": 34, "last_word_id": "pool_raw.word.00015"},
+    {"id": "illness", "label": "enfermedad", "theme": "stress", "style": "solid", "anchor_word_id": "pool_raw.word.00025", "offset_frames": 0, "sample_frame": 271, "duration_frames": 25, "last_word_id": "pool_raw.word.00025"},
+    {"id": "doctor", "label": "van al doctor", "theme": "health", "style": "paper", "anchor_word_id": "pool_raw.word.00033", "offset_frames": 0, "sample_frame": 382, "duration_frames": 73, "last_word_id": "pool_raw.word.00040"},
+    {"id": "designed", "label": "no fue diseñado", "theme": "stress", "style": "solid", "anchor_word_id": "pool_raw.word.00135", "offset_frames": 0, "sample_frame": 1395, "duration_frames": 73, "last_word_id": "pool_raw.word.00143"}
+  ],
+  "cards": [
+    {"id": "patients", "label": "uno de cuatro", "theme": "health", "kind": "patients", "anchor_word_id": "pool_raw.word.00028", "offset_frames": 0, "sample_frame": 339, "duration_frames": 43, "top": 295, "beat": {"anchor_word_id": "pool_raw.word.00031", "offset_frames": 0, "sample_frame": 360}, "meaning": "Un paciente resaltado entre cuatro: cifra citada por el hablante"},
+    {"id": "body", "label": "de la cabeza al cuerpo", "theme": "stress", "kind": "body", "anchor_word_id": "pool_raw.word.00055", "offset_frames": 0, "sample_frame": 578, "duration_frames": 122, "top": 304, "beat": {"anchor_word_id": "pool_raw.word.00066", "offset_frames": 0, "sample_frame": 686}, "meaning": "La cabeza encendida y, al decir cuerpo, el cuerpo que se llena"},
+    {"id": "emergency", "label": "emergencia", "theme": "stress", "kind": "emergency", "anchor_word_id": "pool_raw.word.00069", "offset_frames": 0, "sample_frame": 708, "duration_frames": 77, "top": 313, "beat": {"anchor_word_id": "pool_raw.word.00075", "offset_frames": 0, "sample_frame": 757}, "meaning": "Alerta y una columna que sube al mencionar la presión; sin escala"},
+    {"id": "healing", "label": "tardas más en sanar", "theme": "health", "kind": "healing", "anchor_word_id": "pool_raw.word.00082", "offset_frames": 0, "sample_frame": 843, "duration_frames": 54, "top": 350, "beat": {"anchor_word_id": "pool_raw.word.00087", "offset_frames": 0, "sample_frame": 880}, "meaning": "Un anillo que se completa pronto y otro que avanza despacio; sin cifras"},
+    {"id": "risk", "label": "duplica", "theme": "stress", "kind": "risk", "anchor_word_id": "pool_raw.word.00098", "offset_frames": 0, "sample_frame": 1022, "duration_frames": 66, "top": 332, "beat": {"anchor_word_id": "pool_raw.word.00100", "offset_frames": 2, "sample_frame": 1041}, "meaning": "Dos barras con proporción 1:2 para la palabra duplica; no es una gráfica clínica"},
+    {"id": "bill", "label": "cobrar la factura", "theme": "base", "kind": "bill", "anchor_word_id": "pool_raw.word.00150", "offset_frames": 0, "sample_frame": 1529, "duration_frames": 44, "top": 241, "beat": {"anchor_word_id": "pool_raw.word.00155", "offset_frames": 0, "sample_frame": 1550}, "meaning": "Un recibo que se despliega y su total al decir factura; sin importes"}
+  ],
+  "backgrounds": [
+    {"id": "emergency_bg", "label": "emergencia", "theme": "stress", "motif": "rings", "anchor_word_id": "pool_raw.word.00069", "offset_frames": 0, "sample_frame": 708, "duration_frames": 77},
+    {"id": "sick_bg", "label": "te enfermas más seguido", "theme": "health", "motif": "crosses", "anchor_word_id": "pool_raw.word.00078", "offset_frames": 0, "sample_frame": 801, "duration_frames": 96},
+    {"id": "risk_bg", "label": "duplica", "theme": "stress", "motif": "network", "anchor_word_id": "pool_raw.word.00098", "offset_frames": 0, "sample_frame": 1022, "duration_frames": 66}
+  ],
+  "music": null
+}

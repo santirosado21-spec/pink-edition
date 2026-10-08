@@ -1,22 +1,21 @@
 import { Sequence, useVideoConfig } from "remotion";
-import config from "../full-demo-config.json";
 import { LiquidGlass } from "./LiquidGlass";
+import { ThemeContext, useEdit } from "./edit";
 import { cards } from "./graphics/cards";
-import { ThemeContext, themeOf } from "./theme";
-import { resolveFrame } from "./timeline";
-
-const style = config.graphics;
 
 export const EditorialGraphics: React.FC = () => {
   const { fps } = useVideoConfig();
-  // Cada tarjeta sale del config; entra con su palabra y el énfasis con otra.
+  const { style, plan, resolveFrame, themeOf } = useEdit();
+  const captions = style.captions;
+  // Cada tarjeta sale del plan; entra con su palabra y el énfasis con otra.
   return (
     <>
-      {style.events.map((event) => {
+      {plan.cards.map((event) => {
         const Card = cards[event.kind];
         if (!Card) throw new Error(`Tarjeta desconocida: ${event.kind}`);
-        const from = resolveFrame(event);
-        const beat = resolveFrame({ ...event, ...event.beat }) - from;
+        if (event.top === undefined) throw new Error(`Tarjeta ${event.id} sin posición: falta ejecutar place_graphics.py.`);
+        const from = resolveFrame(event, event.id);
+        const beat = resolveFrame(event.beat, event.id) - from;
         return (
           <Sequence key={event.id} name={`Gráfico: ${event.label}`} from={from} durationInFrames={event.duration_frames} premountFor={fps}>
             <LiquidGlass id={event.id} top={event.top} duration={event.duration_frames}>
@@ -24,11 +23,11 @@ export const EditorialGraphics: React.FC = () => {
                 style={{
                   position: "absolute",
                   inset: 0,
-                  color: style.ink,
-                  fontFamily: config.captions.font_family,
-                  fontSize: config.captions.font_size,
-                  fontWeight: config.captions.font_weight,
-                  letterSpacing: `${config.captions.letter_spacing_em}em`,
+                  color: style.graphics.ink,
+                  fontFamily: captions.font_family,
+                  fontSize: captions.font_size,
+                  fontWeight: captions.font_weight,
+                  letterSpacing: `${captions.letter_spacing_em}em`,
                 }}
               >
                 <ThemeContext.Provider value={themeOf(event.theme)}>

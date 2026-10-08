@@ -15,6 +15,12 @@ ROOT = PROJECT.parent
 SOURCE = PROJECT / "public/client/pool-raw-full.mp4"
 TRANSCRIPT = PROJECT / "local/raw-transcript.json"
 CORRECTIONS = PROJECT / "local/corrections.json"
+TIMELINE = PROJECT / "src/pool-full-timeline.json"
+OUT_DIR = PROJECT / "out"
+STYLE = PROJECT / "style/pink-demo-v1.json"
+PLAN = PROJECT / "projects/piscina/plan.json"
+WORD_PREFIX = "pool_raw.word."
+LANGUAGE = "es"
 ALLOW_MODEL_DOWNLOAD = False
 
 
@@ -49,10 +55,14 @@ def phrase_ranges(words, minimum_gap):
     return ranges
 
 
-def align_all_words(words, config, source_hash):
+def align_all_words(words, style, source_hash):
     """Reutiliza WhisperX local y valida una alineación por palabra original."""
-    cache = PROJECT / "out/full-demo-alignment.json"
-    transcript_hash = hashlib.sha256(TRANSCRIPT.read_bytes()).hexdigest()
+    cache = OUT_DIR / "full-demo-alignment.json"
+    # Las correcciones cambian el texto sin tocar el transcript: van en la clave.
+    transcript_hash = hashlib.sha256(
+        TRANSCRIPT.read_bytes()
+        + json.dumps([word["text"] for word in words], ensure_ascii=False).encode()
+    ).hexdigest()
     if cache.exists():
         previous = json.loads(cache.read_text(encoding="utf-8"))
         if (previous["source_sha256"] == source_hash
@@ -65,7 +75,7 @@ def align_all_words(words, config, source_hash):
     torch.set_num_threads(4)
     audio = whisperx.load_audio(str(SOURCE))
     duration = len(audio) / 16000
-    padding = config["edit"]["alignment_window_padding_seconds"]
+    padding = style["edit"]["alignment_window_padding_seconds"]
     # Ventanas amplias protegen consonantes que el ASR situó demasiado tarde.
     windows = [
         {"start": max(0, words[first]["start"] - padding),
@@ -76,7 +86,8 @@ def align_all_words(words, config, source_hash):
     print(f"Alineando localmente {len(words)} palabras en {len(windows)} frases.",
           flush=True)
     model, metadata = whisperx.load_align_model(
-        language_code="es", device="cpu", model_cache_only=not ALLOW_MODEL_DOWNLOAD)
+        language_code=LANGUAGE, device="cpu",
+        model_cache_only=not ALLOW_MODEL_DOWNLOAD)
     result = whisperx.align(windows, model, metadata, audio, "cpu",
                             return_char_alignments=False, print_progress=True)
     aligned = result["word_segments"]
@@ -87,7 +98,13 @@ def align_all_words(words, config, source_hash):
         if normalize(original["text"]) != normalize(timing["word"]):
             raise ValueError("La alineación modificó una palabra.")
         if "start" not in timing or "end" not in timing:
-            raise ValueError(f"Sin alineación: {original['text']}")
+            # Cifras y símbolos no se alinean; perder la palabra sería peor que
+            # mostrarla con el tiempo aproximado del transcript.
+            print(f"AVISO sin alineación, tiempo del transcript: {original['text']}",
+                  flush=True)
+            output.append({**original, "alignment_score": None,
+                           "timing_source": "transcript_time_unaligned"})
+            continue
         output.append({**original, "start": timing["start"],
                        "end": timing["end"], "alignment_score": timing.get("score"),
                        "timing_source": "whisperx_local_forced_alignment"})
@@ -168,10 +185,10 @@ def caption_pages(words, face, settings, source_end):
     return pages
 
 
-def caption_face(config):
+def caption_face(style):
     return ImageFont.truetype(
-        str(PROJECT / "public" / config["captions"]["font_file"]),
-        config["captions"]["font_size"])
+        str(PROJECT / "public" / style["captions"]["font_file"]),
+        style["captions"]["font_size"])
 
 
 def write_srt(clips, fps):
@@ -185,20 +202,21 @@ def write_srt(clips, fps):
             text = "\n".join(" ".join(w["text"] for w in line) for line in page["lines"])
             srt.append(f"{index}\n{srt_time(start, fps)} --> {srt_time(end, fps)}\n{text}\n")
             index += 1
-    (PROJECT / "out/piscina-demo-completa.srt").write_text(
-        "\n".join(srt), encoding="utf-8")
+    path = OUT_DIR / "piscina-demo-completa.srt"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text("\n".join(srt), encoding="utf-8")
 
 
-def repaginate(config):
+def repaginate(style):
     """Recalcula sólo las páginas del timeline existente, sin realinear la voz."""
-    path = PROJECT / "src/pool-full-timeline.json"
+    path = TIMELINE
     data = json.loads(path.read_text(encoding="utf-8"))
-    face = caption_face(config)
+    face = caption_face(style)
     for clip in data["clips"]:
-        clip["pages"] = caption_pages(clip["words"], face, config["captions"],
+        clip["pages"] = caption_pages(clip["words"], face, style["captions"],
                                       clip["source_out_frame"])
     save_json(path, data)
-    save_json(PROJECT / "out/full-demo-edit-plan.json", data)
+    save_json(OUT_DIR / "full-demo-edit-plan.json", data)
     write_srt(data["clips"], data["fps"])
     print(f"Páginas recalculadas: {sum(len(c['pages']) for c in data['clips'])} "
           f"en {len(data['clips'])} tomas.", flush=True)
@@ -213,25 +231,37 @@ def srt_time(frame, fps):
 
 
 def main():
-    global SOURCE, TRANSCRIPT, ALLOW_MODEL_DOWNLOAD
+    global SOURCE, TRANSCRIPT, CORRECTIONS, TIMELINE, OUT_DIR, STYLE, PLAN
+    global WORD_PREFIX, LANGUAGE, ALLOW_MODEL_DOWNLOAD
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--source", type=Path, default=SOURCE)
     parser.add_argument("--transcript", type=Path, default=TRANSCRIPT)
+    parser.add_argument("--timeline", type=Path, default=TIMELINE)
+    parser.add_argument("--out-dir", type=Path, default=OUT_DIR)
+    parser.add_argument("--style", type=Path, default=STYLE)
+    parser.add_argument("--plan", type=Path, default=PLAN)
+    parser.add_argument("--corrections", type=Path, default=CORRECTIONS)
+    parser.add_argument("--word-prefix", default=WORD_PREFIX)
+    parser.add_argument("--language", default=LANGUAGE)
     parser.add_argument("--allow-model-download", action="store_true")
     parser.add_argument("--pages-only", action="store_true",
                         help="Sólo recalcula captions del timeline existente.")
     args = parser.parse_args()
     SOURCE, TRANSCRIPT = args.source.resolve(), args.transcript.resolve()
+    CORRECTIONS = args.corrections.resolve()
+    TIMELINE, OUT_DIR, STYLE, PLAN = (args.timeline.resolve(), args.out_dir.resolve(),
+                                     args.style.resolve(), args.plan.resolve())
+    WORD_PREFIX, LANGUAGE = args.word_prefix, args.language
     ALLOW_MODEL_DOWNLOAD = args.allow_model_download
-    config = json.loads((PROJECT / "full-demo-config.json").read_text())
-    fps = config["fps"]
+    style = json.loads(STYLE.read_text(encoding="utf-8"))
+    fps = style["fps"]
     if args.pages_only:
-        repaginate(config)
+        repaginate(style)
         return
     source_hash = hashlib.sha256(SOURCE.read_bytes()).hexdigest()
     transcript = json.loads(TRANSCRIPT.read_text(encoding="utf-8"))
     original = [
-        {"id": f"pool_raw.word.{index:05d}", "text": word["word"].strip(),
+        {"id": f"{WORD_PREFIX}{index:05d}", "text": word["word"].strip(),
          "start": word["start"], "end": word["end"]}
         for index, word in enumerate(
             word for segment in transcript["segments"] for word in segment["words"])
@@ -243,13 +273,13 @@ def main():
         index = item["index"]
         if index < len(original) and original[index]["text"] == item["expected"]:
             original[index]["text"] = item["replacement"]
-    words = align_all_words(original, config, source_hash)
-    face = caption_face(config)
-    before = config["edit"]["speech_padding_before_seconds"]
-    after = config["edit"]["speech_padding_after_seconds"]
+    words = align_all_words(original, style, source_hash)
+    face = caption_face(style)
+    before = style["edit"]["speech_padding_before_seconds"]
+    after = style["edit"]["speech_padding_after_seconds"]
     clips, offset, remapped_words = [], 0, []
     for number, (first, last) in enumerate(phrase_ranges(
-            words, config["edit"]["minimum_pause_to_remove_seconds"]), 1):
+            words, style["edit"]["minimum_pause_to_remove_seconds"]), 1):
         selected = words[first:last]
         source_in = max(0, math.floor((selected[0]["start"] - before) * fps))
         source_out = math.ceil((selected[-1]["end"] + after) * fps)
@@ -273,14 +303,22 @@ def main():
                       "timeline_out_frame": offset + duration,
                       "words": local_words,
                       "pages": caption_pages(local_words, face,
-                                             config["captions"], source_out)})
+                                             style["captions"], source_out)})
         remapped_words.extend(local_words)
         offset += duration
     assert [w["id"] for w in remapped_words] == [w["id"] for w in original]
     known_ids = {word["id"] for word in remapped_words}
-    for event in config["graphics"]["events"] + config["audio"]["sfx"]:
-        if event["anchor_word_id"] not in known_ids:
-            raise ValueError(f"Evento sin palabra de anclaje: {event['id']}")
+    if PLAN.exists():
+        plan = json.loads(PLAN.read_text(encoding="utf-8"))
+        for group in ("cuts", "cards", "backgrounds"):
+            for event in plan[group]:
+                anchors = [event["anchor_word_id"]]
+                if group == "cards":
+                    anchors.append(event["beat"]["anchor_word_id"])
+                if group == "cuts":
+                    anchors.append(event["last_word_id"])
+                if any(anchor not in known_ids for anchor in anchors):
+                    raise ValueError(f"Evento sin palabra de anclaje: {event['id']}")
     removed = []
     previous_end = 0
     for clip in clips:
@@ -297,8 +335,8 @@ def main():
                          "retained_word_count": len(remapped_words),
                          "omitted_word_ids": [], "original_order_preserved": True},
             "removed_ranges": removed}
-    save_json(PROJECT / "src/pool-full-timeline.json", data)
-    save_json(PROJECT / "out/full-demo-edit-plan.json", data)
+    save_json(TIMELINE, data)
+    save_json(OUT_DIR / "full-demo-edit-plan.json", data)
     write_srt(clips, fps)
     print(f"Plan listo: {offset / fps:.2f}s, {len(clips)} tomas, "
           f"{len(remapped_words)}/{len(original)} palabras conservadas.", flush=True)

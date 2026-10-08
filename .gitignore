@@ -21,3 +21,8 @@ public/audio/mixkit/
 /*.MP4
 /*.mp4
 /*.mov
+
+# Entornos y carpetas de trabajo por video.
+.venv-asr/
+work/
+public/work/

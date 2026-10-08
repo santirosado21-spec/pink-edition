@@ -15,11 +15,4 @@ for (const [item, name] of sounds) {
   if (!response.ok) throw new Error(`No se pudo descargar el SFX ${item}: ${response.status}`);
   writeFileSync(target, Buffer.from(await response.arrayBuffer()));
 }
-// Música de fondo: Mixkit Stock Music Free License.
-const music = path.join(folder, 'music-399.mp3');
-if (!existsSync(music)) {
-  const response = await fetch('https://assets.mixkit.co/music/399/399.mp3');
-  if (!response.ok) throw new Error(`No se pudo descargar la música: ${response.status}`);
-  writeFileSync(music, Buffer.from(await response.arrayBuffer()));
-}
 console.log('SFX preparados. Procedencia y licencia: AUDIO_ASSETS.md.');

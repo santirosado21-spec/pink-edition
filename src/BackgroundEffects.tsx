@@ -1,14 +1,11 @@
 import { Sequence, interpolate, random, useCurrentFrame, useVideoConfig } from "remotion";
-import config from "../full-demo-config.json";
-import { themeOf } from "./theme";
-import { resolveFrame } from "./timeline";
-
-const settings = config.background;
+import { useEdit } from "./edit";
 
 // Fondo detrás de la persona según el tema de la frase; sin azar por frame.
 const Motif: React.FC<{ id: string; motif: string; duration: number; color: string }> = ({ id, motif, duration, color }) => {
   const frame = useCurrentFrame();
   const { width, height } = useVideoConfig();
+  const settings = useEdit().style.background;
   const clamp = { extrapolateLeft: "clamp", extrapolateRight: "clamp" } as const;
   const shown = interpolate(frame, [0, settings.fade_frames, duration - settings.fade_frames, duration], [0, 1, 1, 0], clamp);
   const points = Array.from({ length: settings.points }, (_, index) => {
@@ -58,10 +55,11 @@ const Motif: React.FC<{ id: string; motif: string; duration: number; color: stri
 
 export const BackgroundEffects: React.FC = () => {
   const { fps } = useVideoConfig();
+  const { plan, resolveFrame, themeOf } = useEdit();
   return (
     <>
-      {settings.events.map((event) => (
-        <Sequence key={event.id} name={`Fondo: ${event.label}`} from={resolveFrame(event)} durationInFrames={event.duration_frames} premountFor={fps}>
+      {plan.backgrounds.map((event) => (
+        <Sequence key={event.id} name={`Fondo: ${event.label}`} from={resolveFrame(event, event.id)} durationInFrames={event.duration_frames} premountFor={fps}>
           <Motif id={event.id} motif={event.motif} duration={event.duration_frames} color={themeOf(event.theme).light} />
         </Sequence>
       ))}

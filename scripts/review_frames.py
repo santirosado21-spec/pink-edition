@@ -9,7 +9,10 @@ from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
 
 PROJECT = Path(__file__).resolve().parents[1]
-COMPOSITION = "PoolFullDemo"
+STYLE = PROJECT / "style/pink-demo-v1.json"
+PLAN = PROJECT / "projects/piscina/plan.json"
+TIMELINE = PROJECT / "src/pool-full-timeline.json"
+COMPOSITION = "PinkEdit"
 THUMB = (360, 640)
 COLUMNS, ROWS = 6, 2
 
@@ -20,7 +23,7 @@ def run(arguments):
 
 
 def word_frames(plan):
-    """Misma regla que src/timeline.ts: frame de la palabra en el montaje."""
+    """Misma regla que src/edit.ts: frame de la palabra en el montaje."""
     return {word["id"]: clip["timeline_in_frame"] + word["source_start_frame"]
             - clip["source_in_frame"]
             for clip in plan["clips"] for word in clip["words"]}
@@ -28,18 +31,18 @@ def word_frames(plan):
 
 def resolve(event, plan, frames):
     if plan.get("is_sample"):
-        return event["sample_frame"]
+        return event.get("sample_frame", 0)
     return frames[event["anchor_word_id"]] + event["offset_frames"]
 
 
-def key_frames(plan, config):
-    """Una muestra por subtítulo completo y tres por tarjeta."""
-    frames = word_frames(plan)
-    reveal = config["captions"]["reveal_frames"]
-    style = config["graphics"]
-    cards = [(resolve(event, plan, frames), event) for event in style["events"]]
+def key_frames(timeline, style, plan):
+    """Una muestra por subtítulo y fondo; tres por tarjeta."""
+    frames = word_frames(timeline)
+    reveal = style["captions"]["reveal_frames"]
+    graphics = style["graphics"]
+    cards = [(resolve(event, timeline, frames), event) for event in plan["cards"]]
     chosen = {}
-    for clip in plan["clips"]:
+    for clip in timeline["clips"]:
         shift = clip["timeline_in_frame"] - clip["source_in_frame"]
         for page in clip["pages"]:
             words = [word for line in page["lines"] for word in line]
@@ -50,17 +53,21 @@ def key_frames(plan, config):
                 "lines": [" ".join(w["text"] for w in line) for line in page["lines"]]}
     for start, event in cards:
         last = start + event["duration_frames"]
-        for name, frame in [("card_enter", start + style["enter_frames"] // 2),
+        for name, frame in [("card_enter", start + graphics["enter_frames"] // 2),
                             ("card_hold", start + event["duration_frames"] // 2),
-                            ("card_exit", last - style["exit_frames"] - 1)]:
+                            ("card_exit", last - graphics["exit_frames"] - 1)]:
             chosen.setdefault(frame, {})["kind"] = name
+    for event in plan["backgrounds"]:
+        start = resolve(event, timeline, frames)
+        chosen.setdefault(start + event["duration_frames"] // 2,
+                          {"kind": "background_hold"})
     items = []
     for frame in sorted(chosen):
         item = {"frame": frame, **chosen[frame]}
         item["cards"] = [event["id"] for start, event in cards
                          if start <= frame < start + event["duration_frames"]]
         if "lines" not in item:
-            item["lines"] = caption_at(plan, frame)
+            item["lines"] = caption_at(timeline, frame)
         items.append(item)
     return items
 
@@ -76,11 +83,11 @@ def caption_at(plan, frame):
     return []
 
 
-def caption_warnings(plan, config):
+def caption_warnings(timeline, style):
     """Avisa de palabras que casi no se ven y de renglones de una palabra corta."""
     warnings = []
-    minimum_frames = config["captions"]["min_last_word_frames"]
-    for clip in plan["clips"]:
+    minimum_frames = style["captions"]["min_last_word_frames"]
+    for clip in timeline["clips"]:
         shift = clip["timeline_in_frame"] - clip["source_in_frame"]
         for page in clip["pages"]:
             text = " / ".join(" ".join(w["text"] for w in line)
@@ -151,6 +158,11 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--out", type=Path, default=PROJECT / "out/review")
     parser.add_argument("--concurrency", type=int, default=3)
+    parser.add_argument("--style", type=Path, default=STYLE)
+    parser.add_argument("--plan", type=Path, default=PLAN)
+    parser.add_argument("--timeline", type=Path, default=TIMELINE)
+    parser.add_argument("--composition", default=COMPOSITION)
+    parser.add_argument("--props", type=Path)
     parser.add_argument("--reference", type=Path,
                         help="Video de referencia para extraer frames.")
     parser.add_argument("--reference-frames", default="",
@@ -160,17 +172,20 @@ def main():
     args = parser.parse_args()
     out = args.out.resolve()
     (out / "frames").mkdir(parents=True, exist_ok=True)
-    config = json.loads((PROJECT / "full-demo-config.json").read_text())
-    plan = json.loads((PROJECT / "src/pool-full-timeline.json").read_text())
-    items = key_frames(plan, config)
+    style = json.loads(args.style.read_text(encoding="utf-8"))
+    plan = json.loads(args.plan.read_text(encoding="utf-8"))
+    timeline = json.loads(args.timeline.read_text(encoding="utf-8"))
+    items = key_frames(timeline, style, plan)
 
-    print(f"Preparando {len(items)} frames de {COMPOSITION}.", flush=True)
+    print(f"Preparando {len(items)} frames de {args.composition}.", flush=True)
     run(["npx", "remotion", "bundle", "--out-dir", str(out / "bundle")])
 
     def still(item):
         target = out / "frames" / f"f{item['frame']:05}.png"
-        command = ["npx", "remotion", "still", str(out / "bundle"), COMPOSITION,
+        command = ["npx", "remotion", "still", str(out / "bundle"), args.composition,
                    str(target), f"--frame={item['frame']}"]
+        if args.props:
+            command.append(f"--props={args.props}")
         try:
             run(command)
         except subprocess.CalledProcessError:
@@ -184,16 +199,16 @@ def main():
     sheets = contact_sheets(
         [(f"{item['frame']} {item['kind'].replace('card_', '')}", path)
          for item, path in zip(items, paths)], out, "sheet")
-    manifest = {"composition": COMPOSITION, "is_sample": bool(plan.get("is_sample")),
+    manifest = {"composition": args.composition, "is_sample": bool(timeline.get("is_sample")),
                 "frames": items, "sheets": sheets,
-                "warnings": caption_warnings(plan, config)}
+                "warnings": caption_warnings(timeline, style)}
 
     if args.reference:
         pairs = [tuple(int(v) for v in pair.split(":"))
                  for pair in args.pairs.split(",") if pair]
         wanted = sorted({int(v) for v in args.reference_frames.split(",") if v}
                         | {reference for _, reference in pairs})
-        size = (config["width"], config["height"])
+        size = (style["width"], style["height"])
         references = extract_reference(args.reference.resolve(), wanted,
                                        out / "reference", size)
         manifest["reference_sheets"] = contact_sheets(

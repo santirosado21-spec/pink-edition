@@ -1,12 +1,9 @@
 import { Easing, interpolate, useCurrentFrame } from "remotion";
-import config from "../full-demo-config.json";
-
-const style = config.graphics;
-const glass = style.glass;
+import { useEdit, type Style } from "./edit";
 
 // Mapa de desplazamiento: rojo mueve en x y verde en y; 0x80 es neutro.
 // Sólo el borde se aparta del neutro, así el centro queda sin deformar.
-const displacementMap = (width: number, height: number) => {
+const displacementMap = (width: number, height: number, glass: Style["graphics"]["glass"]) => {
   const stops = (rim: number, high: string, mid: string) =>
     `<stop offset='0' stop-color='${high}'/><stop offset='${rim}' stop-color='${mid}'/>` +
     `<stop offset='${1 - rim}' stop-color='${mid}'/><stop offset='1' stop-color='#000000'/>`;
@@ -25,6 +22,8 @@ export const LiquidGlass: React.FC<{
   duration: number;
   children: React.ReactNode;
 }> = ({ id, top, duration, children }) => {
+  const style = useEdit().style.graphics;
+  const glass = style.glass;
   const frame = useCurrentFrame();
   const ease = Easing.bezier(0.16, 1, 0.3, 1);
   const clamp = { extrapolateLeft: "clamp", extrapolateRight: "clamp" } as const;
@@ -49,7 +48,7 @@ export const LiquidGlass: React.FC<{
     >
       <svg width="0" height="0" style={{ position: "absolute" }}>
         <filter id={`glass-${id}`} x="0" y="0" width="100%" height="100%" colorInterpolationFilters="sRGB">
-          <feImage href={displacementMap(style.width, style.height)} x="0" y="0" width={style.width} height={style.height} preserveAspectRatio="none" result="map" />
+          <feImage href={displacementMap(style.width, style.height, glass)} x="0" y="0" width={style.width} height={style.height} preserveAspectRatio="none" result="map" />
           <feDisplacementMap in="SourceGraphic" in2="map" scale={glass.refraction} xChannelSelector="R" yChannelSelector="G" />
         </filter>
       </svg>
