@@ -140,5 +140,9 @@
       "halo_pixels": 38,
       "sheen_frames": 16
     }
+  },
+  "limits": {
+    "max_seconds": 90,
+    "max_upload_mb": 500
   }
 }

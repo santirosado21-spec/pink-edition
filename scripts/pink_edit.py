@@ -39,6 +39,17 @@ def probe(path):
     return data["streams"][0]
 
 
+def check_limits(source, style):
+    """Un video más largo que el máximo se rechaza antes de gastar cómputo."""
+    seconds = float(subprocess.run(
+        ["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of",
+         "default=nw=1:nk=1", str(source)], check=True, text=True,
+        capture_output=True).stdout)
+    maximum = style["limits"]["max_seconds"]
+    if seconds > maximum:
+        raise SystemExit(f"El video dura {seconds:.0f} s y el máximo es {maximum} s.")
+
+
 def conform(source, target, fps):
     """El motor cuenta en frames: el fuente debe ir a la cadencia del estilo."""
     if target.exists():
@@ -87,6 +98,7 @@ def main(args, work, stage):
     downloads = ["--allow-model-download"] if args.allow_model_download else []
 
     stage("conform")
+    check_limits(args.source.resolve(), style)
     conform(args.source.resolve(), source, style["fps"])
     if not (media / "poster.jpg").exists():
         run(["ffmpeg", "-v", "error", "-y", "-ss", "1", "-i", source, "-frames:v", "1",
