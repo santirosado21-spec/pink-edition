@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- Copiar a ~/Library/LaunchAgents/ai.pink.worker.plist, ajustar rutas y cargar con:
+       launchctl load ~/Library/LaunchAgents/ai.pink.worker.plist
+     Las claves van en este archivo local; nunca en Git. -->
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>ai.pink.worker</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/opt/homebrew/bin/python3</string>
+    <string>/RUTA/A/motion/scripts/worker.py</string>
+  </array>
+  <key>WorkingDirectory</key><string>/RUTA/A/motion</string>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>SUPABASE_URL</key><string>https://awptxbhlraiddimobwzv.supabase.co</string>
+    <key>SUPABASE_SERVICE_ROLE_KEY</key><string>PEGAR_AQUI</string>
+    <key>PATH</key><string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+  </dict>
+  <key>RunAtLoad</key><true/>
+  <key>KeepAlive</key><true/>
+  <key>StandardOutPath</key><string>/tmp/pink-worker.log</string>
+  <key>StandardErrorPath</key><string>/tmp/pink-worker.log</string>
+</dict>
+</plist>

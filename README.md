@@ -60,8 +60,18 @@ npm run web   # http://localhost:3000
 - **Proponer con IA:** pide el plan a la API de Claude a partir de la
   transcripción. Requiere `ANTHROPIC_API_KEY` en `.env.local`.
 
-La web (`app/`, Next.js) corre en la misma máquina que el motor, procesa un video
-a la vez y lee y escribe `work/<id>/`. Todavía no usa Supabase ni cuentas.
+La web (`app/`, Next.js) tiene dos modos:
+
+- **Local** (por defecto): corre en la misma máquina que el motor, procesa un video
+  a la vez y lee y escribe `work/<id>/`. Sin cuentas.
+- **Nube**: con `NEXT_PUBLIC_SUPABASE_URL` y `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+  exige entrar con un enlace por correo, sube los videos a Supabase y encola los
+  trabajos. Un procesador en el equipo que edita (`python3 scripts/worker.py`, con
+  `SUPABASE_URL` y `SUPABASE_SERVICE_ROLE_KEY`) los toma de la cola. Plantilla en
+  `pink.env.example`; autoarranque en `scripts/worker.launchd.plist.example`.
+  `worker.py --local-queue <carpeta>` ejecuta el mismo flujo sin Supabase.
+
+En Vercel sólo corre la web: sin procesador, subir y renderizar no funcionan.
 
 ## Editar un video
 

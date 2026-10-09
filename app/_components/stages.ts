@@ -3,6 +3,8 @@ import type { JobStatus } from "../_lib/jobs";
 // Nombres legibles de los pasos que reporta `scripts/pink_edit.py`.
 const STAGES: Record<string, string> = {
   start: "Arrancando",
+  queued: "En cola",
+  analyze: "Analizando el video",
   conform: "Preparando el video",
   transcribe: "Transcribiendo",
   cut: "Cortando silencios",

@@ -110,3 +110,5 @@ h3.section { margin: 34px 0 0; font-size: 13px; text-transform: uppercase; lette
 .toast { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); background: #24242e; border: 1px solid var(--line); border-radius: 12px; padding: 10px 16px; max-width: 640px; z-index: 10; box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5); }
 .qc { white-space: pre-wrap; font: 12px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--muted); background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 10px; margin-top: 8px; }
 .waiting { height: 100vh; display: grid; place-items: center; text-align: center; }
+.brand { display: inline-flex; align-items: center; gap: 8px; }
+.brand img { width: 28px; height: 28px; }

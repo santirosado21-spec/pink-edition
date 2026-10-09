@@ -103,18 +103,42 @@ de temas de color más amplia (dinero, salud, peligro, tecnología).
 - **Sonido:** los SFX y sus volúmenes siguen sin aprobarse de oído.
 - **Regla de 4 o 5 palabras por página:** pendiente desde el v5.
 
-## Siguiente paso
+## Estado al 9 de octubre de 2026
 
-Hecho en local, sin Supabase: la web (`npm run web`) con subida, estado, editor
-con vista previa en vivo, guardado por versiones, render y descarga. La propuesta
-automática (punto 2) está escrita pero sin probar contra la API: falta la clave.
+Hecho y probado:
 
-Pendiente, en orden:
+- Motor `PinkEdit` y comando único `scripts/pink_edit.py`; límites de 120 s de
+  material y 500 MB (`style/pink-demo-v1.json`).
+- Catálogo de 13 tarjetas (6 sin tema) con campo `text` sólo para cifras dichas.
+- Web local (`npm run web`): subida, estado, editor con vista previa, versiones
+  de plan, render y descarga.
+- Modo nube (código en `app/_lib/cloud.ts`, `proxy.ts`, `/login`): se activa con
+  `NEXT_PUBLIC_SUPABASE_URL` y `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`. Sin ellas
+  la web sigue en modo local.
+- Segunda migración (`supabase/migrations/…cloud_mode.sql`) y prueba de seguridad
+  de 12 comprobaciones sobre el proyecto real, revertida; sin avisos de Supabase.
+- Procesador `scripts/worker.py`: probado de punta a punta en cola local
+  (análisis → plan de usuario → render → QC en verde → archivo entregado). El
+  camino del fallo también: un video fuera de límites falla con su motivo.
 
-1. Probar la propuesta automática con la clave y ajustar el prompt con videos
-   reales.
-2. Catálogo de tarjetas genéricas (punto 3): las siete actuales son del tema de
-   estrés.
-3. Conectar la web a Supabase (cuentas, `videos`, `edit_plans`, `jobs`, buckets)
-   y convertir el lanzador local en el procesador que toma trabajos de la cola.
-4. Desplegar la web en el VPS.
+Sin probar por falta de datos o claves:
+
+| Pendiente | Qué falta |
+| --- | --- |
+| Procesador contra Supabase real | `SUPABASE_SERVICE_ROLE_KEY` (Project Settings → API) |
+| Web en modo nube con una sesión | Entrar con un correo real; el enlace llega por correo |
+| «Proponer con IA» | `ANTHROPIC_API_KEY`; luego `scripts/propose_smoke.py <id>` |
+| Otros videos | `docs/SECOND_VIDEO_TEST.md` |
+
+Límites conocidos:
+
+- El almacenamiento gratuito de Supabase admite 50 MB por archivo: los videos de
+  más de 50 MB y los renders de más de unos 90 s no caben (el procesador lo avisa;
+  haría falta subida reanudable o un plan de pago).
+- La vista previa en la nube no tiene los efectos de Mixkit (no están en Git por
+  licencia); los de Kenney sí.
+- Las tarjetas se recolocan sobre la persona al renderizar, no al guardar: en la
+  vista previa de la nube su posición es aproximada.
+- Un video a la vez por procesador.
+
+Pagos y créditos no están construidos.

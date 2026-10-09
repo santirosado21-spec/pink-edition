@@ -20,7 +20,7 @@ export type JobStatus = {
   updated_at: number;
   pid?: number;
 };
-export type JobSummary = { id: string; status: JobStatus; poster: string | null; hasOutput: boolean; seconds: number | null; words: number | null };
+export type JobSummary = { id: string; title?: string; status: JobStatus; poster: string | null; hasOutput: boolean; seconds: number | null; words: number | null };
 export type Job = JobSummary & {
   style: Style;
   plan: Plan;
@@ -106,10 +106,14 @@ export const readJob = async (id: string): Promise<Job | null> => {
 
 // Comprobación estructural del plan contra el esquema y contra las palabras reales.
 export const checkPlan = async (id: string, plan: Plan): Promise<string[]> => {
+  const timeline = await readJson<Timeline>(path.join(dir(id), "timeline.json"));
+  return timeline ? validatePlan(plan, timeline) : ["Falta el montaje del video."];
+};
+
+export const validatePlan = async (plan: Plan, timeline: Timeline): Promise<string[]> => {
   const errors: string[] = [];
   const schema = await readJson<{ properties: Record<string, { items: { properties: Record<string, { enum?: string[] }> } }> }>(path.join(ROOT, "schema/edit-plan.schema.json"));
-  const timeline = await readJson<Timeline>(path.join(dir(id), "timeline.json"));
-  if (!schema || !timeline) return ["Falta el esquema o el montaje del video."];
+  if (!schema) return ["Falta el esquema del plan."];
   const words = new Set(timeline.clips.flatMap((clip) => clip.words.map((word) => word.id)));
   const allowed = (group: string, field: string) => schema.properties[group].items.properties[field].enum ?? [];
   const ids = new Set<string>();

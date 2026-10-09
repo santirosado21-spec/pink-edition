@@ -1,4 +1,5 @@
 import { createContext, useContext } from "react";
+import { staticFile } from "remotion";
 import styleJson from "../style/pink-demo-v1.json";
 
 export type AlignedWord = {
@@ -46,6 +47,9 @@ export type Plan = {
 export type EditMedia = { source: string; person: string | null };
 export type EditProps = { style: Style; plan: Plan; timeline: Timeline; media: EditMedia };
 export type Theme = { accent: string; light: string; dark: string };
+
+// Los medios son rutas de `public/` (local) o URLs completas (firmadas, en la nube).
+export const asset = (path: string) => (/^https?:/.test(path) ? path : staticFile(path));
 
 // Todo lo que una edición necesita: estilo y plan, montaje y medios de un video.
 export const buildEdit = ({ style, plan, timeline, media }: EditProps) => {

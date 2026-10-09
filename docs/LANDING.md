@@ -106,3 +106,12 @@ Los videos configurados requieren además revisión audiovisual y de sus pistas.
 - No se pudo iniciar localhost: el sandbox rechazó `127.0.0.1:3000` con `EPERM`.
   No se afirma verificación visual, medición de desbordamiento a 375 px ni
   aprobación estética; esas comprobaciones quedan para el navegador del dueño.
+
+## Actualización del 9 de octubre de 2026
+
+- Las preguntas frecuentes muestran los límites reales del motor (120 s de material y
+  500 MB), tomados de `style/pink-demo-v1.json`. En la nube el archivo máximo es de
+  50 MB por el plan gratuito de Supabase Storage.
+- Ya existen el código de cuentas, la cola y el procesador, pero sin probar con una
+  sesión real ni con la clave de servicio: ver `PINK_AI.md`. Hasta entonces el botón
+  sigue siendo «Solicitar acceso» (`flowConnected: false`).

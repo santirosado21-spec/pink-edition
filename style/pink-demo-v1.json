@@ -142,7 +142,7 @@
     }
   },
   "limits": {
-    "max_seconds": 90,
+    "max_seconds": 120,
     "max_upload_mb": 500
   }
 }

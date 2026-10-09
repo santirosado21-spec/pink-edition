@@ -5,7 +5,6 @@ import {
   Easing,
   Series,
   interpolate,
-  staticFile,
   useCurrentFrame,
   useVideoConfig,
 } from "remotion";
@@ -13,7 +12,7 @@ import { BackgroundEffects } from "./BackgroundEffects";
 import { ColorCuts } from "./ColorCuts";
 import { EditorialGraphics } from "./EditorialGraphics";
 import { SoundDesign } from "./SoundDesign";
-import { EditContext, buildEdit, useEdit, type CaptionPage, type EditProps } from "./edit";
+import { EditContext, asset, buildEdit, useEdit, type CaptionPage, type EditProps } from "./edit";
 
 const FullCaptions: React.FC<{ pages: CaptionPage[] }> = ({ pages }) => {
   // El tiempo heredado del grupo corresponde al raw, junto con su video.
@@ -145,7 +144,7 @@ export const PinkEdit: React.FC<EditProps> = (props) => {
             isSample ? (
               <div style={{ ...fill, background: "#272323" }} />
             ) : (
-              <Video name="Imagen y voz originales" src={staticFile(media.source)} premountFor={fps} objectFit="cover" style={video} />
+              <Video name="Imagen y voz originales" src={asset(media.source)} premountFor={fps} objectFit="cover" style={video} />
             )
           }
         />
@@ -155,7 +154,7 @@ export const PinkEdit: React.FC<EditProps> = (props) => {
         {isSample || !media.person ? null : (
           <ClipSeries
             label="Persona"
-            render={() => <OffthreadVideo transparent muted src={staticFile(media.person as string)} style={{ ...video, objectFit: "cover" }} />}
+            render={() => <OffthreadVideo transparent muted src={asset(media.person as string)} style={{ ...video, objectFit: "cover" }} />}
           />
         )}
       </div>

@@ -26,6 +26,11 @@ generadores de ECG o audio procedural rechazados.
 `docs/EDITING_GUIDELINES.md` para las reglas editoriales, `PINK_AI.md` para la
 plataforma y `supabase/migrations/` para el modelo persistente.
 
+La web (`app/`) tiene modo local y modo nube (Supabase) y el procesador es
+`scripts/worker.py`; ver `README.md` y `PINK_AI.md`. La clave de servicio de
+Supabase y la de Anthropic sólo viven en el entorno del procesador o de la web,
+nunca en Git ni en el navegador. Las tarjetas son 13 (`docs/CARD_CATALOG.md`).
+
 Los videos y transcripts del cliente permanecen locales y fuera de Git. Los
 datos ficticios permiten revisar código y gráficos sin distribuirlos. No leer
 archivos de credenciales ni añadirlos al repositorio.
