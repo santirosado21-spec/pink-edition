@@ -16,3 +16,19 @@ public/client/
 src/pool-timeline.json
 src/pool-full-timeline.json
 public/audio/mixkit/
+
+# Videos de referencia sueltos en la raíz no se versionan.
+/*.MP4
+/*.mp4
+/*.mov
+
+# Entornos y carpetas de trabajo por video.
+.venv-asr/
+work/
+public/work/
+
+# Web (Next.js).
+.next/
+next-env.d.ts
+*.tsbuildinfo
+.next-*/

@@ -1,0 +1,4 @@
+# El motor de edición (Python, FFmpeg, recorte) corre en el equipo local, no en Vercel.
+requirements.txt
+requirements-asr.txt
+scripts/*.py

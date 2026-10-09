@@ -1,2 +1,5 @@
-whisperx==3.8.6
+# Recorte de la persona, colocación, QC y revisión: entorno `.venv`.
+torch
+torchvision
+numpy
 Pillow==11.3.0

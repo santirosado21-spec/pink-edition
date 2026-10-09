@@ -8,6 +8,10 @@ from pathlib import Path
 PROJECT = Path(__file__).resolve().parents[1]
 RENDER = PROJECT / "out/piscina-demo-completa-remotion-v2-render.mp4"
 FINAL = PROJECT / "out/piscina-demo-completa-remotion-v2.mp4"
+TIMELINE = PROJECT / "src/pool-full-timeline.json"
+STYLE = PROJECT / "style/pink-demo-v1.json"
+PLAN = PROJECT / "projects/piscina/plan.json"
+REPORT_DIR = PROJECT / "out"
 
 
 def run(arguments):
@@ -27,16 +31,24 @@ def loudness(path, settings):
 
 
 def main():
-    global RENDER, FINAL
+    global RENDER, FINAL, TIMELINE, STYLE, PLAN, REPORT_DIR
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--input", type=Path, default=RENDER)
     parser.add_argument("--output", type=Path, default=FINAL)
     parser.add_argument("--qc-prefix", default="QC_demo_completa")
+    parser.add_argument("--timeline", type=Path, default=TIMELINE)
+    parser.add_argument("--style", type=Path, default=STYLE)
+    parser.add_argument("--plan", type=Path, default=PLAN)
+    parser.add_argument("--report-dir", type=Path, default=REPORT_DIR)
     args = parser.parse_args()
     RENDER, FINAL = args.input.resolve(), args.output.resolve()
-    config = json.loads((PROJECT / "full-demo-config.json").read_text())
-    plan = json.loads((PROJECT / "src/pool-full-timeline.json").read_text())
-    audio = config["audio"]
+    TIMELINE, STYLE, PLAN = (args.timeline.resolve(), args.style.resolve(),
+                             args.plan.resolve())
+    REPORT_DIR = args.report_dir.resolve()
+    style = json.loads(STYLE.read_text(encoding="utf-8"))
+    edit_plan = json.loads(PLAN.read_text(encoding="utf-8"))
+    timeline = json.loads(TIMELINE.read_text(encoding="utf-8"))
+    audio = style["audio"]
     measured = loudness(RENDER, audio)
     if not FINAL.exists():
         normalization = (
@@ -62,23 +74,31 @@ def main():
     checked_audio = loudness(FINAL, audio)
     video = next(s for s in metadata["streams"] if s["codec_type"] == "video")
     sound = next(s for s in metadata["streams"] if s["codec_type"] == "audio")
-    words = [word for clip in plan["clips"] for word in clip["words"]]
-    expected_ids = [f"pool_raw.word.{i:05d}" for i in range(
-        plan["coverage"]["source_word_count"])]
+    words = [word for clip in timeline["clips"] for word in clip["words"]]
+    word_ids = [word["id"] for word in words]
+    source_frames = [word["source_start_frame"] for word in words]
+    source_word_count = timeline["coverage"]["source_word_count"]
+    retained_word_count = timeline["coverage"]["retained_word_count"]
+    word_limit = style["captions"].get("max_words_fast_speech",
+                                       style["captions"]["max_words"])
     checks = {
         "1080x1920": (video["width"], video["height"]) == (1080, 1920),
         "30fps": video["r_frame_rate"] == "30/1",
         "H264_AAC": video["codec_name"] == "h264" and sound["codec_name"] == "aac",
         "duracion_planeada": abs(float(metadata["format"]["duration"])
-                                  - plan["duration_frames"] / plan["fps"]) < 0.1,
-        "todas_las_palabras_en_orden": [w["id"] for w in words] == expected_ids,
+                                  - timeline["duration_frames"] / timeline["fps"]) < 0.1,
+        "todas_las_palabras_en_orden": (
+            len(word_ids) == len(set(word_ids))
+            and retained_word_count == source_word_count == len(words)
+            and all(previous <= current for previous, current in
+                    zip(source_frames, source_frames[1:]))),
         "ningun_corte_cruza_palabras": all(
             clip["source_in_frame"] <= word["source_start_frame"]
             < word["source_end_frame"] <= clip["source_out_frame"]
-            for clip in plan["clips"] for word in clip["words"]),
-        "captions_maximo_cuatro_palabras": all(
-            sum(len(line) for line in page["lines"]) <= config["captions"]["max_words"]
-            for clip in plan["clips"] for page in clip["pages"]),
+            for clip in timeline["clips"] for word in clip["words"]),
+        "captions_maximo_palabras": all(
+            sum(len(line) for line in page["lines"]) <= word_limit
+            for clip in timeline["clips"] for page in clip["pages"]),
         "sin_higgsfield": True,
         "voz_menos14_lufs": abs(float(checked_audio["input_i"]) + 14) <= 0.5,
         "true_peak_controlado": float(checked_audio["input_tp"]) <= -1.0,
@@ -88,25 +108,29 @@ def main():
         "file": str(FINAL), "checks": checks,
         "duration_seconds": float(metadata["format"]["duration"]),
         "bytes": int(metadata["format"]["size"]),
-        "retained_words": len(words), "clips": len(plan["clips"]),
+        "retained_words": len(words), "clips": len(timeline["clips"]),
         "audio": checked_audio,
         "note": "La cobertura se verifica contra la transcripción y alineación locales.",
     }
-    (PROJECT / "out" / f"{args.qc_prefix}.json").write_text(
+    REPORT_DIR.mkdir(parents=True, exist_ok=True)
+    (REPORT_DIR / f"{args.qc_prefix}.json").write_text(
         json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     lines = ["PICOS.AI — QC de demo completa", f"Estado: {report['status']}",
              f"Duración: {report['duration_seconds']:.3f}s",
-             f"Contenido: {len(words)}/{len(expected_ids)} palabras, "
-             f"{len(plan['clips'])} tomas, orden original",
+             f"Contenido: {len(words)}/{source_word_count} palabras, "
+             f"{len(timeline['clips'])} tomas, orden original",
              "Cortes: pausas entre intervenciones; márgenes 0.22s / 0.28s",
              "Tipografía: Inter Display Bold, tamaño uniforme 100px",
+             f"Captions: máximo {word_limit} palabras por página",
              f"Voz: {checked_audio['input_i']} LUFS, "
              f"{checked_audio['input_tp']} dBTP",
-             f"Gráficos: {len(config.get('graphics', {}).get('events', []))}; "
-             f"SFX: {len(audio.get('sfx', []))}; Higgsfield y música: no utilizados",
+             f"Gráficos: {len(edit_plan['cards'])}; "
+             f"SFX: 1 de inicio, hasta {len(timeline['clips']) - 1} de corte y "
+             f"{len(edit_plan['cards']) + sum(card['kind'] not in audio['card_beat_sfx']['silent_kinds'] for card in edit_plan['cards']) + len(edit_plan['cuts'])} de tarjetas y cortes de color; "
+             f"Higgsfield: no utilizado; música: {'utilizada' if edit_plan.get('music') else 'no utilizada'}",
              "Decodificación completa: sin errores"]
     lines += [f"{'PASS' if passed else 'FAIL'}: {name}" for name, passed in checks.items()]
-    (PROJECT / "out" / f"{args.qc_prefix}.txt").write_text(
+    (REPORT_DIR / f"{args.qc_prefix}.txt").write_text(
         "\n".join(lines) + "\n", encoding="utf-8")
     print("\n".join(lines))
     if not all(checks.values()):

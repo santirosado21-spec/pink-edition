@@ -1,18 +1,15 @@
-# Pink Edition
+# Pink Edition / Pink.ai
 
 Framework de edición de footage real con Remotion 4.0.534, captions sincronizados,
-gráficos contextuales y efectos de sonido. Proyecto compartido entre Codex y Claude.
-
-La demo de piscina dura 53.3s y conserva las 158 palabras de la transcripción
-en orden. Quita pausas entre nueve intervenciones. Usa Inter Display Bold
-a 100px uniformes y captions de hasta cuatro palabras. Tres tarjetas acompañan
-«uno de cada cuatro», «modo de emergencia» y «duplica»; seis SFX acompañan
-su movimiento. Higgsfield no se usa en esta entrega.
+gráficos contextuales y diseño sonoro. La demo de piscina conserva las 158
+palabras en orden y sólo recorta tramos sin habla entre nueve intervenciones.
 
 ## Instalar y abrir
 
-Requisitos: Node 22, npm y FFmpeg. Para analizar material: Python 3.11,
-WhisperX y Pillow (`requirements.txt`). El análisis procesa audio localmente.
+Requisitos: Node 22, npm y FFmpeg. Python 3.12 en dos entornos, porque WhisperX
+fija su propio torch: `.venv-asr` (`requirements-asr.txt`) transcribe y alinea;
+`.venv` (`requirements.txt`) recorta a la persona, coloca tarjetas y verifica.
+Todo el análisis se ejecuta localmente.
 
 ```sh
 npm ci
@@ -21,58 +18,115 @@ npm run typecheck
 npm run dev
 ```
 
-`npm ci` prepara timelines ficticias únicamente si faltan. Un checkout nuevo
-muestra esos ejemplos sobre un fondo; no contiene el video del cliente.
-`npm run setup:audio` descarga el whoosh público de Mixkit y lo prepara con FFmpeg.
-Los dos efectos Kenney CC0 y la licencia de Inter están incluidos.
-Consultar `AUDIO_ASSETS.md` para procedencia y licencias.
+Un checkout sin medios del cliente usa datos ficticios. Los videos, transcripts,
+timelines reales y renders permanecen locales. `AUDIO_ASSETS.md` documenta la
+procedencia y licencia de los efectos.
 
-## Archivos principales
+## Contrato de edición
 
-- `src/FullDemo.tsx`: nueve grupos editables de imagen, voz y captions.
-- `src/EditorialGraphics.tsx`: tarjetas editoriales y entradas de sonido.
-- `full-demo-config.json`: fuente, tamaño, color, tarjetas, ganancias y tiempos.
-- `scripts/prepare_full_demo.py`: alineación, remapeo y comprobación de cobertura.
-- `scripts/finish_full_demo.py`: normalización en dos pasos y QC del MP4.
-- `CLAUDE.md` y `AGENTS.md`: contexto y reglas compartidas.
+`src/FullDemo.tsx` registra `PinkEdit` y el alias `PoolFullDemo`. La composición
+recibe `{style, plan, timeline, media}`; `src/edit.ts` crea el contexto compartido
+y resuelve los anclajes de palabras.
 
-Los gráficos expresan lo dicho por el hablante; no añaden datos independientes.
-Mantener márgenes para rostro y captions.
+- `style/pink-demo-v1.json`: STYLE fijo del look: formato, montaje, captions,
+  temas, fondos, vidrio, movimiento y reglas de audio.
+- `projects/piscina/plan.json`: PLAN del video: nombres de toma, cortes de color,
+  tarjetas, fondos y música.
+- `schema/edit-plan.schema.json`: contrato estructural del PLAN.
+- `docs/EDITING_GUIDELINES.md`: reglas editoriales y límites comprobables.
 
-## Material local y preparación
+El plan de piscina activa seis tarjetas. El registro de
+`src/graphics/cards.tsx` ofrece siete `kind`, incluido `illness`. Los captions
+usan Inter Display Bold a 100 px, normalmente hasta cuatro palabras; STYLE
+permite cinco en habla rápida para evitar una última palabra demasiado fugaz.
 
-Guardar el raw en `public/client/pool-raw-full.mp4` y el transcript Whisper con
-`segments[].words[]` en `local/raw-transcript.json`. Ambas carpetas quedan fuera
-de Git, junto con `src/pool-full-timeline.json` y `out/`.
+Los gráficos se ligan a frases concretas. Hay cortes de color, fondos temáticos
+y temas contextuales azul, verde y rojo. `src/SoundDesign.tsx` deriva desde
+STYLE los sonidos de inicio, fronteras de toma, entradas y énfasis de tarjetas y
+cortes de color; el PLAN no enumera SFX. La música es `null` por defecto. No se
+deben incrustar canciones con derechos en entregas para clientes sin autorización.
+
+## Web
 
 ```sh
-python scripts/prepare_full_demo.py --source public/client/pool-raw-full.mp4 --transcript local/raw-transcript.json --allow-model-download
+npm run web   # http://localhost:3000
 ```
 
-El flag permite descargar el modelo de alineación. Se valida una palabra
-alineada por cada palabra de entrada, sin selección temática.
-Esta es la primera plantilla de piscina: al cambiar la estructura de un video,
-actualizar trims y duraciones de `FullDemo.tsx` desde el plan generado.
-Los tiempos de gráficos y SFX también deben ajustarse a las palabras del nuevo video.
+- **Inicio:** subir un video y ver en qué paso va cada trabajo.
+- **Editor:** vista previa en vivo con la misma composición `PinkEdit`,
+  transcripción clicable y, por frase, cortes de color, tarjetas y fondos con su
+  color. Guardar crea una versión del plan y recoloca las tarjetas sobre la
+  persona; renderizar lanza `scripts/pink_edit.py`.
+- **Proponer con IA:** pide el plan a la API de Claude a partir de la
+  transcripción. Requiere `ANTHROPIC_API_KEY` en `.env.local`.
+
+La web (`app/`, Next.js) tiene dos modos:
+
+- **Local** (por defecto): corre en la misma máquina que el motor, procesa un video
+  a la vez y lee y escribe `work/<id>/`. Sin cuentas.
+- **Nube**: con `NEXT_PUBLIC_SUPABASE_URL` y `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+  exige entrar con un enlace por correo, sube los videos a Supabase y encola los
+  trabajos. Un procesador en el equipo que edita (`python3 scripts/worker.py`, con
+  `SUPABASE_URL` y `SUPABASE_SERVICE_ROLE_KEY`) los toma de la cola. Plantilla en
+  `pink.env.example`; autoarranque en `scripts/worker.launchd.plist.example`.
+  `worker.py --local-queue <carpeta>` ejecuta el mismo flujo sin Supabase.
+
+En Vercel sólo corre la web: sin procesador, subir y renderizar no funcionan.
+
+## Editar un video
+
+```sh
+python3 scripts/pink_edit.py ruta/al/video.mp4 --plan ruta/al/plan.json
+```
+
+Encadena todos los pasos y deja el MP4 y su QC en `work/<id>/out/`: lleva el
+fuente a 30 fps, transcribe, corta silencios y pagina captions, recorta a la
+persona, coloca las tarjetas, renderiza `PinkEdit` y normaliza el audio. Sin
+`--plan` usa un plan vacío: captions y sonidos de corte de toma. Los pasos ya
+hechos (transcript, recorte) se reutilizan. `work/` y `public/work/` quedan
+fuera de Git.
+
+## Preparar la demo paso a paso
+
+El raw y el transcript Whisper con `segments[].words[]` se guardan fuera de Git.
+Las correcciones ortográficas usan el formato
+`[{"index", "expected", "replacement"}]`.
+
+```sh
+python3 scripts/prepare_full_demo.py \
+  --source public/client/pool-raw-full.mp4 \
+  --transcript local/raw-transcript.json \
+  --corrections local/corrections.json \
+  --style style/pink-demo-v1.json \
+  --plan projects/piscina/plan.json
+```
+
+`--pages-only` recalcula únicamente las páginas del timeline. El script conserva
+todas las palabras y valida contra ellas los anclajes del PLAN cuando éste existe.
+No usar `--allow-model-download` salvo autorización expresa.
+
+`scripts/make_matte.py` genera el recorte de la persona. Después,
+`scripts/place_graphics.py` calcula la posición vertical de las tarjetas a partir
+del matte; sus avisos requieren revisión visual.
 
 ## Exportar y verificar
 
 ```sh
 npm run render:demo
-python scripts/finish_full_demo.py --input out/piscina-demo-completa-graficos-sfx-v3-render.mp4 --output out/piscina-demo-completa-graficos-sfx-v3.mp4 --qc-prefix QC_graficos_sfx_v3
+python3 scripts/finish_full_demo.py \
+  --input out/piscina-demo-render.mp4 \
+  --output out/piscina-demo.mp4 \
+  --qc-prefix QC_piscina_demo
+python3 scripts/review_frames.py
 ```
 
-Entrega: 1080 × 1920, 30fps, H.264/AAC; objetivo -14 LUFS y pico -1.5 dBTP.
-El raw recibido es 480 × 848; ampliar la salida no recupera detalle nativo.
-El QC verifica cobertura, duración, formato, loudness y decodificación.
-La aprobación visual y auditiva del cliente se registra por separado.
+La entrega objetivo es 1080 × 1920, 30 fps, H.264/AAC, −14 LUFS y pico de
+−1.5 dBTP. El QC técnico comprueba formato, duración, cobertura, loudness y
+decodificación; la aprobación visual y auditiva es independiente.
+La revisión extrae una muestra por caption y fondo temático, y tres por tarjeta.
 
-## Colaborar con Claude
+`PINK_AI.md` describe la evolución a plataforma. `supabase/migrations/` contiene
+las migraciones de datos. No añadir footage, transcripts, credenciales ni renders
+a Git; trabajar en una rama propia y preservar los cambios de otros.
 
-Clonar el repo privado con una cuenta autorizada, abrir su carpeta en Claude Code
-y leer `CLAUDE.md`. Crear una rama por cambio y trabajar con commits pequeños.
-No añadir footage, transcripts, credenciales o renders a un commit.
-Los datos ficticios permiten revisar el código sin distribuir material del cliente.
-
-Remotion mantiene su propia licencia; el repositorio no concede derechos
-adicionales sobre el motor. [Licencia de Remotion](https://www.remotion.dev/license).
+Remotion conserva su propia licencia: [licencia de Remotion](https://www.remotion.dev/license).

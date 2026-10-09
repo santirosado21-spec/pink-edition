@@ -1,0 +1,371 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Pink.ai edit plan",
+  "type": "object",
+  "description": "PLAN de Pink.ai. Valida estructura, no referencias al timeline, licencias ni reglas editoriales. Mínimos estructurales propuestos; no certifican duración estética.",
+  "additionalProperties": false,
+  "properties": {
+    "style": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Identificador del look versionado, por ejemplo pink-demo-v1; requiere resolver un catálogo externo."
+    },
+    "version": {
+      "type": "integer",
+      "description": "Versión positiva del plan.",
+      "minimum": 1
+    },
+    "cuts": {
+      "type": "array",
+      "description": "Cortes de color en orden editorial.",
+      "items": {
+        "type": "object",
+        "description": "Corte de color a pantalla completa, no corte de toma.",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Identificador del evento; su unicidad se comprueba fuera del esquema."
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Etiqueta editorial; no sustituye el texto del transcript."
+          },
+          "theme": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Tema contextual del catálogo del look actual.",
+            "enum": [
+              "base",
+              "health",
+              "stress"
+            ]
+          },
+          "anchor_word_id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "ID de la palabra de entrada en el timeline; no fija el prefijo del video."
+          },
+          "offset_frames": {
+            "type": "integer",
+            "description": "Desplazamiento firmado respecto a la palabra; comprobar el frame resuelto contra el timeline."
+          },
+          "sample_frame": {
+            "type": "integer",
+            "description": "Frame absoluto opcional, exclusivo del fallback de desarrollo con datos ficticios.",
+            "minimum": 0
+          },
+          "duration_frames": {
+            "type": "integer",
+            "description": "Duración positiva en frames del estilo; permanencia y límites se revisan con el timeline.",
+            "minimum": 1
+          },
+          "style": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Tratamiento del corte de color.",
+            "enum": [
+              "paper",
+              "solid"
+            ]
+          },
+          "last_word_id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Última palabra inclusiva de la frase; debe seguir al anclaje o coincidir con él."
+          }
+        },
+        "required": [
+          "id",
+          "label",
+          "theme",
+          "style",
+          "anchor_word_id",
+          "offset_frames",
+          "duration_frames",
+          "last_word_id"
+        ]
+      }
+    },
+    "cards": {
+      "type": "array",
+      "description": "Tarjetas contextuales en orden editorial.",
+      "items": {
+        "type": "object",
+        "description": "Tarjeta contextual; sus sonidos pertenecen a STYLE, nunca a este objeto.",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Identificador del evento; su unicidad se comprueba fuera del esquema."
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Etiqueta editorial; no sustituye el texto del transcript."
+          },
+          "theme": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Tema contextual del catálogo del look actual.",
+            "enum": [
+              "base",
+              "health",
+              "stress"
+            ]
+          },
+          "anchor_word_id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "ID de la palabra de entrada en el timeline; no fija el prefijo del video."
+          },
+          "offset_frames": {
+            "type": "integer",
+            "description": "Desplazamiento firmado respecto a la palabra; comprobar el frame resuelto contra el timeline."
+          },
+          "sample_frame": {
+            "type": "integer",
+            "description": "Frame absoluto opcional, exclusivo del fallback de desarrollo con datos ficticios.",
+            "minimum": 0
+          },
+          "duration_frames": {
+            "type": "integer",
+            "description": "Duración positiva en frames del estilo; permanencia y límites se revisan con el timeline.",
+            "minimum": 1
+          },
+          "kind": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Clave del registro cards en src/graphics/cards.tsx.",
+            "enum": [
+              "patients",
+              "emergency",
+              "risk",
+              "illness",
+              "body",
+              "healing",
+              "bill",
+              "compare",
+              "steps",
+              "beforeafter",
+              "alert",
+              "counter",
+              "question"
+            ]
+          },
+          "top": {
+            "type": "integer",
+            "description": "Posición vertical en píxeles. La calcula place_graphics.py con el matte, así que un plan recién propuesto no la trae; es obligatoria para renderizar. No garantiza por sí sola espacio libre.",
+            "minimum": 0
+          },
+          "beat": {
+            "type": "object",
+            "description": "Palabra de énfasis; resolver dentro de la tarjeta.",
+            "additionalProperties": false,
+            "properties": {
+              "anchor_word_id": {
+                "type": "string",
+                "minLength": 1,
+                "description": "ID de la palabra de entrada en el timeline; no fija el prefijo del video."
+              },
+              "offset_frames": {
+                "type": "integer",
+                "description": "Desplazamiento firmado respecto a la palabra; comprobar el frame resuelto contra el timeline."
+              },
+              "sample_frame": {
+                "type": "integer",
+                "description": "Frame absoluto opcional, exclusivo del fallback de desarrollo con datos ficticios.",
+                "minimum": 0
+              }
+            },
+            "required": [
+              "anchor_word_id",
+              "offset_frames"
+            ]
+          },
+          "meaning": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Justificación semántica del pictograma, conservada del config actual."
+          },
+          "text": {
+            "type": "string",
+            "maxLength": 12,
+            "description": "Cifra o palabra corta dicha literalmente en el video; sólo la usa `counter`. Sin ella no se muestra ninguna cifra."
+          }
+        },
+        "required": [
+          "id",
+          "label",
+          "theme",
+          "kind",
+          "anchor_word_id",
+          "offset_frames",
+          "duration_frames",
+          "beat"
+        ]
+      }
+    },
+    "backgrounds": {
+      "type": "array",
+      "description": "Fondos temáticos en orden editorial.",
+      "items": {
+        "type": "object",
+        "description": "Fondo temático detrás de la persona.",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Identificador del evento; su unicidad se comprueba fuera del esquema."
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Etiqueta editorial; no sustituye el texto del transcript."
+          },
+          "theme": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Tema contextual del catálogo del look actual.",
+            "enum": [
+              "base",
+              "health",
+              "stress"
+            ]
+          },
+          "anchor_word_id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "ID de la palabra de entrada en el timeline; no fija el prefijo del video."
+          },
+          "offset_frames": {
+            "type": "integer",
+            "description": "Desplazamiento firmado respecto a la palabra; comprobar el frame resuelto contra el timeline."
+          },
+          "sample_frame": {
+            "type": "integer",
+            "description": "Frame absoluto opcional, exclusivo del fallback de desarrollo con datos ficticios.",
+            "minimum": 0
+          },
+          "duration_frames": {
+            "type": "integer",
+            "description": "Duración positiva en frames del estilo; permanencia y límites se revisan con el timeline.",
+            "minimum": 1
+          },
+          "motif": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Motivo disponible en BackgroundEffects.",
+            "enum": [
+              "network",
+              "rings",
+              "crosses"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "label",
+          "theme",
+          "motif",
+          "anchor_word_id",
+          "offset_frames",
+          "duration_frames"
+        ]
+      }
+    },
+    "music": {
+      "description": "Opcional: una pista autorizada o null; omitir equivale a no añadir música.",
+      "anyOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "description": "Una pista de música para toda la composición, según SoundDesign; licencia revisada fuera del esquema.",
+          "additionalProperties": false,
+          "properties": {
+            "file": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Ruta del recurso autorizado, relativa a public como en staticFile."
+            },
+            "title": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Nombre de la pista."
+            },
+            "gain_db": {
+              "type": "number",
+              "description": "Ganancia de la pista en dB."
+            },
+            "fade_in_frames": {
+              "type": "integer",
+              "description": "Duración del fundido inicial; inicio ligado al comienzo de la composición.",
+              "minimum": 1
+            },
+            "fade_out_frames": {
+              "type": "integer",
+              "description": "Duración del fundido final; final ligado a la duración de la composición.",
+              "minimum": 1
+            }
+          },
+          "required": [
+            "file",
+            "title",
+            "gain_db",
+            "fade_in_frames",
+            "fade_out_frames"
+          ]
+        }
+      ]
+    },
+    "clip_labels": {
+      "type": "array",
+      "description": "Etiquetas por índice de toma del timeline; no cambian los trims.",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Etiqueta de una toma."
+      }
+    },
+    "intro_blur": {
+      "type": "object",
+      "description": "Override completo y opcional del blur de STYLE; no es un evento por palabra.",
+      "additionalProperties": false,
+      "properties": {
+        "pixels": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Radio del blur inicial en píxeles; cero lo desactiva."
+        },
+        "hold_frames": {
+          "type": "integer",
+          "description": "Frames de espera desde el inicio de la composición.",
+          "minimum": 0
+        },
+        "release_frames": {
+          "type": "integer",
+          "description": "Frames de resolución del blur; intervalo positivo.",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "pixels",
+        "hold_frames",
+        "release_frames"
+      ]
+    }
+  },
+  "required": [
+    "style",
+    "version",
+    "cuts",
+    "cards",
+    "backgrounds"
+  ]
+}
