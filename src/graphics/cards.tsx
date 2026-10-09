@@ -11,7 +11,8 @@ const ease = Easing.bezier(0.16, 1, 0.3, 1);
 const clamp = { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: ease } as const;
 
 // `beat` es el frame, relativo a la tarjeta, de la palabra que marca el énfasis.
-export type CardProps = { duration: number; beat: number };
+// `text` es una cifra o palabra corta que el video dijo literalmente (sólo `counter`).
+export type CardProps = { duration: number; beat: number; text?: string };
 
 const Canvas: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const theme = useTheme();
@@ -188,6 +189,111 @@ const Bill: React.FC<CardProps> = ({ beat }) => {
   );
 };
 
+// ---- Tarjetas sin tema: sirven para cualquier video (docs/CARD_CATALOG.md). ----
+
+const Compare: React.FC<CardProps> = ({ beat }) => {
+  const { W, H, ink, muted } = useCard();
+  const frame = useCurrentFrame();
+  const shown = interpolate(frame, [2, 12], [0, 1], clamp);
+  const grow = interpolate(frame, [beat, beat + 16], [0, 1], clamp);
+  const base = 150;
+  return (
+    <Canvas>
+      <g opacity={shown}>
+        <rect x={W / 2 - 230} y={H / 2 - 62} width={base} height="46" rx="23" fill={muted} />
+        <rect x={W / 2 - 230} y={H / 2 + 16} width={base + grow * 250} height="46" rx="23" fill="url(#card-accent)" />
+        <circle cx={W / 2 - 230 + base + grow * 250 - 23} cy={H / 2 + 39} r="9" fill={ink} />
+      </g>
+    </Canvas>
+  );
+};
+
+const Steps: React.FC<CardProps> = ({ beat }) => {
+  const { W, H, ink, muted } = useCard();
+  const frame = useCurrentFrame();
+  const xs = [W / 2 - 200, W / 2, W / 2 + 200];
+  const reach = interpolate(frame, [4, beat + 18], [0, 400], clamp);
+  return (
+    <Canvas>
+      <rect x={xs[0]} y={H / 2 - 5} width="400" height="10" rx="5" fill={muted} />
+      <rect x={xs[0]} y={H / 2 - 5} width={reach} height="10" rx="5" fill="url(#card-accent)" />
+      {xs.map((x, index) => {
+        const appear = interpolate(frame, [4 + index * 8, 14 + index * 8], [0, 1], clamp);
+        return (
+          <g key={x} opacity={appear} transform={`translate(${x} ${H / 2}) scale(${0.7 + 0.3 * appear})`}>
+            <circle r="46" fill={index === 2 ? "url(#card-accent)" : muted} />
+            <text textAnchor="middle" dominantBaseline="central" fill={ink} fontSize="52" fontWeight="700">{index + 1}</text>
+          </g>
+        );
+      })}
+    </Canvas>
+  );
+};
+
+const BeforeAfter: React.FC<CardProps> = ({ beat }) => {
+  const { W, H, ink, muted } = useCard();
+  const frame = useCurrentFrame();
+  const left = interpolate(frame, [2, 12], [0, 1], clamp);
+  const turn = interpolate(frame, [beat, beat + 14], [0, 1], clamp);
+  return (
+    <Canvas>
+      <rect x={W / 2 - 280} y={H / 2 - 74} width="190" height="148" rx="30" fill={muted} opacity={left} />
+      <circle cx={W / 2 - 185} cy={H / 2} r="26" fill={ink} opacity={0.5 * left} />
+      <path d={`M${W / 2 - 50} ${H / 2} H${W / 2 + 40} M${W / 2 + 12} ${H / 2 - 28} L${W / 2 + 42} ${H / 2} L${W / 2 + 12} ${H / 2 + 28}`} fill="none" stroke={ink} strokeWidth="9" strokeLinecap="round" strokeLinejoin="round" opacity={0.35 + 0.65 * turn} />
+      <g opacity={turn} transform={`translate(${W / 2 + 185} ${H / 2}) scale(${0.85 + 0.15 * turn})`}>
+        <rect x="-95" y="-74" width="190" height="148" rx="30" fill="url(#card-accent)" />
+        <path d="M-30 4 L-8 28 L34 -22" fill="none" stroke={ink} strokeWidth="12" strokeLinecap="round" strokeLinejoin="round" />
+      </g>
+    </Canvas>
+  );
+};
+
+const Alert: React.FC<CardProps> = ({ beat }) => {
+  const { W, H, ink } = useCard();
+  const frame = useCurrentFrame();
+  const draw = interpolate(frame, [2, 16], [0, 1], clamp);
+  const hit = interpolate(frame, [beat, beat + 5, beat + 14], [1, 1.14, 1], clamp);
+  return (
+    <Canvas>
+      <g transform={`translate(${W / 2} ${H / 2 + 6}) scale(${hit})`}>
+        <path d="M0 -92 L98 78 H-98 Z" fill="url(#card-accent)" opacity={draw} strokeLinejoin="round" stroke="url(#card-accent)" strokeWidth="18" />
+        <path d="M0 -34 V22" stroke={ink} strokeWidth="14" strokeLinecap="round" opacity={draw} />
+        <circle cy="52" r="8" fill={ink} opacity={draw} />
+      </g>
+    </Canvas>
+  );
+};
+
+const Counter: React.FC<CardProps> = ({ beat, text }) => {
+  const { W, H, ink } = useCard();
+  const frame = useCurrentFrame();
+  const shown = interpolate(frame, [2, 10], [0, 1], clamp);
+  const target = text !== undefined && /^\d+$/.test(text) ? Number(text) : null;
+  const progress = interpolate(frame, [beat, beat + 22], [0, 1], clamp);
+  // Sin cifra dicha no se inventa ninguna: el contador sólo existe con `text`.
+  const value = target === null ? (text ?? "") : String(Math.round(target * progress));
+  return (
+    <Canvas>
+      <text x={W / 2} y={H / 2} textAnchor="middle" dominantBaseline="central" fill={ink} fontSize="150" fontWeight="700" opacity={shown} letterSpacing="-4">{value}</text>
+      <rect x={W / 2 - 90} y={H / 2 + 84} width={180 * progress} height="10" rx="5" fill="url(#card-accent)" opacity={shown} />
+    </Canvas>
+  );
+};
+
+const Question: React.FC<CardProps> = ({ beat }) => {
+  const { W, H, ink } = useCard();
+  const frame = useCurrentFrame();
+  const shown = interpolate(frame, [2, 12], [0, 1], clamp);
+  const pulse = interpolate(frame, [beat, beat + 18], [0, 1], clamp);
+  return (
+    <Canvas>
+      <circle cx={W / 2} cy={H / 2} r={78 + pulse * 26} fill="none" stroke="url(#card-accent)" strokeWidth="6" opacity={shown * (1 - pulse)} />
+      <circle cx={W / 2} cy={H / 2} r="78" fill="url(#card-accent)" opacity={shown} />
+      <text x={W / 2} y={H / 2 + 6} textAnchor="middle" dominantBaseline="central" fill={ink} fontSize="124" fontWeight="700" opacity={shown}>?</text>
+    </Canvas>
+  );
+};
+
 export const cards: Record<string, React.FC<CardProps>> = {
   patients: Patients,
   emergency: Emergency,
@@ -196,4 +302,10 @@ export const cards: Record<string, React.FC<CardProps>> = {
   body: Body,
   healing: Healing,
   bill: Bill,
+  compare: Compare,
+  steps: Steps,
+  beforeafter: BeforeAfter,
+  alert: Alert,
+  counter: Counter,
+  question: Question,
 };

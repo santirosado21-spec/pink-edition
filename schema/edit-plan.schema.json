@@ -147,7 +147,13 @@
               "illness",
               "body",
               "healing",
-              "bill"
+              "bill",
+              "compare",
+              "steps",
+              "beforeafter",
+              "alert",
+              "counter",
+              "question"
             ]
           },
           "top": {
@@ -184,6 +190,11 @@
             "type": "string",
             "minLength": 1,
             "description": "Justificación semántica del pictograma, conservada del config actual."
+          },
+          "text": {
+            "type": "string",
+            "maxLength": 12,
+            "description": "Cifra o palabra corta dicha literalmente en el video; sólo la usa `counter`. Sin ella no se muestra ninguna cifra."
           }
         },
         "required": [

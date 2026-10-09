@@ -23,6 +23,12 @@ const KINDS: Record<string, string> = {
   body: "De la cabeza al cuerpo",
   healing: "Recuperación lenta",
   bill: "Recibo / factura",
+  compare: "Comparar: una mayor que otra",
+  steps: "Tres pasos",
+  beforeafter: "Antes → después",
+  alert: "Advertencia",
+  counter: "Contador (cifra dicha)",
+  question: "Pregunta",
 };
 const MOTIFS: Record<string, string> = { network: "Red de puntos", rings: "Ondas de alarma", crosses: "Cruces médicas" };
 const CUT_STYLES: Record<string, string> = { paper: "Papel (fondo claro)", solid: "Sólido (fondo de color)" };

@@ -17,6 +17,12 @@ const CARDS: Record<string, string> = {
   body: "una figura con la cabeza encendida y otra con el cuerpo lleno; para algo que pasa de la cabeza al cuerpo",
   healing: "un anillo que se completa rápido y otro que avanza lento; para recuperarse o sanar más despacio",
   bill: "un recibo que se despliega; para pagar un costo o «pasar factura»",
+  compare: "dos barras, una claramente más larga; para «más que», «mayor», «más rápido» dicho en la frase, sin cifras",
+  steps: "tres pasos numerados que aparecen en secuencia; para un proceso en tres movimientos (primero, luego, al final)",
+  beforeafter: "dos paneles con una flecha y una palomita al final; para una transformación de un estado a otro",
+  alert: "un triángulo de advertencia con signo de exclamación; para un error, un peligro o una advertencia",
+  counter: "un número grande que sube hasta la cifra dicha; SÓLO si el hablante dijo esa cifra literalmente, y se pone en el campo text",
+  question: "un signo de interrogación grande con un pulso; para una pregunta retórica o un misterio que plantea el hablante",
 };
 const MOTIFS: Record<string, string> = {
   rings: "ondas concéntricas de alarma detrás de la persona",
@@ -46,7 +52,7 @@ export const proposePlan = async (id: string, timeline: Timeline, current: Plan)
   const range = { first_word: z.number().int(), last_word: z.number().int(), theme: z.enum(options("cuts", "theme")), label: z.string() };
   const format = z.object({
     cuts: z.array(z.object({ ...range, style: z.enum(options("cuts", "style")) })),
-    cards: z.array(z.object({ ...range, kind: z.enum(options("cards", "kind")), beat_word: z.number().int(), meaning: z.string() })),
+    cards: z.array(z.object({ ...range, kind: z.enum(options("cards", "kind")), beat_word: z.number().int(), meaning: z.string(), text: z.string().max(12).optional() })),
     backgrounds: z.array(z.object({ ...range, motif: z.enum(options("backgrounds", "motif")) })),
     notes: z.string(),
   });
@@ -73,7 +79,7 @@ export const proposePlan = async (id: string, timeline: Timeline, current: Plan)
     output_config: { effort: "high", format: zodOutputFormat(format) },
     messages: [{
       role: "user",
-      content: `Video «${id}», ${(timeline.duration_frames / fps).toFixed(1)} s. Cada palabra va precedida de su número.\n\n${takes.join("\n\n")}\n\n${catalog}\n\nPropón la edición. En "label" pon la frase elegida en minúsculas; en "beat_word", la palabra donde debe caer el énfasis de la tarjeta; en "meaning", qué ilustra la tarjeta y por qué corresponde a lo dicho.`,
+      content: `Video «${id}», ${(timeline.duration_frames / fps).toFixed(1)} s. Cada palabra va precedida de su número.\n\n${takes.join("\n\n")}\n\n${catalog}\n\nPropón la edición. En "label" pon la frase elegida en minúsculas; en "beat_word", la palabra donde debe caer el énfasis de la tarjeta; en "meaning", qué ilustra la tarjeta y por qué corresponde a lo dicho; en "text" (sólo para counter), la cifra tal como se dijo.`,
     }],
   });
   if (response.stop_reason === "refusal") throw new Error("El modelo declinó proponer una edición para este video.");

@@ -31,7 +31,7 @@ export const EditorialGraphics: React.FC = () => {
                 }}
               >
                 <ThemeContext.Provider value={themeOf(event.theme)}>
-                  <Card duration={event.duration_frames} beat={beat} />
+                  <Card duration={event.duration_frames} beat={beat} text={event.text} />
                 </ThemeContext.Provider>
               </div>
             </LiquidGlass>

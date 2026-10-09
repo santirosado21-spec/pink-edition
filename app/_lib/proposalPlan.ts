@@ -4,7 +4,7 @@ import type { BackgroundEvent, CardEvent, CutEvent, Plan, Timeline } from "../..
 type Range = { first_word: number; last_word: number; theme: string; label: string };
 export type Proposal = {
   cuts: (Range & { style: string })[];
-  cards: (Range & { kind: string; beat_word: number; meaning: string })[];
+  cards: (Range & { kind: string; beat_word: number; meaning: string; text?: string })[];
   backgrounds: (Range & { motif: string })[];
   notes: string;
 };
@@ -37,7 +37,7 @@ export const proposalToPlan = (proposal: Proposal, timeline: Timeline, current: 
   const cards: CardEvent[] = proposal.cards.filter(valid).map((card, index) => {
     const beat = card.beat_word >= card.first_word && card.beat_word <= card.last_word ? card.beat_word : card.last_word;
     // `top` es provisional: al guardar se recoloca sobre la persona.
-    return { ...base(card, `card_${index + 1}`), kind: card.kind, top: 300, beat: { anchor_word_id: words[beat].id, offset_frames: 0 }, meaning: card.meaning };
+    return { ...base(card, `card_${index + 1}`), kind: card.kind, top: 300, beat: { anchor_word_id: words[beat].id, offset_frames: 0 }, meaning: card.meaning, ...(card.kind === "counter" && card.text ? { text: card.text } : {}) };
   });
   const backgrounds: BackgroundEvent[] = proposal.backgrounds.filter(valid).map((background, index) => ({ ...base(background, `background_${index + 1}`), motif: background.motif }));
   return { ...current, cuts, cards, backgrounds };
