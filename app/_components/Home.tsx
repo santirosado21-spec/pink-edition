@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import type { JobSummary } from "../_lib/jobs";
 import { statusLabel } from "./stages";
 
-export const Home: React.FC<{ initial: JobSummary[] }> = ({ initial }) => {
+export const Home: React.FC<{ initial: JobSummary[]; online?: boolean }> = ({ initial, online }) => {
   const [jobs, setJobs] = useState(initial);
   const [progress, setProgress] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -57,6 +57,7 @@ export const Home: React.FC<{ initial: JobSummary[] }> = ({ initial }) => {
         {progress !== null && <div className="bar"><i style={{ width: `${progress * 100}%` }} /></div>}
         <input ref={input} type="file" accept="video/*" hidden onChange={(event) => { const file = event.target.files?.[0]; if (file) upload(file); event.target.value = ""; }} />
       </div>
+      {online && <div className="notice">Esta es la versión en línea: todavía no procesa videos. La edición funciona por ahora sólo en el equipo local.</div>}
       {error && <div className="notice">{error}</div>}
 
       <h3 className="section">Tus videos</h3>

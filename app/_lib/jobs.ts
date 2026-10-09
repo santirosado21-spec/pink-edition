@@ -9,6 +9,9 @@ const ROOT = process.cwd();
 const WORK = path.join(ROOT, "work");
 const MEDIA = path.join(ROOT, "public/work");
 const run = promisify(execFile);
+// El motor (Python, FFmpeg, recorte) sólo existe en el equipo que procesa; en Vercel no.
+export const ENGINE_HERE = !process.env.VERCEL;
+export const NO_ENGINE = "La edición todavía no está disponible en línea: el motor corre en el equipo local.";
 
 export type JobStatus = {
   state: "running" | "ready" | "done" | "failed";
@@ -162,6 +165,7 @@ export const runningJob = async () => (await listJobs()).find((job) => job.statu
 
 // Lanza el motor en segundo plano; su avance queda en `status.json` y `job.log`.
 export const startPipeline = async (id: string, source: string, mode: "prepare" | "render") => {
+  if (!ENGINE_HERE) throw new Error(NO_ENGINE);
   const busy = await runningJob();
   if (busy) throw new Error(`Ya hay un video en proceso (${busy.id}). Esta versión procesa uno a la vez.`);
   await fs.mkdir(path.join(dir(id), "out"), { recursive: true });
