@@ -43,15 +43,13 @@ button, select, input { font: inherit; color: inherit; }
 .chip.done, .chip.ready { color: var(--ok); }
 .chip.failed { color: var(--bad); }
 .dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
-.chip.running .dot { animation: pulse 1s ease-in-out infinite; }
-@keyframes pulse { 50% { opacity: 0.25; } }
 
 /* Inicio */
 .home { max-width: 1120px; margin: 0 auto; padding: 28px 24px 60px; }
 .home header { display: flex; align-items: baseline; gap: 14px; margin-bottom: 26px; }
 .drop {
   border: 1.5px dashed #3a3a4a; border-radius: 18px; padding: 34px 20px; text-align: center;
-  background: var(--panel); cursor: pointer; transition: border-color 0.15s, background 0.15s;
+  background: var(--panel); cursor: pointer;
 }
 .drop:hover, .drop.over { border-color: var(--pink); background: var(--pink-soft); }
 .drop h2 { margin: 0 0 6px; font-size: 20px; letter-spacing: -0.01em; }
@@ -125,7 +123,7 @@ h3.section { margin: 34px 0 0; font-size: 13px; text-transform: uppercase; lette
 .steps li { display: flex; align-items: center; gap: 9px; color: var(--muted); font-size: 13px; }
 .steps li i { width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--line); flex: none; }
 .steps li.done { color: var(--text); } .steps li.done i { background: var(--ok); border-color: var(--ok); }
-.steps li.now { color: var(--pink); font-weight: 600; } .steps li.now i { border-color: var(--pink); animation: pulse 1s ease-in-out infinite; }
+.steps li.now { color: var(--pink); font-weight: 600; } .steps li.now i { border-color: var(--pink); }
 .steps li.bad { color: var(--bad); } .steps li.bad i { background: var(--bad); border-color: var(--bad); }
 .ask { display: flex; align-items: center; gap: 8px; opacity: 0.7; }
 .ask input { flex: 1; min-width: 0; background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 9px 11px; }

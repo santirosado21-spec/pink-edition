@@ -1,12 +1,9 @@
 import type { Metadata } from "next";
-import Bento from "./_landing/Bento";
 import { Chat } from "./_landing/Chat";
-import { Compare } from "./_landing/Compare";
 import { Brand, Heading, PrimaryAction } from "./_landing/Elements";
 import Faq from "./_landing/Faq";
-import { HeroPhone } from "./_landing/HeroPhone";
+import { Video } from "./_landing/Video";
 import Plans from "./_landing/Plans";
-import { Reveal } from "./_landing/Reveal";
 import { getPrimaryAction, landingConfig } from "./_landing/config";
 import "./landing.css";
 
@@ -47,12 +44,15 @@ export default function Landing() {
             <div className="actions"><PrimaryAction /><a className="ghost" href="#demo">Ver una demo</a></div>
             <p className="support">Hecho para Reels, TikTok y Shorts. Editamos tu material real: tu voz y tu cara siguen siendo tuyas.</p>
           </div>
-          <HeroPhone />
+          <div className="hero-video"><div className="phone"><Video src={landingConfig.hero.video} poster={landingConfig.hero.poster} label="Edición real" autoPlay /></div></div>
         </header>
 
         <section className="section wrap" id="demo">
-          <Heading eyebrow="El resultado" sub="Mueve la barra y compara tu grabación con su edición.">Lo que grabaste. Lo que publicas.</Heading>
-          <Reveal><Compare /></Reveal>
+          <Heading eyebrow="El resultado" sub="A la izquierda, la grabación sin editar. A la derecha, la misma historia ya editada.">Lo que grabaste. Lo que publicas.</Heading>
+          <div className="pair">
+            <Video src={landingConfig.demo.original} poster={landingConfig.demo.posterOriginal} label="Original" />
+            <Video src={landingConfig.demo.edited} poster={landingConfig.demo.posterEdited} label="Editado" />
+          </div>
         </section>
 
         <section className="section tint" id="como">
@@ -60,9 +60,7 @@ export default function Landing() {
             <Heading eyebrow="Cómo funciona" sub="Hoy el flujo corre en pruebas privadas; lo marcado está en camino.">Cuatro pasos. Cero editores complicados.</Heading>
             <ol className="how">
               {STEPS.map(([title, text, tag], index) => (
-                <Reveal key={title} delay={index * 70}>
-                  <li><b>{index + 1}</b><h3>{title}</h3><p>{text}</p>{tag && <span className="soon">{tag}</span>}</li>
-                </Reveal>
+                <li key={title}><b>{index + 1}</b><h3>{title}</h3><p>{text}</p>{tag && <span className="soon">{tag}</span>}</li>
               ))}
             </ol>
           </div>
@@ -70,7 +68,16 @@ export default function Landing() {
 
         <section className="section wrap" id="incluye">
           <Heading eyebrow="Qué incluye la edición" sub="Todo lo que normalmente toma horas en una línea de tiempo.">Una edición completa, pensada para contenido corto.</Heading>
-          <Bento />
+          <div className="clips">
+            {landingConfig.clips.map((clip) => (
+              <figure key={clip.src}><Video src={clip.src} /><figcaption><h3>{clip.title}</h3><p>{clip.text}</p></figcaption></figure>
+            ))}
+          </div>
+          <div className="facts">
+            <div><h3>Cortes sin habla</h3><p>Quitamos los momentos sin voz y conservamos cada palabra, en el mismo orden.</p></div>
+            <div><h3>Sonido que acompaña</h3><p>Efectos en los cortes y en cada gráfico, sin tapar tu voz.</p></div>
+            <div><h3>Pensado en vertical</h3><p>Contenido corto en 9:16, listo para Reels, TikTok y Shorts.</p></div>
+          </div>
         </section>
 
         <section className="section dark" id="correcciones">
@@ -92,7 +99,6 @@ export default function Landing() {
 
         <section className="wrap">
           <div className="voice">
-            <span className="mic" aria-hidden="true"><i /></span>
             <div><h2>También podrás decirlo en voz alta.</h2><p>Dicta tus instrucciones y correcciones en lugar de escribirlas.</p></div>
             <span className="soon">Próximamente</span>
           </div>

@@ -131,3 +131,22 @@ La landing se rehízo con otra dirección (menos texto de advertencias, más pro
   lenguaje natural, planes con precio y dictado por voz.
 - Conversación de ejemplo animada, etiquetada «Demostración».
 - Todo respeta `prefers-reduced-motion`. Los estilos están bajo `.landing`.
+
+## Cambio del 10 de octubre de 2026: video real y sin animaciones
+
+El dueño pidió usar el video real y no volver a hacer animaciones en la web. La landing
+ya no tiene demos dibujadas ni movimiento: el hero y las secciones muestran clips
+reales del video de piscina (`public/landing/`, unos 6.5 MB en total), con controles.
+
+- Hero: la edición completa (`edited-full.mp4`, 53 s, 540 × 960) en un marco de teléfono,
+  muda y en bucle; es el único video que arranca solo.
+- Antes y después: `original-20s.mp4` (grabación sin editar) junto a `edited-10s.mp4` (la
+  misma historia editada).
+- Qué incluye: tres clips cortos (corte de color, tarjeta detrás de la persona, fondo).
+- La conversación de ejemplo es estática y sigue marcada como demostración.
+- Las rutas están en `app/_landing/config.ts` (`hero`, `demo`, `clips`).
+
+Se asumió que el dueño tiene permiso para publicar este material. Los clips se generaron
+con `ffmpeg` desde `out/piscina-demo-completa-graficos-sfx-v9-sin-musica.mp4` y
+`public/client/pool-raw-full.mp4`. Para cambiar la demo, reemplazar los archivos y, si
+cambian los nombres, las rutas del config.

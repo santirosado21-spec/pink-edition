@@ -13,11 +13,10 @@ type LandingConfig = {
   flowConnected: boolean;
   accessHref: string;
   accessEmail: string;
-  demo: {
-    original: string | null;
-    edited: string | null;
-    captions: string | null;
-  };
+  // Video real de la demo: rutas dentro de public/. Sólo material autorizado para publicar.
+  hero: { video: string; poster: string };
+  demo: { original: string; edited: string; posterOriginal: string; posterEdited: string };
+  clips: { title: string; text: string; src: string }[];
   plans: Plan[];
   faqConditions: {
     uploadFormats: string | null;
@@ -34,8 +33,18 @@ export const landingConfig: LandingConfig = {
   flowConnected: false,
   accessHref: "#acceso",
   accessEmail: "",
-  // Añadir únicamente rutas locales de una demo autorizada para publicación.
-  demo: { original: null, edited: null, captions: null },
+  hero: { video: "/landing/edited-full.mp4", poster: "/landing/poster-edited.jpg" },
+  demo: {
+    original: "/landing/original-20s.mp4",
+    edited: "/landing/edited-10s.mp4",
+    posterOriginal: "/landing/poster-original.jpg",
+    posterEdited: "/landing/poster-edited.jpg",
+  },
+  clips: [
+    { title: "Subtítulos y cortes de color", text: "Tus palabras en pantalla, y tu frase clave a pantalla completa.", src: "/landing/clip-color.mp4" },
+    { title: "Gráficos detrás de ti", text: "Las tarjetas se colocan detrás de tu silueta, nunca encima.", src: "/landing/clip-card.mp4" },
+    { title: "Fondos con sentido", text: "El fondo cambia con lo que estás diciendo.", src: "/landing/clip-background.mp4" },
+  ],
   plans: [
     {
       name: "Por video",

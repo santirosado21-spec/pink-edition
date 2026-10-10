@@ -31,6 +31,10 @@ La web (`app/`) tiene modo local y modo nube (Supabase) y el procesador es
 Supabase y la de Anthropic sólo viven en el entorno del procesador o de la web,
 nunca en Git ni en el navegador. Las tarjetas son 13 (`docs/CARD_CATALOG.md`).
 
+Excepción: `public/landing/` contiene los clips de la demo que muestra la landing, con
+permiso del dueño. No añadir más material del cliente a Git. En la web no hacer
+animaciones ni demos ilustradas: se muestra el video real.
+
 Los videos y transcripts del cliente permanecen locales y fuera de Git. Los
 datos ficticios permiten revisar código y gráficos sin distribuirlos. No leer
 archivos de credenciales ni añadirlos al repositorio.
