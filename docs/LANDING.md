@@ -115,3 +115,19 @@ Los videos configurados requieren además revisión audiovisual y de sus pistas.
 - Ya existen el código de cuentas, la cola y el procesador, pero sin probar con una
   sesión real ni con la clave de servicio: ver `PINK_AI.md`. Hasta entonces el botón
   sigue siendo «Solicitar acceso» (`flowConnected: false`).
+
+## Rediseño del 10 de octubre de 2026
+
+La landing se rehízo con otra dirección (menos texto de advertencias, más producto):
+
+- Tipografía ancha (Inter Display Bold), la misma de los videos, para los titulares.
+- Hero con una demostración animada e interactiva del teléfono (`HeroPhone`): captions,
+  tarjeta detrás de la silueta, corte de color y fondo. Se puede elegir la escena.
+- Comparador de antes y después arrastrable (`Compare`). Con `demo.original` y
+  `demo.edited` en `app/_landing/config.ts` usa los dos videos reales; sin ellos, una
+  ilustración. No hay fotos.
+- Una sola barra de aviso arriba («abre por invitación») en lugar de avisos en cada
+  sección; «Próximamente» sólo en lo que no existe: primera edición con IA, cambios en
+  lenguaje natural, planes con precio y dictado por voz.
+- Conversación de ejemplo animada, etiquetada «Demostración».
+- Todo respeta `prefers-reduced-motion`. Los estilos están bajo `.landing`.

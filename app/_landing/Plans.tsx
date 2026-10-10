@@ -1,35 +1,22 @@
-import { definedOrPending, landingConfig } from "./config";
-import { Badge, PrimaryAction } from "./Elements";
+import { definedOrPending as pending, landingConfig } from "./config";
+import { PrimaryAction } from "./Elements";
+
 export default function Plans() {
   return (
-    <>
-      <div className="plans-grid">
-        {landingConfig.plans.map((plan, index) => (
-          <article className={`plan-card plan-${index}`} key={plan.name}>
-            <Badge>Próximamente</Badge>
-            <h3>{plan.name}</h3>
-            <p>{plan.description}</p>
-            <p className="plan-price">{definedOrPending(plan.price)}</p>
-            <dl>
-              {[
-                ["Créditos", plan.credits],
-                ["Duración admitida", plan.admittedDuration],
-                ["Correcciones incluidas", plan.includedCorrections],
-              ].map(([label, value]) => (
-                <div key={label}>
-                  <dt>{label}</dt>
-                  <dd>{definedOrPending(value)}</dd>
-                </div>
-              ))}
-            </dl>
-            <PrimaryAction />
-          </article>
-        ))}
-      </div>
-      <p className="comparison-note">
-        Los planes y pagos aún no están disponibles. Cuando se habiliten, el
-        costo se mostrará antes de confirmar una edición.
-      </p>
-    </>
+    <div className="plans">
+      {landingConfig.plans.map((plan, index) => (
+        <article key={plan.name} className={`plan${index === 1 ? " pick" : ""}`}>
+          <h3>{plan.name}</h3>
+          <p className="plan-for">{plan.description}</p>
+          <p className="plan-price">{plan.price ?? "Precio por definir"}</p>
+          <dl>
+            <div><dt>Créditos</dt><dd>{pending(plan.credits)}</dd></div>
+            <div><dt>Duración admitida</dt><dd>{pending(plan.admittedDuration)}</dd></div>
+            <div><dt>Correcciones incluidas</dt><dd>{pending(plan.includedCorrections)}</dd></div>
+          </dl>
+          <PrimaryAction light={index !== 1} />
+        </article>
+      ))}
+    </div>
   );
 }
