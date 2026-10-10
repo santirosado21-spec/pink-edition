@@ -31,7 +31,7 @@ y resuelve los anclajes de palabras.
 - `style/pink-demo-v1.json`: STYLE fijo del look: formato, montaje, captions,
   temas, fondos, vidrio, movimiento y reglas de audio.
 - `projects/piscina/plan.json`: PLAN del video: nombres de toma, cortes de color,
-  tarjetas, fondos y música.
+  tarjetas y fondos.
 - `schema/edit-plan.schema.json`: contrato estructural del PLAN.
 - `docs/EDITING_GUIDELINES.md`: reglas editoriales y límites comprobables.
 
@@ -43,8 +43,7 @@ permite cinco en habla rápida para evitar una última palabra demasiado fugaz.
 Los gráficos se ligan a frases concretas. Hay cortes de color, fondos temáticos
 y temas contextuales azul, verde y rojo. `src/SoundDesign.tsx` deriva desde
 STYLE los sonidos de inicio, fronteras de toma, entradas y énfasis de tarjetas y
-cortes de color; el PLAN no enumera SFX. La música es `null` por defecto. No se
-deben incrustar canciones con derechos en entregas para clientes sin autorización.
+cortes de color; el PLAN no enumera SFX. Pink.ai no incluye música: se agrega al publicar.
 
 ## Web
 
@@ -55,8 +54,15 @@ npm run web   # http://localhost:3000
 - **Inicio:** subir un video y ver en qué paso va cada trabajo.
 - **Editor:** vista previa en vivo con la misma composición `PinkEdit`,
   transcripción clicable y, por frase, cortes de color, tarjetas y fondos con su
-  color. Guardar crea una versión del plan y recoloca las tarjetas sobre la
-  persona; renderizar lanza `scripts/pink_edit.py`.
+  color. Línea de tiempo con tres carriles: arrastrar un bloque lo mueve (se
+  vuelve a anclar a la palabra más cercana), su borde derecho cambia la
+  duración. Deshacer y rehacer (⌘Z, ⇧⌘Z), espacio para reproducir, flechas para
+  avanzar un segundo, Supr para borrar el bloque elegido. Guardar crea una
+  versión del plan y recoloca las tarjetas sobre la persona; renderizar lanza
+  `scripts/pink_edit.py` y muestra el avance por pasos.
+- **Celular:** por debajo de 900 px la vista previa queda fija arriba y el resto
+  va en pestañas (Texto, Elementos, Tiempo). La web es instalable (PWA):
+  `app/manifest.ts`, íconos en `public/icons/`, botón «Instalar la app» en `/app`.
 - **Proponer con IA:** pide el plan a la API de Claude a partir de la
   transcripción. Requiere `ANTHROPIC_API_KEY` en `.env.local`.
 

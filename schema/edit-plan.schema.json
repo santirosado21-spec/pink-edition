@@ -278,52 +278,6 @@
         ]
       }
     },
-    "music": {
-      "description": "Opcional: una pista autorizada o null; omitir equivale a no añadir música.",
-      "anyOf": [
-        {
-          "type": "null"
-        },
-        {
-          "type": "object",
-          "description": "Una pista de música para toda la composición, según SoundDesign; licencia revisada fuera del esquema.",
-          "additionalProperties": false,
-          "properties": {
-            "file": {
-              "type": "string",
-              "minLength": 1,
-              "description": "Ruta del recurso autorizado, relativa a public como en staticFile."
-            },
-            "title": {
-              "type": "string",
-              "minLength": 1,
-              "description": "Nombre de la pista."
-            },
-            "gain_db": {
-              "type": "number",
-              "description": "Ganancia de la pista en dB."
-            },
-            "fade_in_frames": {
-              "type": "integer",
-              "description": "Duración del fundido inicial; inicio ligado al comienzo de la composición.",
-              "minimum": 1
-            },
-            "fade_out_frames": {
-              "type": "integer",
-              "description": "Duración del fundido final; final ligado a la duración de la composición.",
-              "minimum": 1
-            }
-          },
-          "required": [
-            "file",
-            "title",
-            "gain_db",
-            "fade_in_frames",
-            "fade_out_frames"
-          ]
-        }
-      ]
-    },
     "clip_labels": {
       "type": "array",
       "description": "Etiquetas por índice de toma del timeline; no cambian los trims.",

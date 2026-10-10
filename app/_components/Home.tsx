@@ -6,6 +6,7 @@ import style from "../../style/pink-demo-v1.json";
 import type { JobSummary } from "../_lib/jobs";
 import { CLOUD_MAX_MB } from "../_lib/supabase/config";
 import { supabaseBrowser } from "../_lib/supabase/browser";
+import { InstallButton } from "./InstallButton";
 import { statusLabel } from "./stages";
 
 const videoSeconds = (file: File) =>
@@ -83,6 +84,8 @@ export const Home: React.FC<{ initial: JobSummary[]; online?: boolean; cloud?: b
       <header>
         <Link href="/" className="brand"><img src="/logo.png" alt="" /><b>Pink<span>.ai</span></b></Link>
         <div className="muted">Sube tu reel o TikTok y recíbelo editado.</div>
+        <span className="grow" style={{ flex: 1 }} />
+        <InstallButton />
       </header>
 
       <div

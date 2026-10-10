@@ -14,6 +14,10 @@ const STAGES: Record<string, string> = {
   finish: "Normalizando audio y verificando",
 };
 
+// Orden de los pasos del pipeline local, para dibujar el avance.
+export const STAGE_ORDER = ["conform", "transcribe", "cut", "matte", "place", "render", "finish"];
+export const stageName = (stage: string) => STAGES[stage] ?? stage;
+
 export const statusLabel = (status: JobStatus) => {
   if (status.state === "running") return `${STAGES[status.stage] ?? status.stage}…`;
   if (status.state === "ready") return "Listo para editar";

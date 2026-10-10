@@ -12,8 +12,8 @@ video y sigue `schema/edit-plan.schema.json`.
 
 El plan de piscina usa seis tarjetas; `src/graphics/cards.tsx` registra siete
 clases. Hay cortes de color, fondos temáticos y temas contextuales. Los SFX se
-derivan de STYLE en `src/SoundDesign.tsx`; la música es `null` por defecto. No
-incrustar canciones con derechos en videos de clientes sin autorización.
+derivan de STYLE en `src/SoundDesign.tsx`; no hay música (se agrega al
+publicar).
 
 Mantener Inter Display Bold a 100 px uniformes. Los captions usan normalmente
 hasta cuatro palabras y admiten cinco para evitar una última palabra visible por

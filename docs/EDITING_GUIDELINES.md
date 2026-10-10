@@ -29,7 +29,6 @@ El plan de piscina tiene **seis tarjetas activas**; el registro contiene siete c
 | `cuts.events` | PLAN → `cuts`. |
 | `audio` | Contenedor mixto. |
 | `audio.{integrated_lufs,true_peak_dbtp,loudness_range}` | STYLE/entrega: −14 LUFS, −1.5 dBTP, 11. |
-| `audio.music` | PLAN → `music`: null o **un objeto**, no array, según `SoundDesign`. `file`, `title`, `gain_db`, `fade_in_frames`, `fade_out_frames` se conservan. |
 | `audio.intro_sfx.{file,gain_db,trim_before_frames,duration_frames}` | STYLE: air-zoom-2608.wav, −12 dB, 10, 24. |
 | `audio.cut_sfx.{gain_db,skip_near_card_frames,sounds}`; `sounds[].{file,peak_frames,duration_frames}` | STYLE: −12 dB, 6 frames; sweep-166.wav (9/23), swoosh-3115.wav (4/17). Son fronteras de toma. |
 | `audio.sfx` | Mixto heredado: no se copió al PLAN; `SoundDesign` deriva esos sonidos de tarjetas y cortes desde STYLE. |
@@ -71,13 +70,13 @@ Orden de `FullDemo.tsx`, de fondo a frente:
 4. Persona con alfa, muda, con los mismos trims: ocluye fondos y tarjetas.
 5. Gradiente de lectura y captions.
 6. Corte de color opaco: reemplaza visualmente todo lo anterior con la frase.
-7. `SoundDesign`, sin capa visual: añade música y SFX; la voz sigue en el video original.
+7. `SoundDesign`, sin capa visual: añade los SFX; la voz sigue en el video original.
 
 El blur de apertura cubre todo el plano del grupo visual (capas 1–4), con 22 px durante 18 frames y resolución en 24: 42 frames = 1.4 s. **No desenfoca captions ni cortes de color**, que están fuera del grupo. El filtro desaparece al llegar a cero para no interferir con el vidrio.
 
 Hay un SFX inicial y uno por frontera entre tomas, salvo si una tarjeta entra a ≤6 frames: el código omite ese barrido. Los sonidos de entrada/énfasis de tarjetas y barridos de color se derivan de STYLE y los anclajes del PLAN. Excepción conservada: `healing` tiene `beat` pero no sonido de énfasis; está en `audio.card_beat_sfx.silent_kinds`. Cambiarla exige escucha. Los recursos, ganancias, duraciones y fades deben quedar explícitos en el plan de audio derivado, con su procedencia (`AUDIO_ASSETS.md`).
 
-Música: null por defecto, o un objeto con los campos que ya consume `SoundDesign`; no varias pistas. Se extiende por la composición con fades relativos a sus extremos. No incrustar canciones con derechos sin autorización para clientes; usar licencia adecuada o añadir música al publicar. La apertura, la música y los SFX de frontera son excepciones estructurales al anclaje por palabra, no eventos absolutos introducidos por el LLM.
+Sin música: Pink.ai no la incluye (decisión del 10 de octubre de 2026); la persona la agrega al publicar.
 
 ## Pipeline previsto
 
@@ -100,7 +99,6 @@ Música: null por defecto, o un objeto con los campos que ya consume `SoundDesig
 - Acordar criterio semántico de `paper`/`solid`, temas ambiguos y nuevos temas/tarjetas; el catálogo actual no cubre cualquier asunto.
 - Resolver la regla estricta de 4/5 palabras frente al optimizador y confirmar aprobación de oído de SFX. `PINK_AI.md` mantiene ambos pendientes; no confundir el look v9 de referencia con aprobación de cada detalle de audio.
 - Definir catálogo versionado de STYLE y política de versiones del PLAN. El motor consume el plan pero no lo valida contra el esquema al renderizar; `sample_frame` es opcional y sólo se usa con datos ficticios.
-- Validar música/licencias y combinación de fades con duración del video; el esquema no prueba derechos ni rangos temporales cruzados. Decidir alcance del override de blur y si debe incluir captions.
 - Definir duración máxima de entrada y probar otros videos, como exige `PINK_AI.md`. No asumir que QC técnico demuestra calidad estética.
 
 La validación JSON es sólo estructural: no puede resolver IDs contra otro documento, medir huecos del matte ni aprobar las afirmaciones del hablante. Los mínimos de enteros del esquema son restricciones nuevas de integridad (duraciones positivas, posiciones/frames de muestra no negativos); los offsets admiten signo. No se añaden umbrales estéticos al esquema hasta validarlos.

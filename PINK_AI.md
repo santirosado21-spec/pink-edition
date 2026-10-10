@@ -96,8 +96,8 @@ de temas de color más amplia (dinero, salud, peligro, tecnología).
   todo el alto del cuadro no hay sitio; falta una regla de respaldo.
 - **Duración:** un video de 53 s tarda 15 min. Un video de 3 min tardará cerca
   de una hora; definir un máximo.
-- **Música:** la plataforma no puede incrustar canciones con derechos. Usar
-  pistas con licencia o dejar que se agregue al publicar.
+- **Música:** fuera del producto por decisión del 10 de octubre de 2026; se
+  agrega al publicar.
 - **Licencia de Remotion:** gratis para individuos y empresas de hasta tres
   personas; por encima requiere licencia de empresa.
 - **Sonido:** los SFX y sus volúmenes siguen sin aprobarse de oído.
@@ -142,3 +142,19 @@ Límites conocidos:
 - Un video a la vez por procesador.
 
 Pagos y créditos no están construidos.
+
+## Decisiones del 10 de octubre de 2026
+
+- **Sin música** en el producto: se agrega al publicar. Se quitó del plan, del
+  esquema y de la composición; el audio sin música es idéntico al del v9.
+- **Pruebas en la Mac**, y después migración a un VPS. El VPS básico de Hostinger
+  (1 núcleo, 4 GB, sin GPU) sólo alcanza para la web y la cola; el recorte de la
+  persona y el render necesitan un equipo más potente o con GPU.
+- **Web primero, app después.** Ruta elegida: web instalable (PWA), que ya está, y
+  más adelante envolverla con Capacitor para las tiendas. Un solo código; la vista
+  previa en vivo con Remotion no se reescribe. Antes de publicar en tiendas hará
+  falta: cuentas (modo nube probado con sesión real), notificaciones al terminar
+  un render y subida reanudable para videos grandes.
+- La interfaz interactiva ya cubre subir, ver el avance, editar con vista previa y
+  línea de tiempo, guardar versiones, renderizar y descargar. Lo que sigue
+  marcado «Próximamente» en ella es pedir cambios con lenguaje natural.

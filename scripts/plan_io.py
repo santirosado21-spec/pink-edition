@@ -8,7 +8,7 @@ from pathlib import Path
 def empty_plan(style_id):
     """Plan sin decisiones: sólo captions y sonidos de corte de toma."""
     return {"style": style_id, "version": 1, "cuts": [], "cards": [],
-            "backgrounds": [], "music": None}
+            "backgrounds": []}
 
 
 def load_plan(path):

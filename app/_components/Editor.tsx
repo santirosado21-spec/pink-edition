@@ -6,7 +6,8 @@ import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { BackgroundEvent, CardEvent, CutEvent, Plan } from "../../src/edit";
 import type { Job, JobStatus } from "../_lib/jobs";
-import { statusLabel } from "./stages";
+import { STAGE_ORDER, stageName, statusLabel } from "./stages";
+import { Timeline, type Block } from "./Timeline";
 
 const Preview = dynamic(() => import("./Preview"), { ssr: false, loading: () => <div className="preview-loading">Cargando vista previa…</div> });
 
@@ -54,7 +55,17 @@ export const Editor: React.FC<{ initial: Job }> = ({ initial }) => {
   const [nowIndex, setNowIndex] = useState(-1);
   const [busy, setBusy] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
+  const [tab, setTab] = useState<"text" | "items" | "time">("text");
+  const [selected, setSelected] = useState<string | null>(null);
+  const [nowFrame, setNowFrame] = useState(0);
+  const [playing, setPlaying] = useState(false);
   const playerRef = useRef<PlayerRef | null>(null);
+  // Historial para deshacer y rehacer; cada gesto guarda el plan anterior una vez.
+  const planRef = useRef(plan);
+  planRef.current = plan;
+  const past = useRef<Plan[]>([]);
+  const future = useRef<Plan[]>([]);
+  const [, bump] = useState(0);
 
   // Palabras en orden, con su frame en el montaje y hasta dónde llega cada una.
   const words = useMemo(() => {
@@ -128,7 +139,9 @@ export const Editor: React.FC<{ initial: Job }> = ({ initial }) => {
       let found = -1;
       for (let index = 0; index < words.length && words[index].frame <= frame; index++) found = index;
       setNowIndex(found);
-    }, 150);
+      setNowFrame(frame);
+      setPlaying(playerRef.current?.isPlaying() ?? false);
+    }, 100);
     return () => clearInterval(timer);
   }, [words]);
 
@@ -154,13 +167,95 @@ export const Editor: React.FC<{ initial: Job }> = ({ initial }) => {
   }, [toast]);
 
   const seek = (frame: number) => playerRef.current?.seekTo(Math.max(0, frame));
+  const record = () => {
+    past.current = [...past.current.slice(-49), planRef.current];
+    future.current = [];
+    bump((count) => count + 1);
+  };
   const change = (next: Plan) => {
+    record();
     setPlan(next);
     setDirty(true);
   };
+  const undo = () => {
+    const previous = past.current.pop();
+    if (!previous) return;
+    future.current.push(planRef.current);
+    setPlan(previous);
+    setDirty(true);
+    bump((count) => count + 1);
+  };
+  const redo = () => {
+    const next = future.current.pop();
+    if (!next) return;
+    past.current.push(planRef.current);
+    setPlan(next);
+    setDirty(true);
+    bump((count) => count + 1);
+  };
+
+  // Una palabra de anclaje y un desfase para cualquier frame del montaje.
+  const wordAt = (frame: number) => {
+    let found = 0;
+    for (let index = 0; index < words.length && words[index].frame <= frame; index++) found = index;
+    return found;
+  };
+  const anchorFor = (frame: number) => {
+    const word = words[wordAt(frame)];
+    return { anchor_word_id: word.id, offset_frames: frame - word.frame };
+  };
+  // Mover y redimensionar actúan en vivo sobre el último plan, sin registrar cada paso.
+  const live = (group: Group, eventId: string, build: (event: AnyEvent) => AnyEvent) => {
+    const current = planRef.current;
+    setPlan({ ...current, [group]: (current[group] as AnyEvent[]).map((event) => (event.id === eventId ? build(event) : event)) });
+    setDirty(true);
+  };
+  const moveBlock = (group: Group, eventId: string, newStart: number) =>
+    live(group, eventId, (event) => {
+      const delta = newStart - startOf(event);
+      const moved = { ...event, ...anchorFor(newStart) } as AnyEvent;
+      if (group === "cuts") (moved as CutEvent).last_word_id = words[wordAt(newStart + event.duration_frames - 1)].id;
+      if (group === "cards") {
+        const beat = (event as CardEvent).beat;
+        const beatFrame = (words[indexOf.get(beat.anchor_word_id) ?? 0]?.frame ?? 0) + beat.offset_frames + delta;
+        (moved as CardEvent).beat = anchorFor(beatFrame);
+      }
+      return moved;
+    });
+  const resizeBlock = (group: Group, eventId: string, duration: number) =>
+    live(group, eventId, (event) => {
+      const resized = { ...event, duration_frames: duration } as AnyEvent;
+      if (group === "cuts") (resized as CutEvent).last_word_id = words[wordAt(startOf(event) + duration - 1)].id;
+      return resized;
+    });
   const update = (group: Group, eventId: string, patch: Partial<AnyEvent>) =>
     change({ ...plan, [group]: (plan[group] as AnyEvent[]).map((event) => (event.id === eventId ? { ...event, ...patch } : event)) });
-  const remove = (group: Group, eventId: string) => change({ ...plan, [group]: (plan[group] as AnyEvent[]).filter((event) => event.id !== eventId) });
+  const remove = (group: Group, eventId: string) => {
+    change({ ...plan, [group]: (plan[group] as AnyEvent[]).filter((event) => event.id !== eventId) });
+    if (selected === eventId) setSelected(null);
+  };
+
+  // Atajos: espacio reproduce, flechas avanzan un segundo, ⌘/Ctrl+Z deshace, Supr borra el bloque elegido.
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement;
+      if (["INPUT", "SELECT", "TEXTAREA"].includes(target.tagName)) return;
+      // Con un botón enfocado, la barra espaciadora ya lo activa por sí sola.
+      if (event.key === " " && ["BUTTON", "A"].includes(target.tagName)) return;
+      const modifier = event.metaKey || event.ctrlKey;
+      if (modifier && event.key.toLowerCase() === "z") { event.preventDefault(); if (event.shiftKey) redo(); else undo(); }
+      else if (modifier && event.key.toLowerCase() === "y") { event.preventDefault(); redo(); }
+      else if (event.key === " ") { event.preventDefault(); playerRef.current?.toggle(); }
+      else if (event.key === "ArrowRight") seek((playerRef.current?.getCurrentFrame() ?? 0) + fps);
+      else if (event.key === "ArrowLeft") seek((playerRef.current?.getCurrentFrame() ?? 0) - fps);
+      else if ((event.key === "Delete" || event.key === "Backspace") && selected) {
+        const found = items.find((item) => item.event.id === selected);
+        if (found) remove(found.group, selected);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  });
 
   const pick = (index: number, extend: boolean) => {
     setSelection(extend && selection ? [Math.min(selection[0], index), Math.max(selection[1], index)] : [index, index]);
@@ -229,7 +324,7 @@ export const Editor: React.FC<{ initial: Job }> = ({ initial }) => {
   const quote = selection ? words.slice(selection[0], selection[1] + 1).map((word) => word.text).join(" ") : null;
 
   return (
-    <div className="editor">
+    <div className="editor" data-tab={tab}>
       <div className="topbar">
         <Link href="/app" className="brand"><img src="/logo.png" alt="" /><b>Pink<span>.ai</span></b></Link>
         <span className="muted">/</span>
@@ -237,6 +332,8 @@ export const Editor: React.FC<{ initial: Job }> = ({ initial }) => {
         <span className={`chip ${status.state}`}><i className="dot" />{statusLabel(status)}</span>
         {dirty && <span className="chip">Cambios sin guardar</span>}
         <span className="spacer" />
+        <button className="button ghost icon" onClick={undo} disabled={past.current.length === 0} title="Deshacer (⌘Z)" aria-label="Deshacer">↶</button>
+        <button className="button ghost icon" onClick={redo} disabled={future.current.length === 0} title="Rehacer (⇧⌘Z)" aria-label="Rehacer">↷</button>
         <button className="button ghost" onClick={propose} disabled={running || busy !== null}>✦ Proponer con IA</button>
         <button className="button" onClick={save} disabled={!dirty || running || busy !== null}>{busy === "Guardando…" ? busy : "Guardar"}</button>
         <button className="button primary" onClick={render} disabled={running || busy !== null}>{running ? "Renderizando…" : "Renderizar"}</button>
@@ -246,10 +343,18 @@ export const Editor: React.FC<{ initial: Job }> = ({ initial }) => {
       <div className="workspace">
         <div className="stage">
           <div className="frame"><Preview props={props} playerRef={playerRef} /></div>
-          <div className="muted">Vista previa en vivo · {clock(timeline.duration_frames, fps)} · versión {plan.version}</div>
+          <div className="transport">
+            <button className="button" onClick={() => playerRef.current?.toggle()} aria-label={playing ? "Pausar" : "Reproducir"}>{playing ? "❚❚" : "▶"}</button>
+            <span className="muted">{clock(nowFrame, fps)} / {clock(timeline.duration_frames, fps)} · versión {plan.version}</span>
+          </div>
+          <div className="tabs" role="tablist">
+            {([["text", "Texto"], ["items", `Elementos (${items.length})`], ["time", "Tiempo"]] as const).map(([key, label]) => (
+              <button key={key} role="tab" aria-selected={tab === key} className={tab === key ? "on" : ""} onClick={() => setTab(key)}>{label}</button>
+            ))}
+          </div>
         </div>
 
-        <div className="column">
+        <div className="column col-text">
           <div className="toolbar">
             {quote ? (
               <>
@@ -291,7 +396,20 @@ export const Editor: React.FC<{ initial: Job }> = ({ initial }) => {
           ))}
         </div>
 
-        <div className="column">
+        <div className="column col-items">
+          {(running || status.state === "failed") && (
+            <div className="steps-box">
+              <h3 className="section" style={{ margin: "0 0 10px" }}>Progreso</h3>
+              <ol className="steps">
+                {STAGE_ORDER.map((stage, index) => {
+                  const current = STAGE_ORDER.indexOf(status.stage);
+                  const state = status.state === "failed" && stage === status.stage ? "bad" : index < current ? "done" : index === current ? "now" : "";
+                  return <li key={stage} className={state}><i />{stageName(stage)}</li>;
+                })}
+              </ol>
+              {status.state === "running" && !STAGE_ORDER.includes(status.stage) && <div className="muted">{statusLabel(status)}</div>}
+            </div>
+          )}
           {warnings.length > 0 && (
             <div className="warnings">
               <b>Avisos de las guías de edición</b>
@@ -301,8 +419,8 @@ export const Editor: React.FC<{ initial: Job }> = ({ initial }) => {
           <h3 className="section" style={{ margin: "0 0 12px" }}>Elementos ({items.length})</h3>
           {items.length === 0 && <div className="empty">Sin elementos: el video sale con captions y sonidos de corte. Elige una frase para agregar el primero.</div>}
           {items.map(({ group, event, start }) => (
-            <div className="item" key={event.id} style={{ "--mark": `var(--${event.theme})` } as React.CSSProperties}>
-              <header onClick={() => seek(start + Math.min(14, event.duration_frames - 1))}>
+            <div className={`item${selected === event.id ? " selected" : ""}`} key={event.id} style={{ "--mark": `var(--${event.theme})` } as React.CSSProperties}>
+              <header onClick={() => { setSelected(event.id); seek(start + Math.min(14, event.duration_frames - 1)); }}>
                 <span className="kind">{NAMES[group]}</span>
                 <span className="label">{event.label}</span>
                 <span className="time">{clock(start, fps)}</span>
@@ -344,6 +462,11 @@ export const Editor: React.FC<{ initial: Job }> = ({ initial }) => {
               </div>
             </div>
           ))}
+          <h3 className="section">Pedir un cambio</h3>
+          <div className="ask" aria-disabled="true">
+            <input disabled placeholder="«Baja los efectos de sonido», «quita ese gráfico»…" aria-label="Pedir un cambio con tus palabras" />
+            <span className="chip">Próximamente</span>
+          </div>
           {qc && (
             <>
               <h3 className="section">Último render</h3>
@@ -352,6 +475,20 @@ export const Editor: React.FC<{ initial: Job }> = ({ initial }) => {
           )}
           {status.state === "failed" && status.error && <div className="notice">{status.error}</div>}
         </div>
+      </div>
+      <div className="dock">
+        <Timeline
+          blocks={items.map(({ group, event, start }) => ({ id: event.id, group, label: event.label, theme: event.theme, start, duration: event.duration_frames })) as Block[]}
+          total={timeline.duration_frames}
+          fps={fps}
+          now={nowFrame}
+          selected={selected}
+          onSeek={seek}
+          onSelect={setSelected}
+          onBegin={record}
+          onMove={moveBlock}
+          onResize={resizeBlock}
+        />
       </div>
       {toast && <div className="toast">{toast}</div>}
     </div>
