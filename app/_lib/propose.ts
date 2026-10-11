@@ -97,6 +97,8 @@ const ask = async (id: string, timeline: Timeline, current: Plan, style: Style, 
   if (!response.parsed_output) throw new Error("La propuesta llegó incompleta; inténtalo de nuevo.");
   // El modelo puede equivocarse: las reglas se comprueban aquí, no sólo en el prompt.
   const { proposal, dropped } = enforceRules(response.parsed_output as Proposal, words, rules);
+  // Tokens reales de cada llamada, para reemplazar las estimaciones de docs/COSTOS.md.
+  if (response.usage) console.log(`[pink] ${id}: ${response.usage.input_tokens} tokens de entrada, ${response.usage.output_tokens} de salida`);
   return { plan: proposalToPlan(proposal, timeline, current), notes: proposal.notes, dropped };
 };
 

@@ -15,8 +15,15 @@ Todo el análisis se ejecuta localmente.
 npm ci
 npm run setup:audio
 npm run typecheck
+npm test
 npm run dev
 ```
+
+`npm test` y `python3 -m unittest discover -s tests -p "test_*.py"` prueban las
+reglas de la propuesta, las correcciones, el procesador y la colocación de
+tarjetas sin red, claves ni material del cliente.
+`python3 scripts/synthetic_qa.py` renderiza stills de revisión con una persona
+sintética.
 
 Un checkout sin medios del cliente usa datos ficticios. Los videos, transcripts,
 timelines reales y renders permanecen locales. `AUDIO_ASSETS.md` documenta la
