@@ -19,6 +19,8 @@
   --base: #6aa6ff;
   --health: #5fd79a;
   --stress: #ff8a80;
+  --money: #ffc857;
+  --tech: #b49bff;
 }
 
 * { box-sizing: border-box; }
@@ -104,6 +106,8 @@ h3.section { margin: 34px 0 0; font-size: 13px; text-transform: uppercase; lette
 .fields select, .fields input { background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; font-size: 13px; width: 100%; }
 .remove { background: none; border: 0; color: var(--muted); cursor: pointer; padding: 2px 6px; border-radius: 6px; }
 .remove:hover { color: var(--bad); background: rgba(255, 107, 107, 0.1); }
+.revise { display: flex; gap: 8px; align-items: flex-end; margin-bottom: 14px; }
+.revise textarea { flex: 1; resize: vertical; background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; font: inherit; font-size: 13px; color: inherit; }
 .warnings { border: 1px solid rgba(255, 196, 0, 0.35); background: rgba(255, 196, 0, 0.07); color: #ffe08a; border-radius: 12px; padding: 10px 12px; margin-bottom: 14px; font-size: 13px; }
 .warnings ul { margin: 6px 0 0; padding-left: 18px; }
 .empty { color: var(--muted); border: 1px dashed var(--line); border-radius: 12px; padding: 18px; text-align: center; }

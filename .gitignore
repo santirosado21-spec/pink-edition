@@ -32,3 +32,4 @@ public/work/
 next-env.d.ts
 *.tsbuildinfo
 .next-*/
+.test-build/

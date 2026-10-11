@@ -40,7 +40,9 @@
             "enum": [
               "base",
               "health",
-              "stress"
+              "stress",
+              "money",
+              "tech"
             ]
           },
           "anchor_word_id": {
@@ -114,7 +116,9 @@
             "enum": [
               "base",
               "health",
-              "stress"
+              "stress",
+              "money",
+              "tech"
             ]
           },
           "anchor_word_id": {
@@ -160,6 +164,14 @@
             "type": "integer",
             "description": "Posición vertical en píxeles. La calcula place_graphics.py con el matte, así que un plan recién propuesto no la trae; es obligatoria para renderizar. No garantiza por sí sola espacio libre.",
             "minimum": 0
+          },
+          "layer": {
+            "type": "string",
+            "enum": [
+              "behind",
+              "front"
+            ],
+            "description": "Capa de la tarjeta. Por defecto va detrás de la persona; place_graphics.py la pone al frente, entre el rostro y los captions, cuando no cabe sobre la cabeza."
           },
           "beat": {
             "type": "object",
@@ -234,7 +246,9 @@
             "enum": [
               "base",
               "health",
-              "stress"
+              "stress",
+              "money",
+              "tech"
             ]
           },
           "anchor_word_id": {

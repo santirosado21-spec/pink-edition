@@ -3,14 +3,15 @@ import { LiquidGlass } from "./LiquidGlass";
 import { ThemeContext, useEdit } from "./edit";
 import { cards } from "./graphics/cards";
 
-export const EditorialGraphics: React.FC = () => {
+// Detrás de la persona por defecto; al frente sólo las que no cupieron sobre la cabeza.
+export const EditorialGraphics: React.FC<{ layer: "behind" | "front" }> = ({ layer }) => {
   const { fps } = useVideoConfig();
   const { style, plan, resolveFrame, themeOf } = useEdit();
   const captions = style.captions;
   // Cada tarjeta sale del plan; entra con su palabra y el énfasis con otra.
   return (
     <>
-      {plan.cards.map((event) => {
+      {plan.cards.filter((event) => (event.layer ?? "behind") === layer).map((event) => {
         const Card = cards[event.kind];
         if (!Card) throw new Error(`Tarjeta desconocida: ${event.kind}`);
         if (event.top === undefined) throw new Error(`Tarjeta ${event.id} sin posición: falta ejecutar place_graphics.py.`);

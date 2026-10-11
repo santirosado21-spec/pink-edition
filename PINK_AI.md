@@ -142,3 +142,37 @@ Límites conocidos:
 - Un video a la vez por procesador.
 
 Pagos y créditos no están construidos.
+
+## Estado al 11 de octubre de 2026
+
+Hecho y probado sin claves ni material del cliente (`npm test` y
+`python3 -m unittest discover -s tests -p "test_*.py"`, ambos en CI):
+
+- **Reglas de la propuesta en código:** solapes, duración mínima, máximo por
+  ventana y cifras dichas se comprueban después de la respuesta del modelo
+  (`app/_lib/proposalRules.ts`, límites en `STYLE.proposal`); lo descartado se
+  muestra junto a las notas. La nube valida la propuesta igual que el modo local.
+- **«Pedir cambio»:** campo en el editor y ruta `/api/jobs/[id]/revise`; Claude
+  recibe el plan en pantalla y la instrucción, y devuelve el plan corregido sin
+  guardarlo. Mismas reglas. Los desfases manuales en frames vuelven a cero en los
+  elementos que el modelo devuelve.
+- **Procesador:** tras un reinicio devuelve a la cola los trabajos que su equipo
+  dejó a medias (antes quedaban «en curso» para siempre).
+- **Tarjetas sin sitio sobre la cabeza:** pasan al frente, entre el rostro y los
+  captions (`layer: "front"`). `graphics.face_height` (600 px) es una estimación
+  y hay que calibrarla con video real.
+- **Temas `money` (ámbar) y `tech` (violeta).**
+- **`scripts/synthetic_qa.py`:** stills de revisión con una persona sintética.
+  Es QC técnico; la aprobación estética sigue pendiente con video real.
+- Costos y capacidad estimados en `docs/COSTOS.md`; cada llamada a Claude
+  registra sus tokens en la consola de la web.
+
+### Al llegar las claves, en este orden
+
+1. `ANTHROPIC_API_KEY` en `.env.local` → `npm run web`, subir un video, «Proponer
+   con IA», luego dos o tres «Pedir cambio». Anotar tokens y tiempos en
+   `docs/COSTOS.md`.
+2. `SUPABASE_SERVICE_ROLE_KEY` en el entorno del procesador →
+   `python3 scripts/worker.py --once` con un video subido desde la web en modo nube.
+3. Segundo y tercer video de otros temas (`docs/SECOND_VIDEO_TEST.md`), con
+   especial atención a `face_height` y a las tarjetas al frente.
