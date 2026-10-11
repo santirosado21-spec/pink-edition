@@ -54,6 +54,7 @@ export const Editor: React.FC<{ initial: Job }> = ({ initial }) => {
   const [nowIndex, setNowIndex] = useState(-1);
   const [busy, setBusy] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
+  const [instruction, setInstruction] = useState("");
   const playerRef = useRef<PlayerRef | null>(null);
 
   // Palabras en orden, con su frame en el montaje y hasta dónde llega cada una.
@@ -225,6 +226,25 @@ export const Editor: React.FC<{ initial: Job }> = ({ initial }) => {
     setToast(`Propuesta lista, sin guardar. ${body.notes ?? ""}${dropped.length > 0 ? ` Descartados por las reglas: ${dropped.join(" ")}` : ""}`);
   };
 
+  // Cambio por instrucción escrita: el modelo devuelve el plan corregido, sin guardarlo.
+  const revise = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!instruction.trim()) return;
+    setBusy("Aplicando cambio…");
+    const response = await fetch(`/api/jobs/${id}/revise`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ instruction, plan }),
+    });
+    const body = await response.json();
+    setBusy(null);
+    if (!response.ok) return setToast(body.error);
+    change(body.plan);
+    setInstruction("");
+    const dropped = (body.dropped ?? []) as string[];
+    setToast(`${body.notes ?? "Cambio aplicado."} Sin guardar.${dropped.length > 0 ? ` Descartados por las reglas: ${dropped.join(" ")}` : ""}`);
+  };
+
   const props = useMemo(() => ({ style, plan, timeline, media }), [style, plan, timeline, media]);
   const running = status.state === "running";
   const quote = selection ? words.slice(selection[0], selection[1] + 1).map((word) => word.text).join(" ") : null;
@@ -293,6 +313,16 @@ export const Editor: React.FC<{ initial: Job }> = ({ initial }) => {
         </div>
 
         <div className="column">
+          <form className="revise" onSubmit={revise}>
+            <textarea
+              value={instruction}
+              onChange={(event) => setInstruction(event.target.value)}
+              maxLength={500}
+              rows={2}
+              placeholder="Pide un cambio: «quita la tarjeta del final», «corte rojo en ‘esto es peligroso’»…"
+            />
+            <button className="button" type="submit" disabled={!instruction.trim() || running || busy !== null}>{busy === "Aplicando cambio…" ? busy : "Pedir cambio"}</button>
+          </form>
           {warnings.length > 0 && (
             <div className="warnings">
               <b>Avisos de las guías de edición</b>

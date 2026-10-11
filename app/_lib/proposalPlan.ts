@@ -42,3 +42,29 @@ export const proposalToPlan = (proposal: Proposal, timeline: Timeline, current: 
   const backgrounds: BackgroundEvent[] = proposal.backgrounds.filter(valid).map((background, index) => ({ ...base(background, `background_${index + 1}`), motif: background.motif }));
   return { ...current, cuts, cards, backgrounds };
 };
+
+// Lo inverso: el plan actual en el formato del modelo, para pedirle una corrección.
+export const planToProposal = (plan: Plan, timeline: Timeline): Proposal => {
+  const words = flatWords(timeline);
+  const index = new Map(words.map((word, position) => [word.id, position]));
+  const range = (event: { anchor_word_id: string; offset_frames: number; duration_frames: number; theme: string; label: string }, lastId?: string) => {
+    const first = index.get(event.anchor_word_id) ?? 0;
+    const end = words[first].frame + event.offset_frames + event.duration_frames;
+    // Sin última palabra explícita, la última que empieza antes de que termine el evento.
+    let last = lastId !== undefined ? index.get(lastId) ?? first : first;
+    if (lastId === undefined) while (last + 1 < words.length && words[last + 1].frame < end) last++;
+    return { first_word: first, last_word: last, theme: event.theme, label: event.label };
+  };
+  return {
+    cuts: plan.cuts.map((cut) => ({ ...range(cut, cut.last_word_id), style: cut.style })),
+    cards: plan.cards.map((card) => ({
+      ...range(card),
+      kind: card.kind,
+      beat_word: index.get(card.beat.anchor_word_id) ?? index.get(card.anchor_word_id) ?? 0,
+      meaning: card.meaning ?? card.label,
+      ...(card.text ? { text: card.text } : {}),
+    })),
+    backgrounds: plan.backgrounds.map((background) => ({ ...range(background), motif: background.motif })),
+    notes: "",
+  };
+};

@@ -2,8 +2,8 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import style from "../style/pink-demo-v1.json";
 import { validatePlan } from "../app/_lib/jobs";
-import { proposePlan, type ProposeClient } from "../app/_lib/propose";
-import { flatWords, type Proposal } from "../app/_lib/proposalPlan";
+import { proposePlan, revisePlan, type ProposeClient } from "../app/_lib/propose";
+import { flatWords, planToProposal, proposalToPlan, type Proposal } from "../app/_lib/proposalPlan";
 import { enforceRules, spokenIn } from "../app/_lib/proposalRules";
 import type { Style } from "../src/edit";
 import { emptyPlan, timelineOf } from "./fixtures";
@@ -112,4 +112,36 @@ test("proposePlan produce un plan válido y aplica las reglas", async () => {
 test("proposePlan informa una negativa del modelo", async () => {
   const { client } = fakeClient(null, "refusal");
   await assert.rejects(proposePlan("prueba", timeline, emptyPlan(), style as Style, client), /declinó/);
+});
+
+test("planToProposal recupera las mismas frases que produjo proposalToPlan", () => {
+  const original = proposal({
+    cuts: [{ ...range(36, 39, "libertad"), style: "solid" }],
+    cards: [card(12, 18, "counter", "30%")],
+    backgrounds: [{ ...range(24, 33), motif: "network" }],
+  });
+  const back = planToProposal(proposalToPlan(original, timeline, emptyPlan()), timeline);
+  assert.deepEqual(back.cuts.map((cut) => [cut.first_word, cut.last_word, cut.style]), [[36, 39, "solid"]]);
+  assert.deepEqual(back.cards.map((item) => [item.first_word, item.last_word, item.beat_word, item.text]), [[12, 18, 18, "30%"]]);
+  assert.deepEqual(back.backgrounds.map((item) => [item.first_word, item.last_word]), [[24, 33]]);
+});
+
+test("revisePlan manda el plan actual y la instrucción, y aplica las reglas", async () => {
+  const current = proposalToPlan(proposal({ cards: [card(12, 18, "counter", "30%")] }), timeline, emptyPlan());
+  const { client, calls } = fakeClient(proposal({
+    cuts: [{ ...range(36, 39, "libertad"), theme: "money", style: "solid" }],
+    cards: [card(12, 18, "counter", "45%")],
+    notes: "Agregué el corte al final.",
+  }));
+  const result = await revisePlan("prueba", timeline, current, style as Style, "pon un corte en libertad", client);
+  const request = calls[0] as { messages: { content: string }[] };
+  assert.match(request.messages[0].content, /"first_word":12,"last_word":18/);
+  assert.match(request.messages[0].content, /«pon un corte en libertad»/);
+  // El modelo cambió la cifra a una que no se dijo: la tarjeta se descarta.
+  assert.equal(result.plan.cuts.length, 1);
+  assert.equal(result.plan.cuts[0].theme, "money");
+  assert.equal(result.plan.cards.length, 0);
+  assert.equal(result.notes, "Agregué el corte al final.");
+  assert.equal(result.dropped.length, 1);
+  assert.deepEqual(await validatePlan(result.plan, timeline), []);
 });

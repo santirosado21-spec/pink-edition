@@ -4,7 +4,7 @@ import { promises as fs } from "node:fs";
 import path from "node:path";
 import { z } from "zod";
 import type { Plan, Style, Timeline } from "../../src/edit";
-import { flatWords, proposalToPlan, type Proposal } from "./proposalPlan";
+import { flatWords, planToProposal, proposalToPlan, type Proposal } from "./proposalPlan";
 import { enforceRules, type ProposalRules } from "./proposalRules";
 
 const ROOT = process.cwd();
@@ -46,28 +46,29 @@ Límites que no puedes romper:
 - Como máximo ${rules.max_per_window} elementos nuevos en cualquier tramo de ${seconds(rules.window_frames, fps)} s. No hace falta llenar el video: menos elementos, bien elegidos, es mejor.
 - Un corte de color necesita al menos ${seconds(rules.min_frames.cut, fps)} s de habla; una tarjeta, ${seconds(rules.min_frames.card, fps)} s; un fondo, ${seconds(rules.min_frames.background, fps)} s. Elige frases completas, no palabras sueltas cortadas a mitad de idea.
 
-En "notes" explica en dos o tres frases qué criterio seguiste y qué dejaste sin elemento a propósito.`;
+En "notes", salvo que el mensaje pida otra cosa, explica en dos o tres frases qué criterio seguiste y qué dejaste sin elemento a propósito.`;
 
 // Lo único que usa del SDK: así las pruebas pasan un cliente falso sin red ni clave.
 export type ProposeClient = Pick<Anthropic, "messages">;
+export type Proposed = { plan: Plan; notes: string; dropped: string[] };
 
-export const proposePlan = async (
-  id: string,
-  timeline: Timeline,
-  current: Plan,
-  style: Style,
-  client: ProposeClient = new Anthropic(),
-): Promise<{ plan: Plan; notes: string; dropped: string[] }> => {
+// Formato de salida: frases por número de palabra, con los valores que admite el esquema.
+const proposalFormat = async () => {
   const schema = JSON.parse(await fs.readFile(path.join(ROOT, "schema/edit-plan.schema.json"), "utf-8"));
   const options = (group: string, field: string) => schema.properties[group].items.properties[field].enum as [string, ...string[]];
   const range = { first_word: z.number().int(), last_word: z.number().int(), theme: z.enum(options("cuts", "theme")), label: z.string() };
-  const format = z.object({
+  return z.object({
     cuts: z.array(z.object({ ...range, style: z.enum(options("cuts", "style")) })),
     cards: z.array(z.object({ ...range, kind: z.enum(options("cards", "kind")), beat_word: z.number().int(), meaning: z.string(), text: z.string().max(12).optional() })),
     backgrounds: z.array(z.object({ ...range, motif: z.enum(options("backgrounds", "motif")) })),
     notes: z.string(),
   });
+};
 
+const FIELDS = `En "label" pon la frase elegida en minúsculas; en "beat_word", la palabra donde debe caer el énfasis de la tarjeta; en "meaning", qué ilustra la tarjeta y por qué corresponde a lo dicho; en "text" (sólo para counter), la cifra tal como se dijo.`;
+
+// Una llamada al modelo con la transcripción numerada y el catálogo; las reglas se aplican después.
+const ask = async (id: string, timeline: Timeline, current: Plan, style: Style, client: ProposeClient, request: string): Promise<Proposed> => {
   const words = flatWords(timeline);
   const fps = (timeline as Timeline & { fps?: number }).fps ?? 30;
   const takes = timeline.clips.map((clip, clipIndex) => {
@@ -82,15 +83,14 @@ export const proposePlan = async (
   ].join("\n");
 
   const rules = style.proposal;
-  // El cliente por defecto lee las credenciales del entorno (ANTHROPIC_API_KEY en .env.local).
   const response = await client.messages.parse({
     model: "claude-opus-5-5",
     max_tokens: 16000,
     system: system(rules, fps),
-    output_config: { effort: "high", format: zodOutputFormat(format) },
+    output_config: { effort: "high", format: zodOutputFormat(await proposalFormat()) },
     messages: [{
       role: "user",
-      content: `Video «${id}», ${(timeline.duration_frames / fps).toFixed(1)} s. Cada palabra va precedida de su número.\n\n${takes.join("\n\n")}\n\n${catalog}\n\nPropón la edición. En "label" pon la frase elegida en minúsculas; en "beat_word", la palabra donde debe caer el énfasis de la tarjeta; en "meaning", qué ilustra la tarjeta y por qué corresponde a lo dicho; en "text" (sólo para counter), la cifra tal como se dijo.`,
+      content: `Video «${id}», ${(timeline.duration_frames / fps).toFixed(1)} s. Cada palabra va precedida de su número.\n\n${takes.join("\n\n")}\n\n${catalog}\n\n${request}`,
     }],
   });
   if (response.stop_reason === "refusal") throw new Error("El modelo declinó proponer una edición para este video.");
@@ -99,3 +99,16 @@ export const proposePlan = async (
   const { proposal, dropped } = enforceRules(response.parsed_output as Proposal, words, rules);
   return { plan: proposalToPlan(proposal, timeline, current), notes: proposal.notes, dropped };
 };
+
+// El cliente por defecto lee las credenciales del entorno (ANTHROPIC_API_KEY en .env.local).
+export const proposePlan = (id: string, timeline: Timeline, current: Plan, style: Style, client: ProposeClient = new Anthropic()) =>
+  ask(id, timeline, current, style, client, `Propón la edición. ${FIELDS}`);
+
+// Corrección conversacional: el plan actual va en el mismo formato y vuelve completo, con el cambio pedido.
+export const revisePlan = (id: string, timeline: Timeline, current: Plan, style: Style, instruction: string, client: ProposeClient = new Anthropic()) =>
+  ask(id, timeline, current, style, client, [
+    "Esta es la edición actual, en el mismo formato que debes devolver:",
+    JSON.stringify(planToProposal(current, timeline)),
+    `El usuario pide este cambio:\n«${instruction}»`,
+    `Devuelve la edición completa con el cambio aplicado y todo lo demás igual. Si el cambio pide inventar cifras o texto que no se dijo, es ambiguo o no se puede hacer con el catálogo, devuelve la edición sin cambios. ${FIELDS} En "notes" responde al usuario en una o dos frases: qué cambiaste o por qué no lo hiciste.`,
+  ].join("\n\n"));
