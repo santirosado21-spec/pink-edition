@@ -1,5 +1,5 @@
 import { CLOUD, cloudJob } from "../../../../_lib/cloud";
-import { checkPlan, readJob, validId } from "../../../../_lib/jobs";
+import { readJob, readStyle, validId, validatePlan } from "../../../../_lib/jobs";
 import { proposePlan } from "../../../../_lib/propose";
 
 type Context = { params: Promise<{ id: string }> };
@@ -13,10 +13,11 @@ export async function POST(_request: Request, { params }: Context) {
     return Response.json({ error: "Falta ANTHROPIC_API_KEY en el archivo .env.local. Agrégala y reinicia la web para proponer la edición automáticamente." }, { status: 501 });
   }
   try {
-    const { plan, notes } = await proposePlan(id, job.timeline, job.plan);
-    const errors = CLOUD ? [] : await checkPlan(id, plan);
+    const { plan, notes, dropped } = await proposePlan(id, job.timeline, job.plan, await readStyle());
+    // La misma validación en local y en la nube, contra las palabras reales del video.
+    const errors = await validatePlan(plan, job.timeline);
     if (errors.length > 0) return Response.json({ error: `La propuesta no pasó la validación: ${errors.join(" ")}` }, { status: 502 });
-    return Response.json({ plan, notes });
+    return Response.json({ plan, notes, dropped });
   } catch (error) {
     return Response.json({ error: `No se pudo proponer la edición: ${(error as Error).message}` }, { status: 502 });
   }

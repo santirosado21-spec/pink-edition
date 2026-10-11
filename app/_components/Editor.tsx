@@ -221,7 +221,8 @@ export const Editor: React.FC<{ initial: Job }> = ({ initial }) => {
     setBusy(null);
     if (!response.ok) return setToast(body.error);
     change(body.plan);
-    setToast(`Propuesta lista, sin guardar. ${body.notes ?? ""}`);
+    const dropped = (body.dropped ?? []) as string[];
+    setToast(`Propuesta lista, sin guardar. ${body.notes ?? ""}${dropped.length > 0 ? ` Descartados por las reglas: ${dropped.join(" ")}` : ""}`);
   };
 
   const props = useMemo(() => ({ style, plan, timeline, media }), [style, plan, timeline, media]);

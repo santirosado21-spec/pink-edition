@@ -144,5 +144,14 @@
   "limits": {
     "max_seconds": 120,
     "max_upload_mb": 500
+  },
+  "proposal": {
+    "min_frames": {
+      "cut": 24,
+      "card": 45,
+      "background": 66
+    },
+    "window_frames": 300,
+    "max_per_window": 4
   }
 }
