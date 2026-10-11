@@ -79,8 +79,10 @@ class Cloud:
         self.rows("PATCH", f"jobs?id=eq.{job_id}", {"status": status, "error": error, "progress": 1 if status == "done" else 0,
                                                     "finished_at": "now()"})
 
-    def requeue(self, worker):
-        self.rows("PATCH", f"jobs?status=eq.running&worker=eq.{worker}", {"status": "queued", "worker": None})
+    def requeue(self, host):
+        """Devuelve a la cola lo que este equipo dejó a medias (el nombre cambia con cada arranque)."""
+        pattern = urllib.parse.quote(f"{host}@*", safe="*")
+        self.rows("PATCH", f"jobs?status=eq.running&worker=like.{pattern}", {"status": "queued", "worker": None})
 
 
 class Local(Cloud):
@@ -135,10 +137,10 @@ class Local(Cloud):
         job = self._read("jobs", job_id)
         self._write("jobs", job_id, {**job, "status": status, "error": error})
 
-    def requeue(self, worker):
+    def requeue(self, host):
         for file in (self.root / "jobs").glob("*.json"):
             job = json.loads(file.read_text())
-            if job["status"] == "running" and job.get("worker") == worker:
+            if job["status"] == "running" and (job.get("worker") or "").startswith(f"{host}@"):
                 file.write_text(json.dumps({**job, "status": "queued", "worker": None}))
 
 
@@ -215,8 +217,9 @@ def main():
         if not url or not key:
             raise SystemExit("Faltan SUPABASE_URL y SUPABASE_SERVICE_ROLE_KEY en el entorno.")
         store = Cloud(url, key)
-    worker = f"{socket.gethostname()}-{os.getpid()}"
-    store.requeue(worker)
+    host = socket.gethostname()
+    worker = f"{host}@{os.getpid()}"
+    store.requeue(host)
     print(f"Procesador {worker} esperando trabajos.", flush=True)
     while True:
         job = store.claim(worker)
