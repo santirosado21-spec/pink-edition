@@ -14,7 +14,7 @@ type Group = "cuts" | "cards" | "backgrounds";
 type AnyEvent = CutEvent | CardEvent | BackgroundEvent;
 type Word = { id: string; text: string; frame: number; clip: number; until: number };
 
-const THEMES: Record<string, string> = { base: "Base (azul)", health: "Salud (verde)", stress: "Estrés (rojo)" };
+const THEMES: Record<string, string> = { base: "Base (azul)", health: "Salud (verde)", stress: "Estrés (rojo)", money: "Dinero (ámbar)", tech: "Tecnología (violeta)" };
 const KINDS: Record<string, string> = {
   patients: "Proporción: uno entre varios",
   emergency: "Alerta y columna que sube",

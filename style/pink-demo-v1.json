@@ -44,6 +44,16 @@
       "accent": "#d63a3a",
       "light": "#ff8a80",
       "dark": "#a82424"
+    },
+    "money": {
+      "accent": "#a86a0c",
+      "light": "#ffc857",
+      "dark": "#7a4c06"
+    },
+    "tech": {
+      "accent": "#6d3fd6",
+      "light": "#b49bff",
+      "dark": "#4b26a6"
     }
   },
   "intro_blur": {

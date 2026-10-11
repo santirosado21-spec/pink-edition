@@ -40,7 +40,9 @@
             "enum": [
               "base",
               "health",
-              "stress"
+              "stress",
+              "money",
+              "tech"
             ]
           },
           "anchor_word_id": {
@@ -114,7 +116,9 @@
             "enum": [
               "base",
               "health",
-              "stress"
+              "stress",
+              "money",
+              "tech"
             ]
           },
           "anchor_word_id": {
@@ -242,7 +246,9 @@
             "enum": [
               "base",
               "health",
-              "stress"
+              "stress",
+              "money",
+              "tech"
             ]
           },
           "anchor_word_id": {

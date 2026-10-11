@@ -38,7 +38,7 @@ Elementos disponibles:
 - Corte de color: toda la pantalla se cubre y muestra la frase elegida en mayúsculas. Estilo "paper" (fondo claro, tinta de color) para explicación o reflexión; "solid" (fondo de color) para una advertencia o afirmación fuerte.
 - Tarjeta: un pictograma sobre la persona. Sólo existen las del catálogo; si ninguna ilustra literalmente la frase, no pongas tarjeta.
 - Fondo: el fondo se oscurece y aparece un motivo detrás de la persona durante la frase.
-- Tema de color de cada elemento: "health" para salud, médico o sanar; "stress" para estrés, emergencia, riesgo o peligro; "base" para todo lo demás.
+- Tema de color de cada elemento: "health" para salud, médico o sanar; "stress" para estrés, emergencia, riesgo o peligro; "money" para dinero, ahorro, precios o negocios; "tech" para tecnología, internet o inteligencia artificial; "base" para todo lo demás.
 
 Límites que no puedes romper:
 - Sólo puedes marcar palabras que están en la transcripción, por su número. No inventes cifras, datos ni llamados a la acción.
