@@ -129,6 +129,8 @@
     "enter_offset": 26,
     "gap_above_person": 70,
     "minimum_top": 150,
+    "gap_above_captions": 40,
+    "face_height": 600,
     "glass": {
       "blur": 9,
       "saturate": 1.7,

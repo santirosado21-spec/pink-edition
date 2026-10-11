@@ -30,6 +30,23 @@ def person_alpha(path, small):
     return np.frombuffer(raw, np.uint8).reshape(-1, small[1], small[0])
 
 
+def place(highest, style):
+    """Posición y capa de una tarjeta según dónde empieza la persona (y en el lienzo).
+
+    Normalmente va detrás de la persona, por encima de la cabeza. Si no cabe, va al
+    frente a la altura del pecho, siempre que quede debajo del rostro y encima de los
+    captions. Si tampoco cabe ahí, queda arriba y se avisa (capa None).
+    """
+    card = style["graphics"]
+    top = int(highest - card["gap_above_person"] - card["height"])
+    if top >= card["minimum_top"]:
+        return top, "behind"
+    front = int(style["captions"]["top"] - card["gap_above_captions"] - card["height"])
+    if front >= highest + card["face_height"]:
+        return front, "front"
+    return card["minimum_top"], None
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--style", type=Path, default=PROJECT / "style/pink-demo-v1.json")
@@ -71,13 +88,17 @@ def main():
             rows = np.where((alpha[source][:, columns] > 96).any(axis=1))[0]
             if len(rows):
                 highest = min(highest, rows[0] * unit * scale - offset_y)
-        top = int(highest - card["gap_above_person"] - card["height"])
-        if top < card["minimum_top"]:
-            # Sin sitio arriba la tarjeta queda detrás del cuerpo: avisar, no ocultarlo.
-            print(f"AVISO {event['id']}: no cabe sobre la persona; faltan "
-                  f"{card['minimum_top'] - top} px y quedará parcialmente tapada.")
-            top = card["minimum_top"]
+        top, layer = place(highest, style)
         event["top"] = top
+        event.pop("layer", None)
+        if layer == "front":
+            event["layer"] = "front"
+            print(f"RESPALDO {event['id']}: no cabe sobre la persona; va al frente, "
+                  f"entre el rostro y los captions (y={top}–{top + card['height']}).")
+        elif layer is None:
+            # Sin sitio arriba ni en el pecho: avisar, no ocultarlo.
+            print(f"AVISO {event['id']}: no cabe sobre la persona ni delante de ella sin "
+                  "tapar el rostro o los captions; quedará parcialmente tapada.")
         print(f"{event['id']}: persona desde y={int(highest)}, "
               f"tarjeta en y={top}–{top + card['height']}")
     save_plan(args.plan, plan)

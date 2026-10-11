@@ -149,7 +149,7 @@ export const PinkEdit: React.FC<EditProps> = (props) => {
           }
         />
         <BackgroundEffects />
-        <EditorialGraphics />
+        <EditorialGraphics layer="behind" />
         {/* La persona recortada vuelve a ir encima: los gráficos quedan detrás de ella. */}
         {isSample || !media.person ? null : (
           <ClipSeries
@@ -157,6 +157,7 @@ export const PinkEdit: React.FC<EditProps> = (props) => {
             render={() => <OffthreadVideo transparent muted src={asset(media.person as string)} style={{ ...video, objectFit: "cover" }} />}
           />
         )}
+        <EditorialGraphics layer="front" />
       </div>
       <ClipSeries
         label="Captions"
