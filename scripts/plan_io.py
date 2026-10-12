@@ -5,10 +5,38 @@ import re
 from pathlib import Path
 
 
-def empty_plan(style_id):
-    """Plan sin decisiones: sólo captions y sonidos de corte de toma."""
-    return {"style": style_id, "version": 1, "cuts": [], "cards": [],
-            "backgrounds": []}
+PREFERENCES = {"vibe": ("clean", "balanced", "dynamic"), "graphics": ("many", "few", "none"),
+               "sfx": ("full", "soft", "none")}
+TEXTS = {"topic": 80, "notes": 300}
+
+
+def check_preferences(prefs):
+    """Mismas reglas que `checkPreferences` en src/preferences.ts."""
+    if not isinstance(prefs, dict):
+        return ["Las preferencias no son válidas."]
+    expected = {*PREFERENCES, *TEXTS, "brand_color", "context_colors"}
+    errors = [f"Preferencia desconocida o ausente: {name}." for name in sorted(set(prefs) ^ expected)]
+    errors += [f"{name}: valor desconocido." for name, values in PREFERENCES.items()
+               if prefs.get(name) not in values]
+    errors += [f"{name}: texto demasiado largo." for name, limit in TEXTS.items()
+               if not isinstance(prefs.get(name), str) or len(prefs[name]) > limit]
+    if not isinstance(prefs.get("brand_color"), str) or not re.fullmatch(
+            r"#[0-9a-fA-F]{6}", prefs["brand_color"]):
+        errors.append("brand_color: debe ser un hexadecimal como #1f5fc4.")
+    if not isinstance(prefs.get("context_colors"), bool):
+        errors.append("context_colors: debe ser verdadero o falso.")
+    return errors
+
+
+def empty_plan(style_id, preferences=None):
+    """Plan sin decisiones: sólo captions y sonidos de corte de toma.
+
+    Lleva copiados los gustos del creador (cuestionario de estilo), si los hay.
+    """
+    plan = {"style": style_id, "version": 1, "cuts": [], "cards": [], "backgrounds": []}
+    if preferences:
+        plan["preferences"] = preferences
+    return plan
 
 
 MAX_EVENTS = 60
@@ -28,6 +56,8 @@ def check_plan(plan, timeline):
     if any(not isinstance(group, list) for group in groups):
         return ["El plan no tiene las listas cuts, cards y backgrounds."]
     events = [event for group in groups for event in group]
+    if "preferences" in plan and check_preferences(plan["preferences"]):
+        return check_preferences(plan["preferences"])
     if len(events) > MAX_EVENTS or any(not isinstance(event, dict) for event in events):
         return [f"El plan tiene elementos inválidos o más de {MAX_EVENTS}."]
     errors = []

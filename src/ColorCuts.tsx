@@ -47,8 +47,8 @@ export const ColorCuts: React.FC = () => {
         // El color del corte sigue el tema: fondo de color o papel con tinta de color.
         const look =
           event.style === "solid"
-            ? { ...settings.solid, background: `linear-gradient(150deg, ${theme.dark} 0%, ${theme.accent} 55%, ${theme.light} 100%)` }
-            : { ...settings.paper, ink: theme.accent };
+            ? { ...settings.solid, background: `linear-gradient(150deg, ${theme.dark} 0%, ${theme.accent} 55%, ${theme.light} 100%)`, ink: theme.on ?? settings.solid.ink, muted: theme.on_muted ?? settings.solid.muted }
+            : { ...settings.paper, ink: theme.ink ?? theme.accent };
         return (
           <Sequence key={event.id} name={`Corte de color: ${event.label}`} from={from} durationInFrames={event.duration_frames} premountFor={fps}>
             <Cut from={from} firstId={event.anchor_word_id} lastId={event.last_word_id} look={look} />

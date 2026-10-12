@@ -28,4 +28,4 @@ export async function proxy(request: NextRequest) {
 
 // La subida de video queda fuera: con un proxy, Next copia sólo los primeros 10 MB del cuerpo
 // de la petición y el resto se perdería en silencio.
-export const config = { matcher: ["/app/:path*", "/edit/:path*", "/api/jobs", "/api/jobs/((?!upload$).*)", "/login"] };
+export const config = { matcher: ["/app/:path*", "/edit/:path*", "/estilo", "/api/profile", "/api/jobs", "/api/jobs/((?!upload$).*)", "/login"] };

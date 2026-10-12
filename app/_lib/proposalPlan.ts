@@ -1,4 +1,8 @@
 import type { BackgroundEvent, CardEvent, CutEvent, Plan, Timeline } from "../../src/edit";
+import type { Preferences } from "../../src/preferences";
+
+// Elementos nuevos admitidos en diez segundos, según el estilo que eligió el creador.
+export const DENSITY: Record<Preferences["vibe"], number> = { clean: 2, balanced: 3, dynamic: 4 };
 
 // Lo que devuelve el modelo: frases por número de palabra, sin tiempos ni posiciones.
 type Range = { first_word: number; last_word: number; theme: string; label: string };
@@ -21,24 +25,33 @@ export const flatWords = (timeline: Timeline): FlatWord[] =>
     }),
   );
 
-// Convierte la propuesta en eventos del plan; descarta lo que apunte fuera del video.
+// Convierte la propuesta en eventos del plan; descarta lo que apunte fuera del video y
+// lo que el creador dijo que no quiere, aunque el modelo lo haya propuesto.
 export const proposalToPlan = (proposal: Proposal, timeline: Timeline, current: Plan): Plan => {
   const words = flatWords(timeline);
+  const prefs = current.preferences;
+  const seconds = timeline.duration_frames / 30;
+  // «Sólo los esenciales»: como mucho una tarjeta cada 12 s y un fondo cada 25 s.
+  const allowed = {
+    cuts: prefs?.vibe === "clean" ? 0 : Infinity,
+    cards: prefs?.graphics === "none" ? 0 : prefs?.graphics === "few" ? Math.ceil(seconds / 12) : Infinity,
+    backgrounds: prefs?.graphics === "none" ? 0 : prefs?.graphics === "few" ? Math.ceil(seconds / 25) : Infinity,
+  };
   const valid = (range: Range) => Number.isInteger(range.first_word) && Number.isInteger(range.last_word) && range.first_word >= 0 && range.last_word >= range.first_word && range.last_word < words.length;
   const base = (range: Range, id: string) => ({
     id,
     label: range.label.slice(0, 48),
-    theme: range.theme,
+    theme: prefs && !prefs.context_colors ? "base" : range.theme,
     anchor_word_id: words[range.first_word].id,
     offset_frames: 0,
     duration_frames: Math.max(1, words[range.last_word].until - words[range.first_word].frame),
   });
-  const cuts: CutEvent[] = proposal.cuts.filter(valid).map((cut, index) => ({ ...base(cut, `cut_${index + 1}`), style: cut.style, last_word_id: words[cut.last_word].id }));
-  const cards: CardEvent[] = proposal.cards.filter(valid).map((card, index) => {
+  const cuts: CutEvent[] = proposal.cuts.filter(valid).slice(0, allowed.cuts).map((cut, index) => ({ ...base(cut, `cut_${index + 1}`), style: cut.style, last_word_id: words[cut.last_word].id }));
+  const cards: CardEvent[] = proposal.cards.filter(valid).slice(0, allowed.cards).map((card, index) => {
     const beat = card.beat_word >= card.first_word && card.beat_word <= card.last_word ? card.beat_word : card.last_word;
     // `top` es provisional: al guardar se recoloca sobre la persona.
     return { ...base(card, `card_${index + 1}`), kind: card.kind, top: 300, beat: { anchor_word_id: words[beat].id, offset_frames: 0 }, meaning: card.meaning, ...(card.kind === "counter" && card.text ? { text: card.text } : {}) };
   });
-  const backgrounds: BackgroundEvent[] = proposal.backgrounds.filter(valid).map((background, index) => ({ ...base(background, `background_${index + 1}`), motif: background.motif }));
+  const backgrounds: BackgroundEvent[] = proposal.backgrounds.filter(valid).slice(0, allowed.backgrounds).map((background, index) => ({ ...base(background, `background_${index + 1}`), motif: background.motif }));
   return { ...current, cuts, cards, backgrounds };
 };

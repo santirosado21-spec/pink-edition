@@ -184,3 +184,27 @@ Authentication → Sign In / Providers → apagar «Allow new users to sign up»
 acceso a alguien: Authentication → Users → «Invite user» con su correo. Mientras el
 registro siga abierto, cualquiera podría crear una cuenta llamando a la API, poner
 videos en la cola y gastar propuestas de IA.
+
+## Cuestionario de estilo (12 de octubre de 2026)
+
+Antes de su primer video, el creador contesta seis preguntas en `/estilo`: de qué
+habla, qué estilo de edición le gusta (limpio, equilibrado, dinámico), si quiere
+gráficos, el color de su marca y si cambia con el tema, y el nivel de efectos de
+sonido, más una nota libre. Cada opción se muestra con un clip real editado por el
+motor (`public/estilo/`, generado con `python3 scripts/make_style_examples.py`).
+
+- Se contesta **una vez por cuenta** y se cambia desde «Mi estilo» en `/app`. Local:
+  `work/_profile.json`. Nube: tabla `public.profiles` (migración
+  `20261012120000_pink_ai_profiles.sql`, ya aplicada; cada usuario sólo lee y cambia
+  la suya).
+- Al subir un video, el perfil se copia a su plan (`plan.preferences`). Los videos
+  anteriores no cambian solos: el editor ofrece «Usar mi estilo actual».
+- El color y el sonido se aplican en cada render. El tema, el estilo y el gusto por
+  los gráficos guían «Proponer con IA», que además aplica reglas fijas
+  (`app/_lib/proposalPlan.ts`). La tabla completa está en
+  `docs/EDITING_GUIDELINES.md`.
+- La propuesta con IA sigue sin probarse con la API real: falta `ANTHROPIC_API_KEY`.
+  No se lanza sola al subir un video; sigue siendo un botón.
+- Los ejemplos salen del video de piscina. Para usar otro material:
+  `python3 scripts/make_style_examples.py --job <id>` y ajustar en ese script los
+  tramos y los identificadores de los elementos.

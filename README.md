@@ -51,6 +51,9 @@ cortes de color; el PLAN no enumera SFX. Pink.ai no incluye música: se agrega a
 npm run web   # http://localhost:3000
 ```
 
+- **Tu estilo (`/estilo`):** cuestionario que el creador contesta una vez antes de su
+  primer video (tema, estilo de edición, gráficos, color de marca, sonido), con clips
+  de ejemplo. Se cambia desde «Mi estilo». Ver `PINK_AI.md`.
 - **Inicio:** subir un video y ver en qué paso va cada trabajo.
 - **Editor:** vista previa en vivo con la misma composición `PinkEdit`,
   transcripción clicable y, por frase, cortes de color, tarjetas y fondos con su

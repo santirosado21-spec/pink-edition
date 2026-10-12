@@ -10,7 +10,7 @@ import sys
 import time
 from pathlib import Path
 
-from plan_io import empty_plan, load_plan, save_plan
+from plan_io import check_preferences, empty_plan, load_plan, save_plan
 
 PROJECT = Path(__file__).resolve().parents[1]
 SCRIPTS = PROJECT / "scripts"
@@ -83,6 +83,8 @@ def parse():
     parser.add_argument("--style", type=Path, default=PROJECT / "style/pink-demo-v1.json")
     parser.add_argument("--plan", type=Path,
                         help="Plan de edición; sin él se usa uno vacío (sólo captions).")
+    parser.add_argument("--preferences", type=Path,
+                        help="Gustos del creador (JSON); se copian al plan inicial.")
     parser.add_argument("--language", default="es")
     parser.add_argument("--model", default="small", help="Modelo de transcripción.")
     parser.add_argument("--allow-model-download", action="store_true")
@@ -121,7 +123,13 @@ def main(args, work, stage):
     if args.plan:
         save_plan(plan_path, load_plan(args.plan))
     elif not plan_path.exists():
-        save_plan(plan_path, empty_plan(style["id"]))
+        preferences = None
+        if args.preferences and args.preferences.exists():
+            preferences = json.loads(args.preferences.read_text(encoding="utf-8"))
+            problems = check_preferences(preferences)
+            if problems:
+                raise SystemExit("Preferencias de estilo inválidas: " + " ".join(problems))
+        save_plan(plan_path, empty_plan(style["id"], preferences))
     stage("cut")
     run([ASR_PYTHON, SCRIPTS / "prepare_full_demo.py", "--source", source,
          "--transcript", transcript, "--timeline", timeline, "--out-dir", work,

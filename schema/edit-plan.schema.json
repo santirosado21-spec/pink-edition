@@ -313,6 +313,58 @@
         "hold_frames",
         "release_frames"
       ]
+    },
+    "preferences": {
+      "description": "Gustos del creador, del cuestionario de estilo. Se copian del perfil al crear el video; STYLE los aplica (color y sonido) y la propuesta automática los respeta (tema, estilo, gráficos).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "topic",
+        "vibe",
+        "graphics",
+        "brand_color",
+        "context_colors",
+        "sfx",
+        "notes"
+      ],
+      "properties": {
+        "topic": {
+          "type": "string",
+          "maxLength": 80
+        },
+        "vibe": {
+          "enum": [
+            "clean",
+            "balanced",
+            "dynamic"
+          ]
+        },
+        "graphics": {
+          "enum": [
+            "many",
+            "few",
+            "none"
+          ]
+        },
+        "brand_color": {
+          "type": "string",
+          "pattern": "^#[0-9a-fA-F]{6}$"
+        },
+        "context_colors": {
+          "type": "boolean"
+        },
+        "sfx": {
+          "enum": [
+            "full",
+            "soft",
+            "none"
+          ]
+        },
+        "notes": {
+          "type": "string",
+          "maxLength": 300
+        }
+      }
     }
   },
   "required": [

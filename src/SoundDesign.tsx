@@ -20,8 +20,10 @@ const Cue: React.FC<{ file: string; gainDb: number; duration: number; trimBefore
 
 export const SoundDesign: React.FC = () => {
   const { fps } = useVideoConfig();
-  const { style, plan, clips, resolveFrame } = useEdit();
+  const { style, plan, clips, resolveFrame, sfx } = useEdit();
   const audio = style.audio;
+  // El creador puede pedir el video sin efectos: queda sólo su voz.
+  if (!sfx) return null;
   const cardEntries = plan.cards.map((card) => resolveFrame(card, card.id));
   // Un barrido por frontera de toma; su pico cae en el corte. Se alternan sonidos
   // y se cede el sitio si una tarjeta entra casi a la vez.
