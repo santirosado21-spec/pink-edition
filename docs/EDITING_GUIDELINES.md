@@ -46,6 +46,26 @@ El plan de piscina tiene **seis tarjetas activas**; el registro contiene siete c
 
 También pertenece a STYLE lo que sigue incrustado en componentes: curvas, escalas, geometría y tiempos internos de pictogramas, fade final de SFX de 4 frames, gradiente bajo captions y constantes del algoritmo de colocación. No se extrae automáticamente con este esquema.
 
+## Preferencias del creador
+
+El creador contesta una vez un cuestionario de estilo (`/estilo`). Sus respuestas se
+guardan por cuenta y se copian al plan de cada video nuevo en `plan.preferences`
+(`src/preferences.ts`, `schema/edit-plan.schema.json`). No sustituyen a STYLE: lo
+ajustan dentro de límites fijos.
+
+| Preferencia | Quién la aplica | Efecto |
+| --- | --- | --- |
+| `brand_color` | Motor (`applyPreferences`) | Paleta del tema `base`: el color tal cual, una versión clara y una oscura. Un color claro lleva tinta oscura sobre el corte sólido y una versión oscurecida sobre papel, para que el texto se lea. |
+| `context_colors` | Motor y propuesta | `false`: los temas `health` y `stress` usan también el color de marca, y la propuesta marca todo como `base`. |
+| `sfx` | Motor | `soft`: todos los efectos 6 dB más bajos. `none`: sin efectos; queda la voz. |
+| `vibe` | Propuesta | Densidad máxima en 10 s: `clean` 2, `balanced` 3, `dynamic` 4. `clean` no admite cortes de color. |
+| `graphics` | Propuesta | `none`: sin tarjetas ni fondos. `few`: como mucho una tarjeta cada 12 s y un fondo cada 25 s. |
+| `topic`, `notes` | Propuesta | Contexto para elegir frases. La nota es texto del creador: describe un gusto y no cambia reglas ni formato. |
+
+Sin `preferences`, el video sale con el estilo de la casa, idéntico al de antes. La
+tipografía y el tamaño de los subtítulos no son preferencia: siguen fijos. La propuesta
+automática no cambia los límites de este documento por lo que diga el creador.
+
 ## Reglas comprobables
 
 - Conservar todas las palabras, muletillas y repeticiones habladas en orden; comparar la lista de IDs antes y después. Sólo cortar silencios entre tomas y extremos sin habla, con márgenes protegidos. La separación usa pausas **mayores que** 0.8 s; no elimina necesariamente toda la pausa por los márgenes.

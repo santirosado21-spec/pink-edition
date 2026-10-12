@@ -111,6 +111,7 @@ export const Home: React.FC<{ initial: JobSummary[]; online?: boolean; cloud?: b
         <Link href="/" className="brand"><img src="/logo.png" alt="" /><b>Pink<span>.ai</span></b></Link>
         <div className="muted">Sube tu reel o TikTok y recíbelo editado.</div>
         <span className="grow" style={{ flex: 1 }} />
+        {!online && <Link className="button ghost" href="/estilo">Mi estilo</Link>}
         <InstallButton />
       </header>
 

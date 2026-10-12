@@ -26,14 +26,19 @@ generadores de ECG o audio procedural rechazados.
 `docs/EDITING_GUIDELINES.md` para las reglas editoriales, `PINK_AI.md` para la
 plataforma y `supabase/migrations/` para el modelo persistente.
 
+El creador contesta una vez un cuestionario de estilo (`/estilo`); sus respuestas
+viajan en `plan.preferences` y `src/preferences.ts` las aplica sobre STYLE (color de
+marca, sonido). Sin preferencias el resultado es el estilo de la casa.
+
 La web (`app/`) tiene modo local y modo nube (Supabase) y el procesador es
 `scripts/worker.py`; ver `README.md` y `PINK_AI.md`. La clave de servicio de
 Supabase y la de Anthropic sólo viven en el entorno del procesador o de la web,
 nunca en Git ni en el navegador.
 
-Excepción: `public/landing/` contiene los clips de la demo que muestra la landing. El
-dueño pidió usar el video real allí el 10 de octubre de 2026; se asume que tiene
-permiso de quien aparece. No añadir más material del cliente a Git. En la web no hacer
+Excepción: `public/landing/` contiene los clips de la demo que muestra la landing y
+`public/estilo/` los ejemplos del cuestionario de estilo, ambos del video de piscina.
+El dueño pidió usar el video real el 10 de octubre de 2026 y aprobó los ejemplos el
+12; se asume que tiene permiso de quien aparece. No añadir más material del cliente a Git. En la web no hacer
 animaciones ni demos ilustradas: se muestra el video real.
 
 Los videos y transcripts del cliente permanecen locales y fuera de Git. Los

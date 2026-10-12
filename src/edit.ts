@@ -1,6 +1,7 @@
 import { createContext, useContext } from "react";
 import { staticFile } from "remotion";
 import styleJson from "../style/pink-demo-v1.json";
+import { applyPreferences, type Preferences } from "./preferences";
 
 export type AlignedWord = {
   id: string;
@@ -40,17 +41,22 @@ export type Plan = {
   backgrounds: BackgroundEvent[];
   clip_labels?: string[];
   intro_blur?: Style["intro_blur"];
+  // Gustos del creador (cuestionario de estilo), copiados al crear el video.
+  preferences?: Preferences;
 };
 // Rutas dentro de `public/`: el video original y el recorte de la persona.
 export type EditMedia = { source: string; person: string | null };
 export type EditProps = { style: Style; plan: Plan; timeline: Timeline; media: EditMedia };
-export type Theme = { accent: string; light: string; dark: string };
+// `ink` y `on` sólo existen en paletas derivadas de un color de marca: la tinta sobre
+// papel y sobre el fondo de color cuando el color tal cual no se leería.
+export type Theme = { accent: string; light: string; dark: string; ink?: string; on?: string; on_muted?: string };
 
 // Los medios son rutas de `public/` (local) o URLs completas (firmadas, en la nube).
 export const asset = (path: string) => (/^https?:/.test(path) ? path : staticFile(path));
 
 // Todo lo que una edición necesita: estilo y plan, montaje y medios de un video.
-export const buildEdit = ({ style, plan, timeline, media }: EditProps) => {
+export const buildEdit = ({ style: houseStyle, plan, timeline, media }: EditProps) => {
+  const style = applyPreferences(houseStyle, plan.preferences);
   const clips = timeline.clips;
   const isSample = timeline.is_sample === true;
   const words = clips.flatMap((clip) =>
@@ -68,6 +74,7 @@ export const buildEdit = ({ style, plan, timeline, media }: EditProps) => {
     media,
     clips,
     isSample,
+    sfx: plan.preferences?.sfx !== "none",
     durationFrames: timeline.duration_frames,
     resolveFrame: (anchor: Anchor, id: string): number => {
       if (isSample) return anchor.sample_frame ?? 0;

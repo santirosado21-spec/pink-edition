@@ -115,6 +115,12 @@ def main():
     REPORT_DIR.mkdir(parents=True, exist_ok=True)
     (REPORT_DIR / f"{args.qc_prefix}.json").write_text(
         json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    sfx = edit_plan.get("preferences", {}).get("sfx", "full")
+    cues = (len(edit_plan["cards"]) + len(edit_plan["cuts"]) + sum(
+        card["kind"] not in audio["card_beat_sfx"]["silent_kinds"] for card in edit_plan["cards"]))
+    sfx_line = "SFX: ninguno, a pedido del creador" if sfx == "none" else (
+        f"SFX{' suaves' if sfx == 'soft' else ''}: 1 de inicio, hasta "
+        f"{len(timeline['clips']) - 1} de corte y {cues} de tarjetas y cortes de color")
     lines = ["Pink.ai — control de calidad", f"Estado: {report['status']}",
              f"Duración: {report['duration_seconds']:.3f}s",
              f"Contenido: {len(words)}/{source_word_count} palabras, "
@@ -124,10 +130,8 @@ def main():
              f"Captions: máximo {word_limit} palabras por página",
              f"Voz: {checked_audio['input_i']} LUFS, "
              f"{checked_audio['input_tp']} dBTP",
-             f"Gráficos: {len(edit_plan['cards'])}; "
-             f"SFX: 1 de inicio, hasta {len(timeline['clips']) - 1} de corte y "
-             f"{len(edit_plan['cards']) + sum(card['kind'] not in audio['card_beat_sfx']['silent_kinds'] for card in edit_plan['cards']) + len(edit_plan['cuts'])} de tarjetas y cortes de color; "
-             f"Higgsfield y música: no utilizados",
+             f"Gráficos: {len(edit_plan['cards'])}; {sfx_line}; "
+             "Higgsfield y música: no utilizados",
              "Decodificación completa: sin errores"]
     lines += [f"{'PASS' if passed else 'FAIL'}: {name}" for name, passed in checks.items()]
     (REPORT_DIR / f"{args.qc_prefix}.txt").write_text(

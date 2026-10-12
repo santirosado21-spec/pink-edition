@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { BackgroundEvent, CardEvent, CutEvent, Plan } from "../../src/edit";
 import type { Job, JobStatus } from "../_lib/jobs";
+import type { Preferences } from "../../src/preferences";
 import { STAGE_ORDER, stageName, statusLabel } from "./stages";
 import { Timeline, type Block } from "./Timeline";
 
@@ -15,7 +16,7 @@ type Group = "cuts" | "cards" | "backgrounds";
 type AnyEvent = CutEvent | CardEvent | BackgroundEvent;
 type Word = { id: string; text: string; frame: number; clip: number; until: number };
 
-const THEMES: Record<string, string> = { base: "Base (azul)", health: "Salud (verde)", stress: "Estrés (rojo)" };
+const THEMES: Record<string, string> = { base: "Base (color de marca)", health: "Salud (verde)", stress: "Estrés (rojo)" };
 const KINDS: Record<string, string> = {
   patients: "Proporción: uno entre varios",
   emergency: "Alerta y columna que sube",
@@ -33,6 +34,8 @@ const KINDS: Record<string, string> = {
 };
 const MOTIFS: Record<string, string> = { network: "Red de puntos", rings: "Ondas de alarma", crosses: "Cruces médicas" };
 const CUT_STYLES: Record<string, string> = { paper: "Papel (fondo claro)", solid: "Sólido (fondo de color)" };
+const VIBE_NAMES = { clean: "limpio", balanced: "equilibrado", dynamic: "dinámico" };
+const SFX_NAMES = { full: "completo", soft: "suave", none: "sin efectos" };
 const NAMES: Record<Group, string> = { cuts: "Corte de color", cards: "Tarjeta", backgrounds: "Fondo" };
 // Pisos propuestos en docs/EDITING_GUIDELINES.md; son avisos, no bloqueos.
 const MINIMUM: Record<Group, number> = { cuts: 25, cards: 43, backgrounds: 66 };
@@ -59,6 +62,7 @@ export const Editor: React.FC<{ initial: Job }> = ({ initial }) => {
   const [selected, setSelected] = useState<string | null>(null);
   const [nowFrame, setNowFrame] = useState(0);
   const [playing, setPlaying] = useState(false);
+  const [profile, setProfile] = useState<Preferences | null>(null);
   const playerRef = useRef<PlayerRef | null>(null);
   // Historial para deshacer y rehacer; cada gesto guarda el plan anterior una vez.
   const planRef = useRef(plan);
@@ -163,6 +167,11 @@ export const Editor: React.FC<{ initial: Job }> = ({ initial }) => {
     }, 3000);
     return () => clearInterval(timer);
   }, [id, status.state]);
+
+  // El estilo de la cuenta puede haber cambiado después de subir este video.
+  useEffect(() => {
+    fetch("/api/profile").then((response) => (response.ok ? response.json() : null)).then((body) => setProfile(body?.preferences ?? null)).catch(() => undefined);
+  }, []);
 
   // El navegador avisa antes de cerrar o recargar con cambios sin guardar.
   useEffect(() => {
@@ -332,11 +341,15 @@ export const Editor: React.FC<{ initial: Job }> = ({ initial }) => {
   };
 
   const props = useMemo(() => ({ style, plan, timeline, media }), [style, plan, timeline, media]);
+  // Las marcas del editor usan el color de marca del video, como el render.
+  const brand = plan.preferences?.brand_color;
+  const brandMarks = (brand ? { "--base": brand, ...(plan.preferences?.context_colors ? {} : { "--health": brand, "--stress": brand }) } : undefined) as React.CSSProperties | undefined;
+  const outdated = profile !== null && JSON.stringify(profile) !== JSON.stringify(plan.preferences ?? null);
   const running = status.state === "running";
   const quote = selection ? words.slice(selection[0], selection[1] + 1).map((word) => word.text).join(" ") : null;
 
   return (
-    <div className="editor" data-tab={tab}>
+    <div className="editor" data-tab={tab} style={brandMarks}>
       <div className="topbar">
         <Link href="/app" className="brand"><img src="/logo.png" alt="" /><b>Pink<span>.ai</span></b></Link>
         <span className="muted">/</span>
@@ -420,6 +433,14 @@ export const Editor: React.FC<{ initial: Job }> = ({ initial }) => {
                 })}
               </ol>
               {status.state === "running" && !STAGE_ORDER.includes(status.stage) && <div className="muted">{statusLabel(status)}</div>}
+            </div>
+          )}
+          {(plan.preferences || outdated) && (
+            <div className="style-box">
+              {plan.preferences ? (
+                <span className="grow"><i className="dot-color" style={{ background: plan.preferences.brand_color }} /> Estilo de este video: {VIBE_NAMES[plan.preferences.vibe]} · sonido {SFX_NAMES[plan.preferences.sfx]}</span>
+              ) : <span className="grow muted">Este video usa el estilo Pink de origen.</span>}
+              {outdated && <button className="button" onClick={() => change({ ...plan, preferences: profile! })}>Usar mi estilo actual</button>}
             </div>
           )}
           {warnings.length > 0 && (

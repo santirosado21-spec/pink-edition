@@ -15,7 +15,7 @@ import urllib.request
 import uuid
 from pathlib import Path
 
-from plan_io import check_plan
+from plan_io import check_plan, check_preferences
 
 PROJECT = Path(__file__).resolve().parents[1]
 PINK_EDIT = PROJECT / "scripts/pink_edit.py"
@@ -71,6 +71,10 @@ class Cloud:
             self.request("POST", f"/storage/v1/object/{bucket}/{urllib.parse.quote(path)}", raw=handle,
                          headers={"Content-Type": content_type, "Content-Length": str(size), "x-upsert": "true"}).close()
 
+    def get_preferences(self, owner_id):
+        rows = self.rows("GET", f"profiles?user_id=eq.{owner_id}&select=preferences")
+        return rows[0]["preferences"] if rows else None
+
     def insert_plan(self, row):
         return self.rows("POST", "edit_plans", row)[0]
 
@@ -124,6 +128,10 @@ class Local(Cloud):
         target = self.root / "storage" / bucket / path
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(file, target)
+
+    def get_preferences(self, owner_id):
+        file = self.root / "profiles" / f"{owner_id}.json"
+        return json.loads(file.read_text()) if file.exists() else None
 
     def insert_plan(self, row):
         row = {**row, "id": str(uuid.uuid4())}
@@ -193,7 +201,14 @@ def shrink(webm):
 
 def analyze(store, job, video, source):
     name = video["id"]
-    run_engine(name, [source, "--id", name, "--prepare-only", "--allow-model-download"])
+    arguments = [source, "--id", name, "--prepare-only", "--allow-model-download"]
+    # El estilo del creador se copia al plan inicial; uno inválido no detiene el video.
+    preferences = store.get_preferences(video["owner_id"])
+    if preferences and not check_preferences(preferences):
+        file = source.with_name(f"{name}-preferences.json")
+        file.write_text(json.dumps(preferences))
+        arguments += ["--preferences", file]
+    run_engine(name, arguments)
     work, media = PROJECT / "work" / name, PROJECT / "public/work" / name
     timeline = json.loads((work / "timeline.json").read_text())
     plan = json.loads((work / "plan.json").read_text())

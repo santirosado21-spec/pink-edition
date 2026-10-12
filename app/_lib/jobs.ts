@@ -5,6 +5,7 @@ import { promisify } from "node:util";
 import schemaJson from "../../schema/edit-plan.schema.json";
 import styleJson from "../../style/pink-demo-v1.json";
 import type { Plan, Style, Timeline } from "../../src/edit";
+import { checkPreferences } from "../../src/preferences";
 
 // La web corre en la misma máquina que el motor: lee y escribe `work/<id>/`.
 // Los comentarios evitan que el compilador rastree las carpetas del motor (work/, .venv/…)
@@ -123,6 +124,10 @@ type SchemaGroup = { items: { properties: Record<string, { enum?: string[] }> } 
 export const validatePlan = async (plan: Plan, timeline: Timeline): Promise<string[]> => {
   const errors: string[] = [];
   if (typeof plan !== "object" || plan === null) return ["El plan no es válido."];
+  if (plan.preferences !== undefined) {
+    const problems = checkPreferences(plan.preferences);
+    if (problems.length > 0) return problems;
+  }
   const groups = schemaJson.properties as unknown as Record<string, SchemaGroup>;
   const total = timeline.duration_frames;
   const frames = new Map(timeline.clips.flatMap((clip) => clip.words.map((word) => [word.id, clip.timeline_in_frame + word.source_start_frame - clip.source_in_frame] as const)));
@@ -195,7 +200,10 @@ export const startPipeline = async (id: string, source: string, mode: "prepare" 
   if (busy) throw new Error(`Ya hay un video en proceso (${busy.id}). Esta versión procesa uno a la vez.`);
   await fs.mkdir(join(dir(id), "out"), { recursive: true });
   const log = openSync(join(dir(id), "job.log"), "a");
-  const child = spawn("python3", ["scripts/pink_edit.py", source, "--id", id, ...(mode === "prepare" ? ["--prepare-only"] : [])], {
+  // Un video nuevo nace con el estilo del creador (cuestionario); el motor lo copia al plan inicial.
+  const profile = at("work", "_profile.json");
+  const prepare = ["--prepare-only", ...(existsSync(profile) ? ["--preferences", profile] : [])];
+  const child = spawn("python3", ["scripts/pink_edit.py", source, "--id", id, ...(mode === "prepare" ? prepare : [])], {
     cwd: ROOT,
     detached: true,
     stdio: ["ignore", log, log],

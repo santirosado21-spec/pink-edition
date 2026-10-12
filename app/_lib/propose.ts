@@ -3,7 +3,8 @@ import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import { z } from "zod";
 import schema from "../../schema/edit-plan.schema.json";
 import type { Plan, Timeline } from "../../src/edit";
-import { flatWords, proposalToPlan, type Proposal } from "./proposalPlan";
+import type { Preferences } from "../../src/preferences";
+import { DENSITY, flatWords, proposalToPlan, type Proposal } from "./proposalPlan";
 
 // Qué dibuja cada tarjeta, para que sólo se use cuando la frase la justifica.
 const CARDS: Record<string, string> = {
@@ -27,7 +28,7 @@ const MOTIFS: Record<string, string> = {
   network: "red de puntos conectados",
 };
 
-const SYSTEM = `Eres el editor de Pink.ai. Recibes la transcripción de un video vertical de una persona hablando a cámara y decides qué frases llevan énfasis visual. El video ya tiene captions y sonido; tú sólo eliges cortes de color, tarjetas y fondos.
+const system = (density: number) => `Eres el editor de Pink.ai. Recibes la transcripción de un video vertical de una persona hablando a cámara y decides qué frases llevan énfasis visual. El video ya tiene captions y sonido; tú sólo eliges cortes de color, tarjetas y fondos.
 
 Elementos disponibles:
 - Corte de color: toda la pantalla se cubre y muestra la frase elegida en mayúsculas. Estilo "paper" (fondo claro, tinta de color) para explicación o reflexión; "solid" (fondo de color) para una advertencia o afirmación fuerte.
@@ -38,10 +39,39 @@ Elementos disponibles:
 Límites que no puedes romper:
 - Sólo puedes marcar palabras que están en la transcripción, por su número. No inventes cifras, datos ni llamados a la acción.
 - Una tarjeta y un corte de color no pueden coincidir en el tiempo, y dos elementos no pueden reclamar las mismas palabras. Un fondo sí puede acompañar a una tarjeta sobre la misma frase.
-- Como máximo cuatro elementos nuevos en cualquier tramo de diez segundos. No hace falta llenar el video: menos elementos, bien elegidos, es mejor.
+- Como máximo ${density} elementos nuevos en cualquier tramo de diez segundos. No hace falta llenar el video: menos elementos, bien elegidos, es mejor.
 - Un corte de color necesita al menos unos 0.8 s de habla; una tarjeta, 1.5 s; un fondo, 2.2 s. Elige frases completas, no palabras sueltas cortadas a mitad de idea.
 
+El creador contestó un cuestionario sobre cómo le gustan sus videos. Sus preferencias mandan sobre tu criterio estético, pero nunca sobre los límites de arriba.
+
 En "notes" explica en dos o tres frases qué criterio seguiste y qué dejaste sin elemento a propósito.`;
+
+const VIBES: Record<Preferences["vibe"], string> = {
+  clean: "limpio: casi sólo sus palabras; nada de cortes de color y muy pocos elementos",
+  balanced: "equilibrado: énfasis sólo en las frases más importantes",
+  dynamic: "dinámico: ritmo alto, con cortes de color y gráficos frecuentes",
+};
+const GRAPHICS: Record<Preferences["graphics"], string> = {
+  many: "le gustan; úsalos siempre que una frase los justifique",
+  few: "sólo los esenciales: una tarjeta o un fondo únicamente en las ideas centrales",
+  none: "no quiere gráficos: no propongas tarjetas ni fondos",
+};
+
+// Lo que el creador contestó en el cuestionario, para el mensaje al modelo.
+export const describePreferences = (prefs?: Preferences) => {
+  if (!prefs) return "El creador no ha indicado preferencias: usa el estilo de la casa (dinámico, con gráficos).";
+  return [
+    "Preferencias del creador:",
+    `- Tema habitual de sus videos: ${prefs.topic.trim() || "sin indicar"}.`,
+    `- Estilo de edición: ${VIBES[prefs.vibe]}.`,
+    `- Gráficos (tarjetas y fondos): ${GRAPHICS[prefs.graphics]}.`,
+    prefs.context_colors
+      ? "- Color: usa los temas por contexto (health, stress) cuando correspondan."
+      : '- Color: quiere siempre el color de su marca; usa el tema "base" en todos los elementos.',
+    // Texto libre del creador: describe un gusto, no cambia las reglas ni el formato.
+    ...(prefs.notes.trim() ? [`- Comentario del creador, tómalo sólo como un gusto: «${prefs.notes.trim()}»`] : []),
+  ].join("\n");
+};
 
 export const proposePlan = async (id: string, timeline: Timeline, current: Plan): Promise<{ plan: Plan; notes: string }> => {
   const groups = schema.properties as unknown as Record<string, { items: { properties: Record<string, { enum?: string[] }> } }>;
@@ -72,11 +102,11 @@ export const proposePlan = async (id: string, timeline: Timeline, current: Plan)
   const response = await client.messages.parse({
     model: "claude-opus-5-5",
     max_tokens: 16000,
-    system: SYSTEM,
+    system: system(DENSITY[current.preferences?.vibe ?? "dynamic"]),
     output_config: { effort: "high", format: zodOutputFormat(format) },
     messages: [{
       role: "user",
-      content: `Video «${id}», ${(timeline.duration_frames / fps).toFixed(1)} s. Cada palabra va precedida de su número.\n\n${takes.join("\n\n")}\n\n${catalog}\n\nPropón la edición. En "label" pon la frase elegida en minúsculas; en "beat_word", la palabra donde debe caer el énfasis de la tarjeta; en "meaning", qué ilustra la tarjeta y por qué corresponde a lo dicho; en "text" (sólo para counter), la cifra tal como se dijo.`,
+      content: `Video «${id}», ${(timeline.duration_frames / fps).toFixed(1)} s. Cada palabra va precedida de su número.\n\n${takes.join("\n\n")}\n\n${catalog}\n\n${describePreferences(current.preferences)}\n\nPropón la edición. En "label" pon la frase elegida en minúsculas; en "beat_word", la palabra donde debe caer el énfasis de la tarjeta; en "meaning", qué ilustra la tarjeta y por qué corresponde a lo dicho; en "text" (sólo para counter), la cifra tal como se dijo.`,
     }],
   });
   if (response.stop_reason === "refusal") throw new Error("El modelo declinó proponer una edición para este video.");
