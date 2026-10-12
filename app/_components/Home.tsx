@@ -9,11 +9,11 @@ import { supabaseBrowser } from "../_lib/supabase/browser";
 import { InstallButton } from "./InstallButton";
 import { statusLabel } from "./stages";
 
-const videoSeconds = (file: File) =>
-  new Promise<number>((resolve, reject) => {
+const videoInfo = (file: File) =>
+  new Promise<{ seconds: number; width: number; height: number }>((resolve, reject) => {
     const video = document.createElement("video");
     video.preload = "metadata";
-    video.onloadedmetadata = () => { URL.revokeObjectURL(video.src); resolve(video.duration); };
+    video.onloadedmetadata = () => { URL.revokeObjectURL(video.src); resolve({ seconds: video.duration, width: video.videoWidth, height: video.videoHeight }); };
     video.onerror = () => reject(new Error("No se pudo leer el video."));
     video.src = URL.createObjectURL(file);
   });
@@ -26,19 +26,39 @@ export const Home: React.FC<{ initial: JobSummary[]; online?: boolean; cloud?: b
   const input = useRef<HTMLInputElement>(null);
   const busy = jobs.some((job) => job.status.state === "running");
 
+  const refresh = async () => {
+    const response = await fetch("/api/jobs").catch(() => null);
+    if (response?.status === 401) return void (window.location.href = "/login");
+    if (response?.ok) setJobs(await response.json());
+  };
+
   useEffect(() => {
     if (!busy) return;
-    const timer = setInterval(async () => setJobs(await (await fetch("/api/jobs")).json()), 3000);
+    const timer = setInterval(refresh, 3000);
     return () => clearInterval(timer);
   }, [busy]);
+
+  // Lo que el motor rechazaría se avisa antes de subir. Si el navegador no puede leer
+  // el archivo, en local decide el motor; en la nube no se sube a ciegas.
+  const reject = async (file: File): Promise<string | null> => {
+    let info;
+    try {
+      info = await videoInfo(file);
+    } catch (failure) {
+      return cloud ? (failure as Error).message : null;
+    }
+    if (info.width > info.height) return "El video es horizontal. Pink.ai edita videos verticales (9:16).";
+    if (info.seconds > style.limits.max_seconds) return `El video dura ${Math.round(info.seconds)} s y el máximo es ${style.limits.max_seconds} s.`;
+    return null;
+  };
 
   // En la nube el navegador sube directo al almacenamiento y pide el análisis a la cola.
   const uploadCloud = async (file: File) => {
     setError(null);
     try {
       if (file.size > CLOUD_MAX_MB * 1024 * 1024) throw new Error(`El archivo pesa más de ${CLOUD_MAX_MB} MB, el máximo en línea por ahora.`);
-      const seconds = await videoSeconds(file);
-      if (seconds > style.limits.max_seconds) throw new Error(`El video dura ${Math.round(seconds)} s y el máximo es ${style.limits.max_seconds} s.`);
+      const problem = await reject(file);
+      if (problem) throw new Error(problem);
       setProgress(0.05);
       const supabase = supabaseBrowser();
       const user = (await supabase.auth.getUser()).data.user;
@@ -56,21 +76,27 @@ export const Home: React.FC<{ initial: JobSummary[]; online?: boolean; cloud?: b
       setError((failure as Error).message);
     }
     setProgress(null);
-    setJobs(await (await fetch("/api/jobs")).json());
+    await refresh();
   };
 
   // XMLHttpRequest y no fetch: es lo que informa el avance de la subida.
-  const upload = (file: File) => {
+  const upload = async (file: File) => {
     if (cloud) return void uploadCloud(file);
     setError(null);
+    const problem = await reject(file);
+    if (problem) return setError(problem);
     setProgress(0);
     const request = new XMLHttpRequest();
     request.open("PUT", `/api/jobs/upload?name=${encodeURIComponent(file.name)}`);
     request.upload.onprogress = (event) => setProgress(event.loaded / event.total);
     request.onload = async () => {
       setProgress(null);
-      if (request.status >= 400) setError(JSON.parse(request.responseText).error ?? "No se pudo subir el video.");
-      setJobs(await (await fetch("/api/jobs")).json());
+      if (request.status >= 400) {
+        let message = "No se pudo subir el video.";
+        try { message = JSON.parse(request.responseText).error ?? message; } catch { /* respuesta sin JSON */ }
+        setError(message);
+      }
+      await refresh();
     };
     request.onerror = () => {
       setProgress(null);

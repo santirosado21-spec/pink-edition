@@ -148,17 +148,29 @@ export const Editor: React.FC<{ initial: Job }> = ({ initial }) => {
   useEffect(() => {
     if (status.state !== "running") return;
     const timer = setInterval(async () => {
-      const next = await (await fetch(`/api/jobs/${id}?status`)).json();
+      const response = await fetch(`/api/jobs/${id}?status`).catch(() => null);
+      if (response?.status === 401) return void (window.location.href = "/login");
+      // Un fallo pasajero de red no debe romper la pantalla: se reintenta en el siguiente ciclo.
+      if (!response?.ok) return;
+      const next = await response.json();
       setStatus(next.status);
       setHasOutput(next.hasOutput);
       if (next.status.state !== "running") {
-        const job = (await (await fetch(`/api/jobs/${id}`)).json()) as Job;
-        setQc(job.qc);
+        const detail = await fetch(`/api/jobs/${id}`).catch(() => null);
+        if (detail?.ok) setQc(((await detail.json()) as Job).qc);
         setBusy(null);
       }
     }, 3000);
     return () => clearInterval(timer);
   }, [id, status.state]);
+
+  // El navegador avisa antes de cerrar o recargar con cambios sin guardar.
+  useEffect(() => {
+    if (!dirty) return;
+    const warn = (event: BeforeUnloadEvent) => event.preventDefault();
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [dirty]);
 
   useEffect(() => {
     if (!toast) return;
@@ -439,6 +451,11 @@ export const Editor: React.FC<{ initial: Job }> = ({ initial }) => {
                     <select value={(event as CardEvent).kind} onChange={(change) => update(group, event.id, { kind: change.target.value })}>
                       {Object.entries(KINDS).map(([key, label]) => <option key={key} value={key}>{label}</option>)}
                     </select>
+                  </label>
+                )}
+                {group === "cards" && (event as CardEvent).kind === "counter" && (
+                  <label>Cifra dicha
+                    <input maxLength={12} value={(event as CardEvent).text ?? ""} placeholder="200" onChange={(change) => update(group, event.id, { text: change.target.value })} />
                   </label>
                 )}
                 {group === "backgrounds" && (

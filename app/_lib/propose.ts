@@ -1,12 +1,9 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
-import { promises as fs } from "node:fs";
-import path from "node:path";
 import { z } from "zod";
+import schema from "../../schema/edit-plan.schema.json";
 import type { Plan, Timeline } from "../../src/edit";
 import { flatWords, proposalToPlan, type Proposal } from "./proposalPlan";
-
-const ROOT = process.cwd();
 
 // Qué dibuja cada tarjeta, para que sólo se use cuando la frase la justifica.
 const CARDS: Record<string, string> = {
@@ -47,8 +44,8 @@ Límites que no puedes romper:
 En "notes" explica en dos o tres frases qué criterio seguiste y qué dejaste sin elemento a propósito.`;
 
 export const proposePlan = async (id: string, timeline: Timeline, current: Plan): Promise<{ plan: Plan; notes: string }> => {
-  const schema = JSON.parse(await fs.readFile(path.join(ROOT, "schema/edit-plan.schema.json"), "utf-8"));
-  const options = (group: string, field: string) => schema.properties[group].items.properties[field].enum as [string, ...string[]];
+  const groups = schema.properties as unknown as Record<string, { items: { properties: Record<string, { enum?: string[] }> } }>;
+  const options = (group: string, field: string) => groups[group].items.properties[field].enum as [string, ...string[]];
   const range = { first_word: z.number().int(), last_word: z.number().int(), theme: z.enum(options("cuts", "theme")), label: z.string() };
   const format = z.object({
     cuts: z.array(z.object({ ...range, style: z.enum(options("cuts", "style")) })),

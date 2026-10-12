@@ -1,4 +1,5 @@
 import style from "../../style/pink-demo-v1.json";
+import { CLOUD, CLOUD_MAX_MB } from "../_lib/supabase/config";
 
 export type Plan = {
   name: string;
@@ -73,8 +74,8 @@ export const landingConfig: LandingConfig = {
   ],
   faqConditions: {
     uploadFormats: null,
-    // Límites técnicos reales del motor (style/pink-demo-v1.json).
-    maxFileSize: `${style.limits.max_upload_mb} MB`,
+    // Límites técnicos reales: los del motor (style/pink-demo-v1.json) y, en línea, el del almacenamiento.
+    maxFileSize: `${CLOUD ? CLOUD_MAX_MB : style.limits.max_upload_mb} MB`,
     admittedDuration: `${style.limits.max_seconds} segundos`,
     corrections: null,
     creditConsumption: null,

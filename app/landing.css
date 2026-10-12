@@ -74,9 +74,6 @@
 @media (min-width: 1080px) { .landing .how { grid-template-columns: repeat(4, 1fr); } }
 
 /* Qué incluye */
-@media (min-width: 820px) {
-}
-.landing .g-blue { background: linear-gradient(150deg, #174a9c, #3b82e6); } .landing .g-green { background: linear-gradient(150deg, #157a43, #3fc47e); } .landing .g-red { background: linear-gradient(150deg, #a82424, #f06a6a); }
 
 /* Correcciones */
 .landing .section.dark { background: var(--plum); color: #fff; }

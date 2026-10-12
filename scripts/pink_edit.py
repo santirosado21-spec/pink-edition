@@ -40,7 +40,17 @@ def probe(path):
 
 
 def check_limits(source, style):
-    """Un video más largo que el máximo se rechaza antes de gastar cómputo."""
+    """Un video horizontal o más largo que el máximo se rechaza antes de gastar cómputo."""
+    video = json.loads(subprocess.run(
+        ["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries",
+         "stream=width,height:stream_side_data=rotation", "-of", "json", str(source)],
+        check=True, text=True, capture_output=True).stdout)["streams"][0]
+    width, height = video["width"], video["height"]
+    # Los celulares guardan el giro aparte: cuenta cómo se ve, no cómo está almacenado.
+    if any(abs(int(data.get("rotation", 0))) % 180 == 90 for data in video.get("side_data_list", [])):
+        width, height = height, width
+    if width > height:
+        raise SystemExit("El video es horizontal. Pink.ai edita videos verticales (9:16).")
     seconds = float(subprocess.run(
         ["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of",
          "default=nw=1:nk=1", str(source)], check=True, text=True,
@@ -173,6 +183,11 @@ if __name__ == "__main__":
     try:
         main(arguments, folder, enter)
     except BaseException as error:
-        write_status(folder, "failed", current["stage"], str(error) or type(error).__name__)
+        # El usuario ve este texto: un paso que falló no debe mostrar su línea de comandos.
+        if isinstance(error, subprocess.CalledProcessError):
+            reason = f"Un paso del motor falló (código {error.returncode}); el detalle está en el registro del trabajo."
+        else:
+            reason = str(error) or type(error).__name__
+        write_status(folder, "failed", current["stage"], reason)
         raise
     write_status(folder, "ready" if arguments.prepare_only else "done", current["stage"])

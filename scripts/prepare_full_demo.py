@@ -119,12 +119,19 @@ def token_width(text, face, settings):
         "letter_spacing_em"]
 
 
+OVERSIZED = set()
+
+
 def layout_tokens(tokens, face, settings):
     lines, line, width = [], [], 0.0
     for token in tokens:
         size = token_width(token["text"], face, settings)
-        if size > settings["max_width"]:
-            raise ValueError(f"Palabra fuera de zona segura: {token['text']}")
+        # Una palabra más ancha que la zona segura va sola en su renglón y se avisa:
+        # detener el video entero por ella sería peor que excederse unos píxeles.
+        if size > settings["max_width"] and token["text"] not in OVERSIZED:
+            OVERSIZED.add(token["text"])
+            print(f"AVISO: «{token['text']}» mide {size:.0f} px y la zona segura "
+                  f"{settings['max_width']} px; va sola en su renglón.", flush=True)
         candidate = width + (settings["word_gap"] if line else 0) + size
         if line and candidate > settings["max_width"]:
             lines.append(line)

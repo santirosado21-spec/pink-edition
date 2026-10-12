@@ -32,7 +32,9 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
     ".next-cloud/types/**/*.ts",
-    ".next-cloud/dev/types/**/*.ts"
+    ".next-cloud/dev/types/**/*.ts",
+    ".next-review/types/**/*.ts",
+    ".next-review/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules"
