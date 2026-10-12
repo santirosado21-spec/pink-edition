@@ -13,7 +13,10 @@ export const Waiting: React.FC<{ id: string; initial: JobStatus | null }> = ({ i
   useEffect(() => {
     if (!status || status.state === "failed") return;
     const timer = setInterval(async () => {
-      const next = (await (await fetch(`/api/jobs/${id}?status`)).json()).status as JobStatus;
+      const response = await fetch(`/api/jobs/${id}?status`).catch(() => null);
+      if (response?.status === 401) return void (window.location.href = "/login");
+      if (!response?.ok) return;
+      const next = (await response.json()).status as JobStatus;
       setStatus(next);
       if (next.state !== "running") router.refresh();
     }, 3000);

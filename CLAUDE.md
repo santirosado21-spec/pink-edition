@@ -10,10 +10,10 @@ recibe `{style, plan, timeline, media}`. `src/edit.ts` construye el contexto.
 STYLE fija el look y las reglas reutilizables; PLAN contiene las decisiones del
 video y sigue `schema/edit-plan.schema.json`.
 
-El plan de piscina usa seis tarjetas; `src/graphics/cards.tsx` registra siete
-clases. Hay cortes de color, fondos temáticos y temas contextuales. Los SFX se
-derivan de STYLE en `src/SoundDesign.tsx`; la música es `null` por defecto. No
-incrustar canciones con derechos en videos de clientes sin autorización.
+El plan de piscina usa seis tarjetas; `src/graphics/cards.tsx` registra trece
+clases (`docs/CARD_CATALOG.md`). Hay cortes de color, fondos temáticos y temas contextuales. Los SFX se
+derivan de STYLE en `src/SoundDesign.tsx`; no hay música (se agrega al
+publicar).
 
 Mantener Inter Display Bold a 100 px uniformes. Los captions usan normalmente
 hasta cuatro palabras y admiten cinco para evitar una última palabra visible por
@@ -29,7 +29,12 @@ plataforma y `supabase/migrations/` para el modelo persistente.
 La web (`app/`) tiene modo local y modo nube (Supabase) y el procesador es
 `scripts/worker.py`; ver `README.md` y `PINK_AI.md`. La clave de servicio de
 Supabase y la de Anthropic sólo viven en el entorno del procesador o de la web,
-nunca en Git ni en el navegador. Las tarjetas son 13 (`docs/CARD_CATALOG.md`).
+nunca en Git ni en el navegador.
+
+Excepción: `public/landing/` contiene los clips de la demo que muestra la landing. El
+dueño pidió usar el video real allí el 10 de octubre de 2026; se asume que tiene
+permiso de quien aparece. No añadir más material del cliente a Git. En la web no hacer
+animaciones ni demos ilustradas: se muestra el video real.
 
 Los videos y transcripts del cliente permanecen locales y fuera de Git. Los
 datos ficticios permiten revisar código y gráficos sin distribuirlos. No leer

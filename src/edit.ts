@@ -32,14 +32,12 @@ export type PlanEvent = Anchor & { id: string; label: string; theme: string; dur
 export type CutEvent = PlanEvent & { style: string; last_word_id: string };
 export type CardEvent = PlanEvent & { kind: string; top?: number; beat: Anchor; meaning?: string; text?: string };
 export type BackgroundEvent = PlanEvent & { motif: string };
-export type Music = { file: string; title: string; gain_db: number; fade_in_frames: number; fade_out_frames: number };
 export type Plan = {
   style: string;
   version: number;
   cuts: CutEvent[];
   cards: CardEvent[];
   backgrounds: BackgroundEvent[];
-  music?: Music | null;
   clip_labels?: string[];
   intro_blur?: Style["intro_blur"];
 };

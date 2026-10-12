@@ -64,7 +64,7 @@ def main():
              "-map", "0:v:0", "-map", "0:a:0", "-c:v", "copy",
              "-af", normalization, "-ar", "48000", "-c:a", "aac",
              "-b:a", "192k", "-movflags", "+faststart",
-             "-metadata", "comment=PICOS.AI - discurso completo, edición local",
+             "-metadata", "comment=Pink.ai",
              str(FINAL)])
     metadata = json.loads(run([
         "ffprobe", "-v", "error", "-show_streams", "-show_format",
@@ -115,7 +115,7 @@ def main():
     REPORT_DIR.mkdir(parents=True, exist_ok=True)
     (REPORT_DIR / f"{args.qc_prefix}.json").write_text(
         json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    lines = ["PICOS.AI — QC de demo completa", f"Estado: {report['status']}",
+    lines = ["Pink.ai — control de calidad", f"Estado: {report['status']}",
              f"Duración: {report['duration_seconds']:.3f}s",
              f"Contenido: {len(words)}/{source_word_count} palabras, "
              f"{len(timeline['clips'])} tomas, orden original",
@@ -127,7 +127,7 @@ def main():
              f"Gráficos: {len(edit_plan['cards'])}; "
              f"SFX: 1 de inicio, hasta {len(timeline['clips']) - 1} de corte y "
              f"{len(edit_plan['cards']) + sum(card['kind'] not in audio['card_beat_sfx']['silent_kinds'] for card in edit_plan['cards']) + len(edit_plan['cuts'])} de tarjetas y cortes de color; "
-             f"Higgsfield: no utilizado; música: {'utilizada' if edit_plan.get('music') else 'no utilizada'}",
+             f"Higgsfield y música: no utilizados",
              "Decodificación completa: sin errores"]
     lines += [f"{'PASS' if passed else 'FAIL'}: {name}" for name, passed in checks.items()]
     (REPORT_DIR / f"{args.qc_prefix}.txt").write_text(

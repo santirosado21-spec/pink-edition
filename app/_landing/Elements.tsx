@@ -1,42 +1,25 @@
-import type { ReactNode } from "react";
 import { getPrimaryAction, landingConfig } from "./config";
 
-export function Badge({ children }: { children: ReactNode }) {
-  return <span className="status-label">{children}</span>;
-}
-export function PrimaryAction() {
+export function PrimaryAction({ light = false }: { light?: boolean }) {
   const action = getPrimaryAction(landingConfig);
-  return (
-    <a className="primary-cta" href={action.href}>
-      {action.label}
-      <span aria-hidden="true">↗</span>
-    </a>
-  );
+  return <a className={`cta${light ? " light" : ""}`} href={action.href}>{action.label}<span aria-hidden="true">→</span></a>;
 }
-export function SectionHeading({
-  number,
-  title,
-  children,
-}: {
-  number: string;
-  title: string;
-  children?: ReactNode;
-}) {
-  return (
-    <div className="section-heading">
-      <p className="eyebrow">{number} / PINK.AI</p>
-      <h2>{title}</h2>
-      {children && <p className="section-lead">{children}</p>}
-    </div>
-  );
-}
+
 export function Brand() {
   return (
     <a className="brand-link" href="/" aria-label="Pink.ai, inicio">
-      <img src="/logo.png" width="48" height="48" alt="" />
-      <span>
-        Pink.ai<span className="brand-dot">●</span>
-      </span>
+      <img src="/logo.png" width="40" height="40" alt="" />
+      <span>Pink<i>.ai</i></span>
     </a>
+  );
+}
+
+export function Heading({ eyebrow, children, sub, center = true }: { eyebrow?: string; children: React.ReactNode; sub?: React.ReactNode; center?: boolean }) {
+  return (
+    <div className={`heading${center ? " center" : ""}`}>
+      {eyebrow && <p className="eyebrow">{eyebrow}</p>}
+      <h2>{children}</h2>
+      {sub && <p className="sub">{sub}</p>}
+    </div>
   );
 }

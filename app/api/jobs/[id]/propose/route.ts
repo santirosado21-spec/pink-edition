@@ -1,5 +1,5 @@
 import { CLOUD, cloudJob } from "../../../../_lib/cloud";
-import { checkPlan, readJob, validId } from "../../../../_lib/jobs";
+import { readJob, validId, validatePlan } from "../../../../_lib/jobs";
 import { proposePlan } from "../../../../_lib/propose";
 
 type Context = { params: Promise<{ id: string }> };
@@ -14,7 +14,7 @@ export async function POST(_request: Request, { params }: Context) {
   }
   try {
     const { plan, notes } = await proposePlan(id, job.timeline, job.plan);
-    const errors = CLOUD ? [] : await checkPlan(id, plan);
+    const errors = await validatePlan(plan, job.timeline);
     if (errors.length > 0) return Response.json({ error: `La propuesta no pasó la validación: ${errors.join(" ")}` }, { status: 502 });
     return Response.json({ plan, notes });
   } catch (error) {

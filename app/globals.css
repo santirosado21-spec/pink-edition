@@ -43,15 +43,13 @@ button, select, input { font: inherit; color: inherit; }
 .chip.done, .chip.ready { color: var(--ok); }
 .chip.failed { color: var(--bad); }
 .dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
-.chip.running .dot { animation: pulse 1s ease-in-out infinite; }
-@keyframes pulse { 50% { opacity: 0.25; } }
 
 /* Inicio */
 .home { max-width: 1120px; margin: 0 auto; padding: 28px 24px 60px; }
 .home header { display: flex; align-items: baseline; gap: 14px; margin-bottom: 26px; }
 .drop {
   border: 1.5px dashed #3a3a4a; border-radius: 18px; padding: 34px 20px; text-align: center;
-  background: var(--panel); cursor: pointer; transition: border-color 0.15s, background 0.15s;
+  background: var(--panel); cursor: pointer;
 }
 .drop:hover, .drop.over { border-color: var(--pink); background: var(--pink-soft); }
 .drop h2 { margin: 0 0 6px; font-size: 20px; letter-spacing: -0.01em; }
@@ -112,3 +110,71 @@ h3.section { margin: 34px 0 0; font-size: 13px; text-transform: uppercase; lette
 .waiting { height: 100vh; display: grid; place-items: center; text-align: center; }
 .brand { display: inline-flex; align-items: center; gap: 8px; }
 .brand img { width: 28px; height: 28px; }
+
+/* Editor: controles nuevos */
+.editor { grid-template-rows: auto minmax(0, 1fr) auto; }
+.button.icon { padding: 6px 10px; font-size: 16px; line-height: 1; }
+.transport { display: flex; align-items: center; gap: 10px; }
+.tabs { display: none; }
+.dock { border-top: 1px solid var(--line); background: var(--panel); padding: 8px 14px 12px; }
+.item.selected { box-shadow: 0 0 0 1.5px var(--pink); }
+.steps-box { border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; margin-bottom: 14px; background: var(--panel-2); }
+.steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 7px; }
+.steps li { display: flex; align-items: center; gap: 9px; color: var(--muted); font-size: 13px; }
+.steps li i { width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--line); flex: none; }
+.steps li.done { color: var(--text); } .steps li.done i { background: var(--ok); border-color: var(--ok); }
+.steps li.now { color: var(--pink); font-weight: 600; } .steps li.now i { border-color: var(--pink); }
+.steps li.bad { color: var(--bad); } .steps li.bad i { background: var(--bad); border-color: var(--bad); }
+.ask { display: flex; align-items: center; gap: 8px; opacity: 0.7; }
+.ask input { flex: 1; min-width: 0; background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 9px 11px; }
+
+/* Línea de tiempo */
+.tl-bar { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 6px; font-size: 12px; }
+.tl-zoom { display: flex; gap: 4px; flex: none; }
+.tl-zoom .button { padding: 2px 10px; }
+.tl-scroll { overflow-x: auto; overflow-y: hidden; padding-bottom: 4px; }
+.tl { position: relative; padding-bottom: 2px; }
+.tl-ruler { position: relative; height: 22px; border-bottom: 1px solid var(--line); cursor: pointer; touch-action: pan-x; }
+.tl-ruler .tick { position: absolute; top: 4px; font-size: 10px; color: var(--muted); padding-left: 4px; border-left: 1px solid var(--line); height: 18px; }
+.tl-lane { display: flex; align-items: center; height: 34px; border-bottom: 1px solid rgba(255, 255, 255, 0.04); }
+.tl-name { flex: none; width: 74px; font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; position: sticky; left: 0; z-index: 2; background: var(--panel); height: 100%; display: flex; align-items: center; }
+.tl-track { position: relative; height: 100%; cursor: pointer; }
+.tl-block { position: absolute; top: 4px; height: 26px; border-radius: 7px; background: color-mix(in srgb, var(--mark) 32%, #1b1b22); border: 1px solid var(--mark); overflow: hidden; display: flex; align-items: center; cursor: grab; touch-action: none; }
+.tl-block:active { cursor: grabbing; }
+.tl-block.on { box-shadow: 0 0 0 2px var(--pink); z-index: 1; }
+.tl-block span { padding: 0 14px 0 7px; font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; pointer-events: none; }
+.tl-grip { position: absolute; right: 0; top: 0; bottom: 0; width: 10px; cursor: ew-resize; background: linear-gradient(90deg, transparent, var(--mark)); }
+.tl-head { position: absolute; top: 0; bottom: 0; width: 2px; margin-left: -1px; background: var(--pink); pointer-events: none; z-index: 3; }
+
+/* Celular: la vista previa queda fija arriba y el resto va por pestañas */
+@media (max-width: 900px) {
+  .editor { display: block; height: auto; min-height: 100vh; }
+  .topbar { flex-wrap: wrap; gap: 8px; padding: 8px 12px; }
+  .topbar .title { max-width: 38vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .topbar .spacer { display: none; }
+  .topbar .button { padding: 7px 10px; font-size: 13px; }
+  .topbar .button.primary, .topbar a.button { flex: 1; text-align: center; }
+  .topbar .chip { display: none; }
+  .topbar .brand b { display: none; }
+  .transport { display: none; }
+  .workspace { display: block; }
+  .stage { position: sticky; top: 0; z-index: 6; background: var(--bg); border-right: 0; border-bottom: 1px solid var(--line); padding: 8px 12px 0; gap: 6px; }
+  .stage .frame { height: 40vh; }
+  .tabs { display: flex; width: 100%; gap: 4px; }
+  .tabs button { flex: 1; padding: 10px 6px; background: none; border: 0; border-bottom: 2px solid transparent; color: var(--muted); cursor: pointer; font-weight: 600; }
+  .tabs button.on { color: var(--text); border-bottom-color: var(--pink); }
+  .column { padding: 12px 14px 80px; overflow: visible; }
+  .column + .column { border-left: 0; }
+  .toolbar { top: 0; position: static; margin: 0 0 12px; padding: 0 0 10px; }
+  .editor[data-tab="text"] .col-items, .editor[data-tab="text"] .dock,
+  .editor[data-tab="items"] .col-text, .editor[data-tab="items"] .dock,
+  .editor[data-tab="time"] .col-text, .editor[data-tab="time"] .col-items { display: none; }
+  .words { font-size: 20px; }
+  .toast { bottom: 12px; left: 12px; right: 12px; transform: none; max-width: none; }
+}
+
+/* Zonas seguras (muesca y barra inferior) cuando se usa como app instalada */
+.topbar { padding-top: max(10px, env(safe-area-inset-top)); }
+.home { padding-top: max(28px, env(safe-area-inset-top)); }
+.dock { padding-bottom: max(12px, env(safe-area-inset-bottom)); }
+.home header { flex-wrap: wrap; }

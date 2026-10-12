@@ -20,7 +20,7 @@ const Cue: React.FC<{ file: string; gainDb: number; duration: number; trimBefore
 
 export const SoundDesign: React.FC = () => {
   const { fps } = useVideoConfig();
-  const { style, plan, clips, durationFrames, resolveFrame } = useEdit();
+  const { style, plan, clips, resolveFrame } = useEdit();
   const audio = style.audio;
   const cardEntries = plan.cards.map((card) => resolveFrame(card, card.id));
   // Un barrido por frontera de toma; su pico cae en el corte. Se alternan sonidos
@@ -43,19 +43,8 @@ export const SoundDesign: React.FC = () => {
     })),
   ];
   const intro = audio.intro_sfx;
-  const music = plan.music ?? null;
   return (
     <>
-      {music ? (
-        <Audio
-          name={`Música: ${music.title}`}
-          src={staticFile(music.file)}
-          volume={(frame) =>
-            Math.pow(10, music.gain_db / 20) *
-            interpolate(frame, [0, music.fade_in_frames, durationFrames - music.fade_out_frames, durationFrames], [0, 1, 1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" })
-          }
-        />
-      ) : null}
       <Sequence name="SFX: inicio" from={0} durationInFrames={intro.duration_frames} premountFor={fps}>
         <Cue file={intro.file} gainDb={intro.gain_db} duration={intro.duration_frames} trimBefore={intro.trim_before_frames} />
       </Sequence>

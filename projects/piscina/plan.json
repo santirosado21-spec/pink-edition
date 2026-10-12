@@ -30,6 +30,5 @@
     {"id": "emergency_bg", "label": "emergencia", "theme": "stress", "motif": "rings", "anchor_word_id": "pool_raw.word.00069", "offset_frames": 0, "sample_frame": 708, "duration_frames": 77},
     {"id": "sick_bg", "label": "te enfermas más seguido", "theme": "health", "motif": "crosses", "anchor_word_id": "pool_raw.word.00078", "offset_frames": 0, "sample_frame": 801, "duration_frames": 96},
     {"id": "risk_bg", "label": "duplica", "theme": "stress", "motif": "network", "anchor_word_id": "pool_raw.word.00098", "offset_frames": 0, "sample_frame": 1022, "duration_frames": 66}
-  ],
-  "music": null
+  ]
 }

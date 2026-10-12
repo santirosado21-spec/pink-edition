@@ -96,8 +96,8 @@ de temas de color más amplia (dinero, salud, peligro, tecnología).
   todo el alto del cuadro no hay sitio; falta una regla de respaldo.
 - **Duración:** un video de 53 s tarda 15 min. Un video de 3 min tardará cerca
   de una hora; definir un máximo.
-- **Música:** la plataforma no puede incrustar canciones con derechos. Usar
-  pistas con licencia o dejar que se agregue al publicar.
+- **Música:** fuera del producto por decisión del 10 de octubre de 2026; se
+  agrega al publicar.
 - **Licencia de Remotion:** gratis para individuos y empresas de hasta tres
   personas; por encima requiere licencia de empresa.
 - **Sonido:** los SFX y sus volúmenes siguen sin aprobarse de oído.
@@ -142,3 +142,45 @@ Límites conocidos:
 - Un video a la vez por procesador.
 
 Pagos y créditos no están construidos.
+
+## Decisiones del 10 de octubre de 2026
+
+- **Sin música** en el producto: se agrega al publicar. Se quitó del plan, del
+  esquema y de la composición; el audio sin música es idéntico al del v9.
+- **Pruebas en la Mac**, y después migración a un VPS. El VPS básico de Hostinger
+  (1 núcleo, 4 GB, sin GPU) sólo alcanza para la web y la cola; el recorte de la
+  persona y el render necesitan un equipo más potente o con GPU.
+- **Web primero, app después.** Ruta elegida: web instalable (PWA), que ya está, y
+  más adelante envolverla con Capacitor para las tiendas. Un solo código; la vista
+  previa en vivo con Remotion no se reescribe. Antes de publicar en tiendas hará
+  falta: cuentas (modo nube probado con sesión real), notificaciones al terminar
+  un render y subida reanudable para videos grandes.
+- La interfaz interactiva ya cubre subir, ver el avance, editar con vista previa y
+  línea de tiempo, guardar versiones, renderizar y descargar. Lo que sigue
+  marcado «Próximamente» en ella es pedir cambios con lenguaje natural.
+
+## Correcciones tras la revisión del 11 de octubre de 2026
+
+- **Compilación de producción:** `next build` fallaba en el equipo que tiene el motor
+  porque el compilador rastreaba `.venv/`. Las rutas del motor en `app/_lib/jobs.ts`
+  llevan ahora el comentario `turbopackIgnore`, y el estilo y el esquema se importan
+  como JSON. La web corre con `next build` y `next start` junto al motor.
+- **Procesador:** su nombre se guarda la primera vez en `work/.worker-name` (o se fija
+  con `PINK_WORKER_NAME`), así que al reiniciar reencola lo que dejó a medias. Ni el
+  número de proceso ni el nombre del equipo servían: cambian entre arranques. Cada
+  trabajo tiene un tope de 45 minutos. Un render que no cabe en el almacenamiento
+  (45 MB) se sube en una copia más liviana; el original queda en `work/<id>/out/`.
+  Un plan llegado de la base se comprueba (`check_plan` en `scripts/plan_io.py`)
+  antes de renderizar.
+- **Validación:** `validatePlan` acota duración, desfase, cantidad de elementos y el
+  texto de las tarjetas; un contador exige la cifra dicha. El motor y la pantalla de
+  subida rechazan videos horizontales.
+
+### Acceso por invitación (modo nube)
+
+La pantalla de entrada ya no crea cuentas (`shouldCreateUser: false`), pero eso sólo
+vale para nuestra pantalla. **El cierre real lo hace Santiago en Supabase:**
+Authentication → Sign In / Providers → apagar «Allow new users to sign up». Para dar
+acceso a alguien: Authentication → Users → «Invite user» con su correo. Mientras el
+registro siga abierto, cualquiera podría crear una cuenta llamando a la API, poner
+videos en la cola y gastar propuestas de IA.

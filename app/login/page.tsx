@@ -1,22 +1,24 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { supabaseBrowser } from "../_lib/supabase/browser";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [state, setState] = useState<"idle" | "sending" | "sent">("idle");
   const [error, setError] = useState<string | null>(null);
-  const failed = typeof window !== "undefined" && new URLSearchParams(window.location.search).has("error");
+  const [failed, setFailed] = useState(false);
+  useEffect(() => setFailed(new URLSearchParams(window.location.search).has("error")), []);
 
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
     setState("sending");
     setError(null);
-    const { error: failure } = await supabaseBrowser().auth.signInWithOtp({ email, options: { emailRedirectTo: `${window.location.origin}/auth/callback` } });
+    const { error: failure } = await supabaseBrowser().auth.signInWithOtp({ email, options: { emailRedirectTo: `${window.location.origin}/auth/callback`, shouldCreateUser: false } });
     if (failure) {
-      setError(failure.message);
+      // Pink.ai abre por invitación: sólo entran los correos dados de alta en Supabase.
+      setError(/signups? not allowed/i.test(failure.message) ? "Este correo no tiene acceso todavía. Pink.ai abre por invitación." : failure.message);
       setState("idle");
     } else setState("sent");
   };

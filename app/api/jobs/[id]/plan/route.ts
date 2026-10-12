@@ -6,7 +6,12 @@ type Context = { params: Promise<{ id: string }> };
 
 export async function PUT(request: Request, { params }: Context) {
   const { id } = await params;
-  const plan = (await request.json()) as Plan;
+  let plan: Plan;
+  try {
+    plan = (await request.json()) as Plan;
+  } catch {
+    return Response.json({ error: "El plan no llegó como JSON válido." }, { status: 400 });
+  }
   if (CLOUD) {
     const saved = await cloudSavePlan(id, plan);
     return saved.plan ? Response.json({ plan: saved.plan }) : Response.json({ error: "El plan tiene errores.", errors: saved.errors }, { status: 400 });

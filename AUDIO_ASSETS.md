@@ -19,5 +19,4 @@ y [licencia específica](https://mixkit.co/license/modal/sfxFree/).
 Los assets de Mixkit no se distribuyen dentro de Git; cada checkout los prepara
 con `npm run setup:audio`. Kenney y su licencia CC0 sí se incluyen.
 Los archivos, ganancias y tiempos, incluida la excepción silenciosa de `healing`,
-viven en `style/pink-demo-v1.json` (`audio`). La música pertenece al PLAN y no se
-lista aquí.
+viven en `style/pink-demo-v1.json` (`audio`). Pink.ai no incluye música.
