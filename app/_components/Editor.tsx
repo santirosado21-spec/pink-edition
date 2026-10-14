@@ -7,13 +7,19 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { BackgroundEvent, CardEvent, CutEvent, Plan } from "../../src/edit";
 import type { Job, JobStatus } from "../_lib/jobs";
 import type { Preferences } from "../../src/preferences";
+import { autoZooms, type TakeTransition, type ZoomEvent } from "../../src/zooms";
 import { STAGE_ORDER, stageName, statusLabel } from "./stages";
 import { Timeline, type Block } from "./Timeline";
 
 const Preview = dynamic(() => import("./Preview"), { ssr: false, loading: () => <div className="preview-loading">Cargando vista previa…</div> });
 
-type Group = "cuts" | "cards" | "backgrounds";
-type AnyEvent = CutEvent | CardEvent | BackgroundEvent;
+type Group = "cuts" | "cards" | "backgrounds" | "zooms";
+// Los zooms no tienen etiqueta ni color: en pantalla se muestran con unos de cortesía.
+type AnyEvent = CutEvent | CardEvent | BackgroundEvent | (ZoomEvent & { label: string; theme: string });
+const GROUPS: Group[] = ["cuts", "cards", "backgrounds", "zooms"];
+const listOf = (plan: Plan, group: Group) => (plan[group] ?? []) as AnyEvent[];
+const ZOOM_SCALES = [1.1, 1.15, 1.2, 1.3];
+const TRANSITIONS: Record<TakeTransition, string> = { none: "Ninguna", punch: "Punch (zoom breve)", flash: "Destello" };
 type Word = { id: string; text: string; frame: number; clip: number; until: number };
 
 const THEMES: Record<string, string> = { base: "Base (color de marca)", health: "Salud (verde)", stress: "Estrés (rojo)" };
@@ -36,9 +42,12 @@ const MOTIFS: Record<string, string> = { network: "Red de puntos", rings: "Ondas
 const CUT_STYLES: Record<string, string> = { paper: "Papel (fondo claro)", solid: "Sólido (fondo de color)" };
 const VIBE_NAMES = { clean: "limpio", balanced: "equilibrado", dynamic: "dinámico" };
 const SFX_NAMES = { full: "completo", soft: "suave", none: "sin efectos" };
-const NAMES: Record<Group, string> = { cuts: "Corte de color", cards: "Tarjeta", backgrounds: "Fondo" };
+const CAPTION_NAMES = { pink: "subtítulos clásicos", keyword: "palabra clave", karaoke: "karaoke" };
+// Mismo límite que valida el servidor (`MAX_EMPHASIS` en app/_lib/jobs.ts).
+const MAX_EMPHASIS = 40;
+const NAMES: Record<Group, string> = { cuts: "Corte de color", cards: "Tarjeta", backgrounds: "Fondo", zooms: "Zoom" };
 // Pisos propuestos en docs/EDITING_GUIDELINES.md; son avisos, no bloqueos.
-const MINIMUM: Record<Group, number> = { cuts: 25, cards: 43, backgrounds: 66 };
+const MINIMUM: Record<Group, number> = { cuts: 25, cards: 43, backgrounds: 66, zooms: 15 };
 
 const clock = (frame: number, fps: number) => {
   const seconds = frame / fps;
@@ -89,8 +98,8 @@ export const Editor: React.FC<{ initial: Job }> = ({ initial }) => {
 
   const items = useMemo(
     () =>
-      (["cuts", "cards", "backgrounds"] as Group[])
-        .flatMap((group) => (plan[group] as AnyEvent[]).map((event) => ({ group, event, start: startOf(event) })))
+      GROUPS
+        .flatMap((group) => listOf(plan, group).map((event) => ({ group, event: group === "zooms" ? ({ ...event, label: `Zoom ×${(event as ZoomEvent).scale}`, theme: "base" } as AnyEvent) : event, start: startOf(event) })))
         .sort((a, b) => a.start - b.start),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [plan, words],
@@ -100,7 +109,7 @@ export const Editor: React.FC<{ initial: Job }> = ({ initial }) => {
   const marks = useMemo(() => {
     const map = new Map<number, { cut?: string; card?: string }>();
     for (const { group, event, start } of items) {
-      if (group === "backgrounds") continue;
+      if (group === "backgrounds" || group === "zooms") continue;
       words.forEach((word, index) => {
         if (word.frame >= start && word.frame < start + event.duration_frames) {
           map.set(index, { ...map.get(index), [group === "cuts" ? "cut" : "card"]: event.theme });
@@ -112,7 +121,7 @@ export const Editor: React.FC<{ initial: Job }> = ({ initial }) => {
 
   const warnings = useMemo(() => {
     const list: string[] = [];
-    const main = items.filter((item) => item.group !== "backgrounds");
+    const main = items.filter((item) => item.group === "cuts" || item.group === "cards");
     for (const item of items) {
       if (item.event.duration_frames < MINIMUM[item.group]) {
         list.push(`${NAMES[item.group]} «${item.event.label}» dura ${item.event.duration_frames} frames; menos de ${MINIMUM[item.group]} se lee con dificultad.`);
@@ -228,7 +237,7 @@ export const Editor: React.FC<{ initial: Job }> = ({ initial }) => {
   // Mover y redimensionar actúan en vivo sobre el último plan, sin registrar cada paso.
   const live = (group: Group, eventId: string, build: (event: AnyEvent) => AnyEvent) => {
     const current = planRef.current;
-    setPlan({ ...current, [group]: (current[group] as AnyEvent[]).map((event) => (event.id === eventId ? build(event) : event)) });
+    setPlan({ ...current, [group]: listOf(current, group).map((event) => (event.id === eventId ? build(event) : event)) });
     setDirty(true);
   };
   const moveBlock = (group: Group, eventId: string, newStart: number) =>
@@ -250,9 +259,9 @@ export const Editor: React.FC<{ initial: Job }> = ({ initial }) => {
       return resized;
     });
   const update = (group: Group, eventId: string, patch: Partial<AnyEvent>) =>
-    change({ ...plan, [group]: (plan[group] as AnyEvent[]).map((event) => (event.id === eventId ? { ...event, ...patch } : event)) });
+    change({ ...plan, [group]: listOf(plan, group).map((event) => (event.id === eventId ? { ...event, ...patch } : event)) });
   const remove = (group: Group, eventId: string) => {
-    change({ ...plan, [group]: (plan[group] as AnyEvent[]).filter((event) => event.id !== eventId) });
+    change({ ...plan, [group]: listOf(plan, group).filter((event) => event.id !== eventId) });
     if (selected === eventId) setSelected(null);
   };
 
@@ -283,6 +292,23 @@ export const Editor: React.FC<{ initial: Job }> = ({ initial }) => {
     if (!extend) seek(words[index].frame);
   };
 
+  // Marca o desmarca las palabras elegidas para el estilo «palabra clave».
+  const toggleEmphasis = () => {
+    if (!selection) return;
+    const ids = words.slice(selection[0], selection[1] + 1).map((word) => word.id);
+    const current = new Set(plan.emphasis_word_ids ?? []);
+    const next = new Set(current);
+    if (ids.every((id) => current.has(id))) ids.forEach((id) => next.delete(id));
+    else {
+      ids.forEach((id) => next.add(id));
+      // Una adición que pase del límite se rechaza entera: el plan no cambia.
+      if (next.size > MAX_EMPHASIS) return setToast(`Puedes resaltar hasta ${MAX_EMPHASIS} palabras por video; quita algunas antes de agregar más.`);
+    }
+    const ordered = words.map((word) => word.id).filter((id) => next.has(id));
+    change({ ...plan, emphasis_word_ids: ordered });
+    setSelection(null);
+  };
+
   const add = (group: Group) => {
     if (!selection) return;
     const first = words[selection[0]];
@@ -296,6 +322,10 @@ export const Editor: React.FC<{ initial: Job }> = ({ initial }) => {
       offset_frames: 0,
       duration_frames: Math.max(1, last.until - first.frame),
     };
+    if (group === "zooms") {
+      const zoom: ZoomEvent = { id: base.id, anchor_word_id: base.anchor_word_id, offset_frames: 0, duration_frames: base.duration_frames, scale: 1.2 };
+      change({ ...plan, zooms: [...(plan.zooms ?? []), zoom] });
+    }
     if (group === "cuts") change({ ...plan, cuts: [...plan.cuts, { ...base, style: "paper", last_word_id: last.id }] });
     if (group === "backgrounds") change({ ...plan, backgrounds: [...plan.backgrounds, { ...base, motif: "network" }] });
     if (group === "cards") {
@@ -346,6 +376,7 @@ export const Editor: React.FC<{ initial: Job }> = ({ initial }) => {
   const brandMarks = (brand ? { "--base": brand, ...(plan.preferences?.context_colors ? {} : { "--health": brand, "--stress": brand }) } : undefined) as React.CSSProperties | undefined;
   const outdated = profile !== null && JSON.stringify(profile) !== JSON.stringify(plan.preferences ?? null);
   const running = status.state === "running";
+  const emphasized = useMemo(() => new Set(plan.emphasis_word_ids ?? []), [plan.emphasis_word_ids]);
   const quote = selection ? words.slice(selection[0], selection[1] + 1).map((word) => word.text).join(" ") : null;
 
   return (
@@ -390,6 +421,8 @@ export const Editor: React.FC<{ initial: Job }> = ({ initial }) => {
                 <button className="button" onClick={() => add("cuts")}>＋ Corte de color</button>
                 <button className="button" onClick={() => add("cards")} disabled={!media.person} title={media.person ? "" : "Este video no tiene recorte de la persona"}>＋ Tarjeta</button>
                 <button className="button" onClick={() => add("backgrounds")} disabled={!media.person}>＋ Fondo</button>
+                <button className="button" onClick={() => add("zooms")}>＋ Zoom</button>
+                <button className="button" onClick={toggleEmphasis} title="Para el estilo de subtítulos «palabra clave»">★ Resaltar</button>
                 <button className="button ghost" onClick={() => setSelection(null)}>Cancelar</button>
               </>
             ) : (
@@ -407,7 +440,7 @@ export const Editor: React.FC<{ initial: Job }> = ({ initial }) => {
                 {words.map((word, index) => {
                   if (word.clip !== clipIndex) return null;
                   const mark = marks.get(index);
-                  const classes = ["word", index === nowIndex && "now", selection && index >= selection[0] && index <= selection[1] && "selected", mark?.cut && "cut", mark?.card && "card"].filter(Boolean).join(" ");
+                  const classes = ["word", index === nowIndex && "now", selection && index >= selection[0] && index <= selection[1] && "selected", mark?.cut && "cut", mark?.card && "card", emphasized.has(word.id) && "emph"].filter(Boolean).join(" ");
                   return (
                     <span key={word.id}>
                       <span className={classes} style={mark ? ({ "--mark": `var(--${mark.cut ?? mark.card})` } as React.CSSProperties) : undefined} onClick={(event) => pick(index, event.shiftKey)}>
@@ -438,11 +471,21 @@ export const Editor: React.FC<{ initial: Job }> = ({ initial }) => {
           {(plan.preferences || outdated) && (
             <div className="style-box">
               {plan.preferences ? (
-                <span className="grow"><i className="dot-color" style={{ background: plan.preferences.brand_color }} /> Estilo de este video: {VIBE_NAMES[plan.preferences.vibe]} · sonido {SFX_NAMES[plan.preferences.sfx]}</span>
+                <span className="grow"><i className="dot-color" style={{ background: plan.preferences.brand_color }} /> Estilo de este video: {VIBE_NAMES[plan.preferences.vibe]} · {CAPTION_NAMES[plan.preferences.captions ?? "pink"]} · sonido {SFX_NAMES[plan.preferences.sfx]}</span>
               ) : <span className="grow muted">Este video usa el estilo Pink de origen.</span>}
               {outdated && <button className="button" onClick={() => change({ ...plan, preferences: profile! })}>Usar mi estilo actual</button>}
             </div>
           )}
+          <div className="style-box">
+            <span className="grow">Ritmo: {(plan.zooms ?? []).length} zooms</span>
+            <button className="button" title="Reemplaza los zooms por unos automáticos según tu estilo de edición" onClick={() => change({ ...plan, zooms: autoZooms(timeline, plan, plan.preferences?.vibe ?? "dynamic") })}>Zooms automáticos</button>
+            <label>Transición entre tomas{" "}
+              <select className="button" value={plan.take_transition ?? "none"} onChange={(event) => change({ ...plan, take_transition: event.target.value as TakeTransition })}>
+                {Object.entries(TRANSITIONS).map(([key, label]) => <option key={key} value={key}>{label}</option>)}
+              </select>
+            </label>
+            {timeline.clips.every((clip) => !clip.head) && <span className="muted">Este video no tiene recorte de la persona: los zooms no se aplican.</span>}
+          </div>
           {warnings.length > 0 && (
             <div className="warnings">
               <b>Avisos de las guías de edición</b>
@@ -479,6 +522,13 @@ export const Editor: React.FC<{ initial: Job }> = ({ initial }) => {
                     <input maxLength={12} value={(event as CardEvent).text ?? ""} placeholder="200" onChange={(change) => update(group, event.id, { text: change.target.value })} />
                   </label>
                 )}
+                {group === "zooms" && (
+                  <label>Escala
+                    <select value={(event as ZoomEvent).scale} onChange={(change) => update(group, event.id, { scale: Number(change.target.value) } as Partial<AnyEvent>)}>
+                      {ZOOM_SCALES.map((scale) => <option key={scale} value={scale}>×{scale}</option>)}
+                    </select>
+                  </label>
+                )}
                 {group === "backgrounds" && (
                   <label>Motivo
                     <select value={(event as BackgroundEvent).motif} onChange={(change) => update(group, event.id, { motif: change.target.value })}>
@@ -486,11 +536,11 @@ export const Editor: React.FC<{ initial: Job }> = ({ initial }) => {
                     </select>
                   </label>
                 )}
-                <label>Color
+                {group !== "zooms" && <label>Color
                   <select value={event.theme} onChange={(change) => update(group, event.id, { theme: change.target.value })}>
                     {Object.entries(THEMES).map(([key, label]) => <option key={key} value={key}>{label}</option>)}
                   </select>
-                </label>
+                </label>}
                 <label>Duración (frames)
                   <input type="number" min={1} value={event.duration_frames} onChange={(change) => update(group, event.id, { duration_frames: Math.max(1, Math.round(Number(change.target.value)) || 1) })} />
                 </label>

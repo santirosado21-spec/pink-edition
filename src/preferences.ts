@@ -5,6 +5,9 @@ import type { Style, Theme } from "./edit";
 export const VIBES = ["clean", "balanced", "dynamic"] as const;
 export const GRAPHICS = ["many", "few", "none"] as const;
 export const SFX = ["full", "soft", "none"] as const;
+// Estilo de subtítulos: «pink» es el de la casa; los otros dos son opcionales.
+export const CAPTION_PRESETS = ["pink", "keyword", "karaoke"] as const;
+export type CaptionPreset = (typeof CAPTION_PRESETS)[number];
 export type Preferences = {
   topic: string;
   vibe: (typeof VIBES)[number];
@@ -13,6 +16,8 @@ export type Preferences = {
   context_colors: boolean;
   sfx: (typeof SFX)[number];
   notes: string;
+  // Opcional: los perfiles anteriores no lo tienen y siguen siendo válidos.
+  captions?: CaptionPreset;
 };
 
 // Los valores por defecto reproducen el look de la casa: sin preferencias nada cambia.
@@ -35,7 +40,7 @@ export const checkPreferences = (value: unknown): string[] => {
   if (typeof value !== "object" || value === null || Array.isArray(value)) return ["Las preferencias no son válidas."];
   const prefs = value as Record<string, unknown>;
   const errors: string[] = [];
-  const unknown = Object.keys(prefs).filter((key) => !(key in DEFAULT_PREFERENCES));
+  const unknown = Object.keys(prefs).filter((key) => !(key in DEFAULT_PREFERENCES) && key !== "captions");
   if (unknown.length > 0) errors.push(`Preferencias desconocidas: ${unknown.join(", ")}.`);
   if (typeof prefs.topic !== "string" || prefs.topic.length > MAX_TOPIC) errors.push(`El tema admite hasta ${MAX_TOPIC} caracteres.`);
   if (typeof prefs.notes !== "string" || prefs.notes.length > MAX_NOTES) errors.push(`La nota admite hasta ${MAX_NOTES} caracteres.`);
@@ -44,6 +49,7 @@ export const checkPreferences = (value: unknown): string[] => {
   if (!SFX.includes(prefs.sfx as Preferences["sfx"])) errors.push("Preferencia de sonido desconocida.");
   if (typeof prefs.brand_color !== "string" || !HEX.test(prefs.brand_color)) errors.push("El color de marca debe ser un hexadecimal como #1f5fc4.");
   if (typeof prefs.context_colors !== "boolean") errors.push("Falta indicar si el color cambia con el tema.");
+  if (prefs.captions !== undefined && !CAPTION_PRESETS.includes(prefs.captions as CaptionPreset)) errors.push("Estilo de subtítulos desconocido.");
   return errors;
 };
 

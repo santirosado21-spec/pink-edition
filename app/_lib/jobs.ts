@@ -6,6 +6,7 @@ import schemaJson from "../../schema/edit-plan.schema.json";
 import styleJson from "../../style/pink-demo-v1.json";
 import type { Plan, Style, Timeline } from "../../src/edit";
 import { checkPreferences } from "../../src/preferences";
+import { TAKE_TRANSITIONS, ZOOM_SCALE } from "../../src/zooms";
 
 // La web corre en la misma máquina que el motor: lee y escribe `work/<id>/`.
 // Los comentarios evitan que el compilador rastree las carpetas del motor (work/, .venv/…)
@@ -92,8 +93,22 @@ export const listJobs = async (): Promise<JobSummary[]> => {
   return jobs.sort((a, b) => b.status.updated_at - a.status.updated_at);
 };
 
+// Los videos analizados antes de los zooms no tienen la cabeza por toma: se mide una vez
+// y se guarda, para que la vista previa y el render encuadren igual.
+const backfillHeads = async (id: string, timeline: Timeline) => {
+  const person = join(MEDIA, id, "person.webm");
+  if (timeline.clips.every((clip) => "head" in clip) || !existsSync(person)) return timeline;
+  try {
+    await run(at(".venv/bin/python"), ["scripts/heads.py", "--timeline", join(dir(id), "timeline.json"), "--person", person], { cwd: ROOT });
+    return (await readJson<Timeline>(join(dir(id), "timeline.json"))) ?? timeline;
+  } catch {
+    return timeline;
+  }
+};
+
 export const readJob = async (id: string): Promise<Job | null> => {
-  const timeline = await readJson<Timeline>(join(dir(id), "timeline.json"));
+  const stored = await readJson<Timeline>(join(dir(id), "timeline.json"));
+  const timeline = stored && ENGINE_HERE ? await backfillHeads(id, stored) : stored;
   const plan = await readJson<Plan>(join(dir(id), "plan.json"));
   if (!timeline || !plan) return null;
   let qc: string | null = null;
@@ -119,6 +134,7 @@ export const checkPlan = async (id: string, plan: Plan): Promise<string[]> => {
 };
 
 const MAX_EVENTS = 60;
+export const MAX_EMPHASIS = 40;
 type SchemaGroup = { items: { properties: Record<string, { enum?: string[] }> } };
 
 export const validatePlan = async (plan: Plan, timeline: Timeline): Promise<string[]> => {
@@ -137,7 +153,9 @@ export const validatePlan = async (plan: Plan, timeline: Timeline): Promise<stri
     if (!Array.isArray(plan[group])) return [`El plan no tiene la lista ${group}.`];
     if (plan[group].some((event) => typeof event !== "object" || event === null)) return [`La lista ${group} tiene un elemento que no es válido.`];
   }
-  if (plan.cuts.length + plan.cards.length + plan.backgrounds.length > MAX_EVENTS) return [`El plan tiene más de ${MAX_EVENTS} elementos.`];
+  if (plan.zooms !== undefined && (!Array.isArray(plan.zooms) || plan.zooms.some((event) => typeof event !== "object" || event === null))) return ["La lista de zooms no es válida."];
+  const zooms = plan.zooms ?? [];
+  if (plan.cuts.length + plan.cards.length + plan.backgrounds.length + zooms.length > MAX_EVENTS) return [`El plan tiene más de ${MAX_EVENTS} elementos.`];
   for (const group of ["cuts", "cards", "backgrounds"] as const) {
     for (const event of plan[group]) {
       const name = `${group}/${event.id}`;
@@ -165,6 +183,24 @@ export const validatePlan = async (plan: Plan, timeline: Timeline): Promise<stri
   }
   for (const background of plan.backgrounds) {
     if (!allowed("backgrounds", "motif").includes(background.motif)) errors.push(`backgrounds/${background.id}: motivo desconocido.`);
+  }
+  // Zooms: mismas reglas de anclaje y tiempo que los demás elementos, y escala acotada.
+  for (const zoom of zooms) {
+    const name = `zooms/${zoom.id}`;
+    if (typeof zoom.id !== "string" || !zoom.id || ids.has(zoom.id)) errors.push(`${name}: identificador vacío o repetido.`);
+    ids.add(zoom.id);
+    const anchor = frames.get(zoom.anchor_word_id);
+    if (anchor === undefined) errors.push(`${name}: la palabra de anclaje no existe.`);
+    if (!Number.isInteger(zoom.duration_frames) || zoom.duration_frames < 1 || zoom.duration_frames > total) errors.push(`${name}: duración inválida.`);
+    if (!Number.isInteger(zoom.offset_frames) || Math.abs(zoom.offset_frames) > total) errors.push(`${name}: desfase inválido.`);
+    else if (anchor !== undefined && (anchor + zoom.offset_frames < 0 || anchor + zoom.offset_frames >= total)) errors.push(`${name}: empieza fuera del video.`);
+    if (typeof zoom.scale !== "number" || !(zoom.scale >= ZOOM_SCALE.min && zoom.scale <= ZOOM_SCALE.max)) errors.push(`${name}: la escala va de ${ZOOM_SCALE.min} a ${ZOOM_SCALE.max}.`);
+  }
+  if (plan.take_transition !== undefined && !TAKE_TRANSITIONS.includes(plan.take_transition)) errors.push("Transición entre tomas desconocida.");
+  if (plan.emphasis_word_ids !== undefined) {
+    const emphasis = plan.emphasis_word_ids;
+    if (!Array.isArray(emphasis) || emphasis.length > MAX_EMPHASIS || new Set(emphasis).size !== emphasis.length) errors.push(`Las palabras resaltadas deben ser una lista sin repetidos de hasta ${MAX_EMPHASIS}.`);
+    else if (emphasis.some((id) => typeof id !== "string" || !frames.has(id))) errors.push("Una palabra resaltada no existe en el video.");
   }
   return errors;
 };

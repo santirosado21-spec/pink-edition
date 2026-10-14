@@ -10,7 +10,7 @@ import sys
 import time
 from pathlib import Path
 
-from plan_io import check_preferences, empty_plan, load_plan, save_plan
+from plan_io import check_plan, check_preferences, empty_plan, load_plan, save_plan, snapshot_heads
 
 PROJECT = Path(__file__).resolve().parents[1]
 SCRIPTS = PROJECT / "scripts"
@@ -131,15 +131,26 @@ def main(args, work, stage):
                 raise SystemExit("Preferencias de estilo inválidas: " + " ".join(problems))
         save_plan(plan_path, empty_plan(style["id"], preferences))
     stage("cut")
+    # La etapa de corte reescribe el timeline sin cabezas: se guardan antes para reutilizarlas.
+    previous_heads = work / "heads-previous.json"
+    snapshot_heads(timeline, previous_heads)
     run([ASR_PYTHON, SCRIPTS / "prepare_full_demo.py", "--source", source,
          "--transcript", transcript, "--timeline", timeline, "--out-dir", work,
          "--style", args.style, "--plan", plan_path,
          "--corrections", work / "corrections.json",
          "--word-prefix", f"{job}.word.", "--language", args.language, *downloads])
+    # Un plan con palabras que no existen no debe llegar al recorte ni al render.
+    problems = check_plan(load_plan(plan_path), json.loads(timeline.read_text(encoding="utf-8")))
+    if problems:
+        raise SystemExit("El plan no es válido: " + " ".join(problems[:3]))
     stage("matte")
     if not args.skip_matte and not person.exists():
         run([TOOLS_PYTHON, SCRIPTS / "make_matte.py", "--source", source,
              "--output", person])
+    if person.exists():
+        # Caja de la cabeza por toma: encuadra zooms y transiciones (y la vista previa).
+        run([TOOLS_PYTHON, SCRIPTS / "heads.py", "--timeline", timeline, "--person", person,
+             "--style", args.style, "--previous", previous_heads])
     stage("place")
     plan = load_plan(plan_path)
     if plan["cards"]:
