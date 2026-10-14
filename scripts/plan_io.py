@@ -66,11 +66,11 @@ def check_plan(plan, timeline):
     if len(events) > MAX_EVENTS or any(not isinstance(event, dict) for event in events):
         return [f"El plan tiene elementos inválidos o más de {MAX_EVENTS}."]
     errors = []
-    emphasis = plan.get("emphasis_word_ids")
-    if emphasis is not None:
-        if (not isinstance(emphasis, list) or len(emphasis) > MAX_EMPHASIS
-                or len(set(map(str, emphasis))) != len(emphasis)):
-            errors.append(f"emphasis_word_ids: lista sin repetidos de hasta {MAX_EMPHASIS}.")
+    if "emphasis_word_ids" in plan:
+        emphasis = plan["emphasis_word_ids"]
+        if (not isinstance(emphasis, list) or not all(isinstance(word, str) for word in emphasis)
+                or len(emphasis) > MAX_EMPHASIS or len(set(emphasis)) != len(emphasis)):
+            errors.append(f"emphasis_word_ids: lista de textos sin repetidos, hasta {MAX_EMPHASIS}.")
         elif any(word not in frames for word in emphasis):
             errors.append("emphasis_word_ids: una palabra no existe en el video.")
     for event in events:

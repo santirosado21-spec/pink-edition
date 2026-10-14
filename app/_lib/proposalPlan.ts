@@ -54,10 +54,12 @@ export const proposalToPlan = (proposal: Proposal, timeline: Timeline, current: 
     return { ...base(card, `card_${index + 1}`), kind: card.kind, top: 300, beat: { anchor_word_id: words[beat].id, offset_frames: 0 }, meaning: card.meaning, ...(card.kind === "counter" && card.text ? { text: card.text } : {}) };
   });
   const backgrounds: BackgroundEvent[] = proposal.backgrounds.filter(valid).slice(0, allowed.backgrounds).map((background, index) => ({ ...base(background, `background_${index + 1}`), motif: background.motif }));
-  // Palabras clave: sólo índices válidos, sin repetir, en orden del video.
-  const emphasis = [...new Set((proposal.emphasis_words ?? []).filter((index) => Number.isInteger(index) && index >= 0 && index < words.length))]
+  // Palabras clave: sólo índices válidos, sin repetir, en orden del video. Si la propuesta
+  // las trae, sustituyen a las del plan (aunque queden en cero); si no, se conservan.
+  if (proposal.emphasis_words === undefined) return { ...current, cuts, cards, backgrounds };
+  const emphasis = [...new Set(proposal.emphasis_words.filter((index) => Number.isInteger(index) && index >= 0 && index < words.length))]
     .sort((a, b) => a - b)
     .slice(0, 40)
     .map((index) => words[index].id);
-  return { ...current, cuts, cards, backgrounds, ...(emphasis.length > 0 ? { emphasis_word_ids: emphasis } : {}) };
+  return { ...current, cuts, cards, backgrounds, emphasis_word_ids: emphasis };
 };

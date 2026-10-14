@@ -40,8 +40,8 @@ EXAMPLES = [
     ("captions-keyword", CAPTIONS, set(), {"captions": "keyword"}, 0.8),
     ("captions-karaoke", CAPTIONS, set(), {"captions": "karaoke"}, 0.8),
 ]
-# Palabras marcadas en el ejemplo de «palabra clave»: las cuatro más largas del tramo.
-EMPHASIS = {"captions-keyword": 4}
+# Palabras marcadas en el ejemplo de «palabra clave»: dos con el peso de la frase.
+EMPHASIS = {"captions-keyword": ("ansiedad", "estrés")}
 
 
 def run(arguments, **options):
@@ -82,8 +82,9 @@ def main():
         if name in EMPHASIS:
             spoken = [word for clip in props["timeline"]["clips"] for word in clip["words"]
                       if first <= clip["timeline_in_frame"] + word["source_start_frame"] - clip["source_in_frame"] < last]
-            longest = sorted(spoken, key=lambda word: -len(word["text"].strip(".,;:¡!¿?")))[:EMPHASIS[name]]
-            variant["emphasis_word_ids"] = [word["id"] for word in spoken if word in longest]
+            chosen = [word for word in spoken if word["text"].strip(".,;:¡!¿?").lower() in EMPHASIS[name]]
+            assert len(chosen) == len(EMPHASIS[name]), f"{name}: no encontré {EMPHASIS[name]} en el tramo"
+            variant["emphasis_word_ids"] = [word["id"] for word in chosen]
         for group in ("cuts", "cards", "backgrounds"):
             variant[group] = [event for event in plan[group] if kept is ALL or event["id"] in kept]
         file = scratch / f"{name}.json"

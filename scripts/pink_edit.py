@@ -10,7 +10,7 @@ import sys
 import time
 from pathlib import Path
 
-from plan_io import check_preferences, empty_plan, load_plan, save_plan
+from plan_io import check_plan, check_preferences, empty_plan, load_plan, save_plan
 
 PROJECT = Path(__file__).resolve().parents[1]
 SCRIPTS = PROJECT / "scripts"
@@ -136,6 +136,10 @@ def main(args, work, stage):
          "--style", args.style, "--plan", plan_path,
          "--corrections", work / "corrections.json",
          "--word-prefix", f"{job}.word.", "--language", args.language, *downloads])
+    # Un plan con palabras que no existen no debe llegar al recorte ni al render.
+    problems = check_plan(load_plan(plan_path), json.loads(timeline.read_text(encoding="utf-8")))
+    if problems:
+        raise SystemExit("El plan no es válido: " + " ".join(problems[:3]))
     stage("matte")
     if not args.skip_matte and not person.exists():
         run([TOOLS_PYTHON, SCRIPTS / "make_matte.py", "--source", source,
