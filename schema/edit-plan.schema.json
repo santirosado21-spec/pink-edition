@@ -363,7 +363,25 @@
         "notes": {
           "type": "string",
           "maxLength": 300
+        },
+        "captions": {
+          "enum": [
+            "pink",
+            "keyword",
+            "karaoke"
+          ],
+          "description": "Estilo de subtítulos. Opcional: sin él, «pink» (el de la casa)."
         }
+      }
+    },
+    "emphasis_word_ids": {
+      "description": "Palabras que el estilo de subtítulos «keyword» resalta. Sin ellas, «keyword» resalta la palabra que suena.",
+      "type": "array",
+      "maxItems": 40,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
       }
     }
   },

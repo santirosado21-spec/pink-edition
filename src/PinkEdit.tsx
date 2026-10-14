@@ -14,16 +14,73 @@ import { EditorialGraphics } from "./EditorialGraphics";
 import { SoundDesign } from "./SoundDesign";
 import { EditContext, asset, buildEdit, useEdit, type CaptionPage, type EditProps } from "./edit";
 
+// Estilos «keyword» y «karaoke»: mismo tamaño, fuente y paginación que «pink»; sólo
+// cambian el color, la escala de la palabra resaltada y cuándo aparece cada palabra.
+const PresetCaptions: React.FC<{ page: CaptionPage; frame: number }> = ({ page, frame }) => {
+  const { style, captionPreset, emphasis, themeOf } = useEdit();
+  const settings = style.captions;
+  const accent = themeOf("base").accent;
+  const words = page.lines.flat();
+  const active = words.reduce<string | null>((found, word) => (word.source_start_frame <= frame ? word.id : found), null);
+  const ease = { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.bezier(0.22, 1, 0.36, 1) } as const;
+  return (
+    <div
+      style={{
+        position: "absolute",
+        top: settings.top,
+        left: (style.width - settings.max_width) / 2,
+        width: settings.max_width,
+        fontFamily: settings.font_family,
+        fontSize: settings.font_size,
+        fontWeight: settings.font_weight,
+        color: settings.color,
+        textShadow: settings.shadow,
+      }}
+    >
+      {page.lines.map((line, lineIndex) => (
+        <div
+          key={`${page.start_frame}-${lineIndex}`}
+          style={{ display: "flex", justifyContent: "center", alignItems: "baseline", height: settings.line_height, lineHeight: `${settings.line_height}px`, gap: settings.word_gap, whiteSpace: "nowrap" }}
+        >
+          {line.map((word) => {
+            const reveal = [word.source_start_frame, word.source_start_frame + settings.reveal_frames];
+            // keyword: con palabras marcadas se resaltan sólo ésas; sin marcas, la que suena.
+            const highlighted = captionPreset === "keyword" ? (emphasis.size > 0 ? emphasis.has(word.id) : word.id === active) : word.id === active;
+            const karaoke = captionPreset === "karaoke";
+            return (
+              <span
+                key={word.id}
+                style={{
+                  letterSpacing: `${settings.letter_spacing_em}em`,
+                  color: highlighted ? accent : settings.color,
+                  opacity: karaoke ? (word.source_start_frame <= frame ? 1 : 0.45) : interpolate(frame, reveal, [0, 1], ease),
+                  translate: karaoke ? undefined : interpolate(frame, reveal, [`0px ${settings.lift_pixels}px`, "0px 0px"], ease),
+                  scale: !karaoke && highlighted ? "1.08" : undefined,
+                  transformOrigin: "50% 100%",
+                }}
+              >
+                {word.text}
+              </span>
+            );
+          })}
+        </div>
+      ))}
+    </div>
+  );
+};
+
 const FullCaptions: React.FC<{ pages: CaptionPage[] }> = ({ pages }) => {
   // El tiempo heredado del grupo corresponde al raw, junto con su video.
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
-  const { style } = useEdit();
+  const { style, captionPreset } = useEdit();
   const settings = style.captions;
   const page = pages.find(
     (candidate) => frame >= candidate.start_frame && frame < candidate.end_frame,
   );
   if (!page) return null;
+  // «pink» sigue exactamente el camino de siempre (resultado idéntico).
+  if (captionPreset !== "pink") return <PresetCaptions page={page} frame={frame} />;
 
   return (
     <div

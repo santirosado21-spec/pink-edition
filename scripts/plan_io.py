@@ -8,6 +8,8 @@ from pathlib import Path
 PREFERENCES = {"vibe": ("clean", "balanced", "dynamic"), "graphics": ("many", "few", "none"),
                "sfx": ("full", "soft", "none")}
 TEXTS = {"topic": 80, "notes": 300}
+CAPTION_PRESETS = ("pink", "keyword", "karaoke")
+MAX_EMPHASIS = 40
 
 
 def check_preferences(prefs):
@@ -15,7 +17,10 @@ def check_preferences(prefs):
     if not isinstance(prefs, dict):
         return ["Las preferencias no son válidas."]
     expected = {*PREFERENCES, *TEXTS, "brand_color", "context_colors"}
-    errors = [f"Preferencia desconocida o ausente: {name}." for name in sorted(set(prefs) ^ expected)]
+    # «captions» es opcional: los perfiles anteriores no lo tienen.
+    errors = [f"Preferencia desconocida o ausente: {name}." for name in sorted((set(prefs) - {"captions"}) ^ expected)]
+    if "captions" in prefs and prefs["captions"] not in CAPTION_PRESETS:
+        errors.append("captions: valor desconocido.")
     errors += [f"{name}: valor desconocido." for name, values in PREFERENCES.items()
                if prefs.get(name) not in values]
     errors += [f"{name}: texto demasiado largo." for name, limit in TEXTS.items()
@@ -61,6 +66,13 @@ def check_plan(plan, timeline):
     if len(events) > MAX_EVENTS or any(not isinstance(event, dict) for event in events):
         return [f"El plan tiene elementos inválidos o más de {MAX_EVENTS}."]
     errors = []
+    emphasis = plan.get("emphasis_word_ids")
+    if emphasis is not None:
+        if (not isinstance(emphasis, list) or len(emphasis) > MAX_EMPHASIS
+                or len(set(map(str, emphasis))) != len(emphasis)):
+            errors.append(f"emphasis_word_ids: lista sin repetidos de hasta {MAX_EMPHASIS}.")
+        elif any(word not in frames for word in emphasis):
+            errors.append("emphasis_word_ids: una palabra no existe en el video.")
     for event in events:
         name = event.get("id")
         duration, offset = event.get("duration_frames"), event.get("offset_frames")

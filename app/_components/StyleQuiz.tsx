@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { DEFAULT_PREFERENCES, MAX_NOTES, MAX_TOPIC, brandTheme, type Preferences } from "../../src/preferences";
+import { DEFAULT_PREFERENCES, MAX_NOTES, MAX_TOPIC, brandTheme, type CaptionPreset, type Preferences } from "../../src/preferences";
 
 // Mismos colores sugeridos que `PRESETS` en scripts/make_style_examples.py: cada uno tiene su clip.
 const PRESETS: [string, string][] = [["#1f5fc4", "Azul"], ["#e63b7a", "Rosa"], ["#19a974", "Verde"], ["#ff6b00", "Naranja"], ["#7c3aed", "Morado"], ["#ffd400", "Amarillo"]];
@@ -30,7 +30,12 @@ const CONTEXT: Choice<"on" | "off">[] = [
   { key: "on", title: "Que cambie con el tema", text: "Verde cuando hablas de salud, rojo en una alerta, y tu color en lo demás." },
   { key: "off", title: "Siempre mi color", text: "Todo el video usa el color de tu marca. El ejemplo lo muestra en azul." },
 ];
-const STEPS = ["Tu contenido", "Estilo de edición", "Gráficos", "Color", "Sonido", "Resumen"];
+const CAPTIONS: Choice<CaptionPreset>[] = [
+  { key: "pink", title: "Clásicos", text: "Tus palabras aparecen una a una, en blanco." },
+  { key: "keyword", title: "Palabra clave", text: "La palabra importante se resalta con el color de tu marca." },
+  { key: "karaoke", title: "Karaoke", text: "Ves la frase completa y se va encendiendo mientras hablas." },
+];
+const STEPS = ["Tu contenido", "Estilo de edición", "Subtítulos", "Gráficos", "Color", "Sonido", "Resumen"];
 const titleOf = <Key extends string>(choices: Choice<Key>[], key: Key) => choices.find((choice) => choice.key === key)?.title ?? key;
 
 // Un ejemplo es un clip real, editado por el motor con esa opción.
@@ -89,7 +94,7 @@ export const StyleQuiz: React.FC<{ initial: Preferences | null }> = ({ initial }
       {step === 0 && (
         <section>
           <h1>{initial ? "Tu estilo" : "Antes de editar, cuéntanos cómo te gustan tus videos."}</h1>
-          <p className="lead">Son seis preguntas, una sola vez. Con tus respuestas editamos cada video a tu gusto, y puedes cambiarlas cuando quieras.</p>
+          <p className="lead">Son siete preguntas, una sola vez. Con tus respuestas editamos cada video a tu gusto, y puedes cambiarlas cuando quieras.</p>
           <h2>¿De qué hablas en tus videos?</h2>
           <div className="topics">
             {TOPICS.map((topic) => (
@@ -112,13 +117,21 @@ export const StyleQuiz: React.FC<{ initial: Preferences | null }> = ({ initial }
 
       {step === 2 && (
         <section>
+          <h1>¿Cómo quieres tus subtítulos?</h1>
+          <p className="lead">La misma letra y el mismo tamaño; cambia cómo se destacan tus palabras.</p>
+          <Options choices={CAPTIONS} value={prefs.captions ?? "pink"} prefix="captions" onPick={(captions) => set({ captions })} />
+        </section>
+      )}
+
+      {step === 3 && (
+        <section>
           <h1>¿Te gustan los gráficos?</h1>
           <p className="lead">Las tarjetas aparecen detrás de ti, nunca encima, y los fondos cambian con lo que dices.</p>
           <Options choices={GRAPHICS} value={prefs.graphics} prefix="graphics" onPick={(graphics) => set({ graphics })} />
         </section>
       )}
 
-      {step === 3 && (
+      {step === 4 && (
         <section>
           <h1>¿Cuál es el color de tu marca?</h1>
           <p className="lead">Lo usamos en los gráficos, los fondos y las frases a pantalla completa.</p>
@@ -151,7 +164,7 @@ export const StyleQuiz: React.FC<{ initial: Preferences | null }> = ({ initial }
         </section>
       )}
 
-      {step === 4 && (
+      {step === 5 && (
         <section>
           <h1>¿Efectos de sonido?</h1>
           <p className="lead">Sube el volumen y reproduce cada ejemplo. No incluimos música: la agregas al publicar.</p>
@@ -159,7 +172,7 @@ export const StyleQuiz: React.FC<{ initial: Preferences | null }> = ({ initial }
         </section>
       )}
 
-      {step === 5 && (
+      {step === 6 && (
         <section>
           <h1>¿Algo más que debamos saber?</h1>
           <p className="lead">Opcional. Por ejemplo: «prefiero algo sobrio», «no uses rojo», «hablo rápido».</p>
@@ -170,6 +183,7 @@ export const StyleQuiz: React.FC<{ initial: Preferences | null }> = ({ initial }
             <div><dt>Edición</dt><dd>{titleOf(VIBES, prefs.vibe)}</dd></div>
             <div><dt>Gráficos</dt><dd>{titleOf(GRAPHICS, prefs.graphics)}</dd></div>
             <div><dt>Color</dt><dd><i className="dot-color" style={{ background: prefs.brand_color }} />{preset?.[1] ?? prefs.brand_color.toUpperCase()} · {prefs.context_colors ? "cambia con el tema" : "siempre el tuyo"}</dd></div>
+            <div><dt>Subtítulos</dt><dd>{titleOf(CAPTIONS, prefs.captions ?? "pink")}</dd></div>
             <div><dt>Sonido</dt><dd>{titleOf(SOUNDS, prefs.sfx)}</dd></div>
           </dl>
           <p className="muted">El color y el sonido se aplican solos en cada video. El resto guía la propuesta de edición.</p>

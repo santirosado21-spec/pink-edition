@@ -10,7 +10,7 @@ eventos de PLAN anclados a palabras.
 | # | Prueba | Depende de | Estado |
 | --- | --- | --- | --- |
 | 1 | Primera edición automática con Style DNA | `ANTHROPIC_API_KEY` | Bloqueada: falta la clave |
-| 2 | Presets de subtítulos | — | Pendiente |
+| 2 | Presets de subtítulos | — | Construida; inspección de Codex en curso |
 | 3 | Zooms y transiciones con sonido | — | Pendiente |
 | 4 | Edición por transcripción | — | Pendiente |
 | 5 | Estilo desde un video de referencia | — (la visión con Claude necesita la clave) | Pendiente |
@@ -87,3 +87,25 @@ eventos de PLAN anclados a palabras.
 ## Registro de avance
 
 Esta sección se actualiza al cerrar cada prueba (fecha, pull request, resultado medido).
+
+### POC 2 · Presets de subtítulos — 14 de octubre de 2026
+
+- Plan revisado por Codex (GPT-6 Astra, esfuerzo alto) en 4 rondas: 4 hallazgos de
+  severidad media, todos aceptados. Alcance de «keyword», límite atómico de 40 en el
+  editor, QC de entrega completa y procedimiento de copia del trabajo de prueba.
+  Aprobado.
+- Construido por Claude: preferencia opcional `captions` (`pink`, `keyword`, `karaoke`),
+  `plan.emphasis_word_ids`, paso «Subtítulos» en el cuestionario con tres clips reales,
+  «★ Resaltar» en el editor, palabras clave en la propuesta automática.
+- Verificado:
+  - Piscina sin preset: 10 cuadros y 10 s de audio idénticos a la versión anterior.
+  - QC de entrega completa con `keyword` y con `karaoke`: pass, 158/158 palabras,
+    −14.01 LUFS.
+  - 13 pruebas de validación en Python y TypeScript.
+  - Casos del editor: 39→40, rechazo de 40→41, quitar en 40, rechazo de 51 y de
+    selecciones mixtas.
+  - Cuestionario a 1440 y 390 px sin animaciones.
+  - Build de producción.
+- Pendiente estético: con un color de marca oscuro (el azul por defecto) la palabra
+  resaltada contrasta menos sobre cielo claro; valorar usar la versión clara de la
+  paleta o un contorno.

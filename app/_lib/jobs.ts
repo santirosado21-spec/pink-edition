@@ -119,6 +119,7 @@ export const checkPlan = async (id: string, plan: Plan): Promise<string[]> => {
 };
 
 const MAX_EVENTS = 60;
+export const MAX_EMPHASIS = 40;
 type SchemaGroup = { items: { properties: Record<string, { enum?: string[] }> } };
 
 export const validatePlan = async (plan: Plan, timeline: Timeline): Promise<string[]> => {
@@ -165,6 +166,11 @@ export const validatePlan = async (plan: Plan, timeline: Timeline): Promise<stri
   }
   for (const background of plan.backgrounds) {
     if (!allowed("backgrounds", "motif").includes(background.motif)) errors.push(`backgrounds/${background.id}: motivo desconocido.`);
+  }
+  if (plan.emphasis_word_ids !== undefined) {
+    const emphasis = plan.emphasis_word_ids;
+    if (!Array.isArray(emphasis) || emphasis.length > MAX_EMPHASIS || new Set(emphasis).size !== emphasis.length) errors.push(`Las palabras resaltadas deben ser una lista sin repetidos de hasta ${MAX_EMPHASIS}.`);
+    else if (emphasis.some((id) => typeof id !== "string" || !frames.has(id))) errors.push("Una palabra resaltada no existe en el video.");
   }
   return errors;
 };

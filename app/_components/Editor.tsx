@@ -36,6 +36,9 @@ const MOTIFS: Record<string, string> = { network: "Red de puntos", rings: "Ondas
 const CUT_STYLES: Record<string, string> = { paper: "Papel (fondo claro)", solid: "Sólido (fondo de color)" };
 const VIBE_NAMES = { clean: "limpio", balanced: "equilibrado", dynamic: "dinámico" };
 const SFX_NAMES = { full: "completo", soft: "suave", none: "sin efectos" };
+const CAPTION_NAMES = { pink: "subtítulos clásicos", keyword: "palabra clave", karaoke: "karaoke" };
+// Mismo límite que valida el servidor (`MAX_EMPHASIS` en app/_lib/jobs.ts).
+const MAX_EMPHASIS = 40;
 const NAMES: Record<Group, string> = { cuts: "Corte de color", cards: "Tarjeta", backgrounds: "Fondo" };
 // Pisos propuestos en docs/EDITING_GUIDELINES.md; son avisos, no bloqueos.
 const MINIMUM: Record<Group, number> = { cuts: 25, cards: 43, backgrounds: 66 };
@@ -283,6 +286,23 @@ export const Editor: React.FC<{ initial: Job }> = ({ initial }) => {
     if (!extend) seek(words[index].frame);
   };
 
+  // Marca o desmarca las palabras elegidas para el estilo «palabra clave».
+  const toggleEmphasis = () => {
+    if (!selection) return;
+    const ids = words.slice(selection[0], selection[1] + 1).map((word) => word.id);
+    const current = new Set(plan.emphasis_word_ids ?? []);
+    const next = new Set(current);
+    if (ids.every((id) => current.has(id))) ids.forEach((id) => next.delete(id));
+    else {
+      ids.forEach((id) => next.add(id));
+      // Una adición que pase del límite se rechaza entera: el plan no cambia.
+      if (next.size > MAX_EMPHASIS) return setToast(`Puedes resaltar hasta ${MAX_EMPHASIS} palabras por video; quita algunas antes de agregar más.`);
+    }
+    const ordered = words.map((word) => word.id).filter((id) => next.has(id));
+    change({ ...plan, emphasis_word_ids: ordered });
+    setSelection(null);
+  };
+
   const add = (group: Group) => {
     if (!selection) return;
     const first = words[selection[0]];
@@ -346,6 +366,7 @@ export const Editor: React.FC<{ initial: Job }> = ({ initial }) => {
   const brandMarks = (brand ? { "--base": brand, ...(plan.preferences?.context_colors ? {} : { "--health": brand, "--stress": brand }) } : undefined) as React.CSSProperties | undefined;
   const outdated = profile !== null && JSON.stringify(profile) !== JSON.stringify(plan.preferences ?? null);
   const running = status.state === "running";
+  const emphasized = useMemo(() => new Set(plan.emphasis_word_ids ?? []), [plan.emphasis_word_ids]);
   const quote = selection ? words.slice(selection[0], selection[1] + 1).map((word) => word.text).join(" ") : null;
 
   return (
@@ -390,6 +411,7 @@ export const Editor: React.FC<{ initial: Job }> = ({ initial }) => {
                 <button className="button" onClick={() => add("cuts")}>＋ Corte de color</button>
                 <button className="button" onClick={() => add("cards")} disabled={!media.person} title={media.person ? "" : "Este video no tiene recorte de la persona"}>＋ Tarjeta</button>
                 <button className="button" onClick={() => add("backgrounds")} disabled={!media.person}>＋ Fondo</button>
+                <button className="button" onClick={toggleEmphasis} title="Para el estilo de subtítulos «palabra clave»">★ Resaltar</button>
                 <button className="button ghost" onClick={() => setSelection(null)}>Cancelar</button>
               </>
             ) : (
@@ -407,7 +429,7 @@ export const Editor: React.FC<{ initial: Job }> = ({ initial }) => {
                 {words.map((word, index) => {
                   if (word.clip !== clipIndex) return null;
                   const mark = marks.get(index);
-                  const classes = ["word", index === nowIndex && "now", selection && index >= selection[0] && index <= selection[1] && "selected", mark?.cut && "cut", mark?.card && "card"].filter(Boolean).join(" ");
+                  const classes = ["word", index === nowIndex && "now", selection && index >= selection[0] && index <= selection[1] && "selected", mark?.cut && "cut", mark?.card && "card", emphasized.has(word.id) && "emph"].filter(Boolean).join(" ");
                   return (
                     <span key={word.id}>
                       <span className={classes} style={mark ? ({ "--mark": `var(--${mark.cut ?? mark.card})` } as React.CSSProperties) : undefined} onClick={(event) => pick(index, event.shiftKey)}>
@@ -438,7 +460,7 @@ export const Editor: React.FC<{ initial: Job }> = ({ initial }) => {
           {(plan.preferences || outdated) && (
             <div className="style-box">
               {plan.preferences ? (
-                <span className="grow"><i className="dot-color" style={{ background: plan.preferences.brand_color }} /> Estilo de este video: {VIBE_NAMES[plan.preferences.vibe]} · sonido {SFX_NAMES[plan.preferences.sfx]}</span>
+                <span className="grow"><i className="dot-color" style={{ background: plan.preferences.brand_color }} /> Estilo de este video: {VIBE_NAMES[plan.preferences.vibe]} · {CAPTION_NAMES[plan.preferences.captions ?? "pink"]} · sonido {SFX_NAMES[plan.preferences.sfx]}</span>
               ) : <span className="grow muted">Este video usa el estilo Pink de origen.</span>}
               {outdated && <button className="button" onClick={() => change({ ...plan, preferences: profile! })}>Usar mi estilo actual</button>}
             </div>

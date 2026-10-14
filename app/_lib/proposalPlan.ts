@@ -10,6 +10,7 @@ export type Proposal = {
   cuts: (Range & { style: string })[];
   cards: (Range & { kind: string; beat_word: number; meaning: string; text?: string })[];
   backgrounds: (Range & { motif: string })[];
+  emphasis_words?: number[];
   notes: string;
 };
 export type FlatWord = { id: string; text: string; frame: number; clip: number; until: number };
@@ -53,5 +54,10 @@ export const proposalToPlan = (proposal: Proposal, timeline: Timeline, current: 
     return { ...base(card, `card_${index + 1}`), kind: card.kind, top: 300, beat: { anchor_word_id: words[beat].id, offset_frames: 0 }, meaning: card.meaning, ...(card.kind === "counter" && card.text ? { text: card.text } : {}) };
   });
   const backgrounds: BackgroundEvent[] = proposal.backgrounds.filter(valid).slice(0, allowed.backgrounds).map((background, index) => ({ ...base(background, `background_${index + 1}`), motif: background.motif }));
-  return { ...current, cuts, cards, backgrounds };
+  // Palabras clave: sólo índices válidos, sin repetir, en orden del video.
+  const emphasis = [...new Set((proposal.emphasis_words ?? []).filter((index) => Number.isInteger(index) && index >= 0 && index < words.length))]
+    .sort((a, b) => a - b)
+    .slice(0, 40)
+    .map((index) => words[index].id);
+  return { ...current, cuts, cards, backgrounds, ...(emphasis.length > 0 ? { emphasis_word_ids: emphasis } : {}) };
 };

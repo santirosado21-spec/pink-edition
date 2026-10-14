@@ -1,7 +1,7 @@
 import { createContext, useContext } from "react";
 import { staticFile } from "remotion";
 import styleJson from "../style/pink-demo-v1.json";
-import { applyPreferences, type Preferences } from "./preferences";
+import { applyPreferences, type CaptionPreset, type Preferences } from "./preferences";
 
 export type AlignedWord = {
   id: string;
@@ -43,6 +43,8 @@ export type Plan = {
   intro_blur?: Style["intro_blur"];
   // Gustos del creador (cuestionario de estilo), copiados al crear el video.
   preferences?: Preferences;
+  // Palabras que el estilo «keyword» resalta; sin ellas resalta la palabra activa.
+  emphasis_word_ids?: string[];
 };
 // Rutas dentro de `public/`: el video original y el recorte de la persona.
 export type EditMedia = { source: string; person: string | null };
@@ -75,6 +77,8 @@ export const buildEdit = ({ style: houseStyle, plan, timeline, media }: EditProp
     clips,
     isSample,
     sfx: plan.preferences?.sfx !== "none",
+    captionPreset: (plan.preferences?.captions ?? "pink") as CaptionPreset,
+    emphasis: new Set(plan.emphasis_word_ids ?? []),
     durationFrames: timeline.duration_frames,
     resolveFrame: (anchor: Anchor, id: string): number => {
       if (isSample) return anchor.sample_frame ?? 0;

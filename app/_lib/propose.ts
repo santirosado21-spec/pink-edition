@@ -81,6 +81,8 @@ export const proposePlan = async (id: string, timeline: Timeline, current: Plan)
     cuts: z.array(z.object({ ...range, style: z.enum(options("cuts", "style")) })),
     cards: z.array(z.object({ ...range, kind: z.enum(options("cards", "kind")), beat_word: z.number().int(), meaning: z.string(), text: z.string().max(12).optional() })),
     backgrounds: z.array(z.object({ ...range, motif: z.enum(options("backgrounds", "motif")) })),
+    // Palabras que el estilo de subtítulos «palabra clave» resalta.
+    emphasis_words: z.array(z.number().int()).max(12),
     notes: z.string(),
   });
 
@@ -106,7 +108,7 @@ export const proposePlan = async (id: string, timeline: Timeline, current: Plan)
     output_config: { effort: "high", format: zodOutputFormat(format) },
     messages: [{
       role: "user",
-      content: `Video «${id}», ${(timeline.duration_frames / fps).toFixed(1)} s. Cada palabra va precedida de su número.\n\n${takes.join("\n\n")}\n\n${catalog}\n\n${describePreferences(current.preferences)}\n\nPropón la edición. En "label" pon la frase elegida en minúsculas; en "beat_word", la palabra donde debe caer el énfasis de la tarjeta; en "meaning", qué ilustra la tarjeta y por qué corresponde a lo dicho; en "text" (sólo para counter), la cifra tal como se dijo.`,
+      content: `Video «${id}», ${(timeline.duration_frames / fps).toFixed(1)} s. Cada palabra va precedida de su número.\n\n${takes.join("\n\n")}\n\n${catalog}\n\n${describePreferences(current.preferences)}\n\nPropón la edición. En "emphasis_words" pon los números de hasta 12 palabras sueltas que cargan la idea central (una cifra dicha, un sustantivo clave); no marques artículos ni frases enteras. En "label" pon la frase elegida en minúsculas; en "beat_word", la palabra donde debe caer el énfasis de la tarjeta; en "meaning", qué ilustra la tarjeta y por qué corresponde a lo dicho; en "text" (sólo para counter), la cifra tal como se dijo.`,
     }],
   });
   if (response.stop_reason === "refusal") throw new Error("El modelo declinó proponer una edición para este video.");

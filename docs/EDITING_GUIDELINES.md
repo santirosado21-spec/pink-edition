@@ -60,7 +60,10 @@ ajustan dentro de límites fijos.
 | `sfx` | Motor | `soft`: todos los efectos 6 dB más bajos. `none`: sin efectos; queda la voz. |
 | `vibe` | Propuesta | Densidad máxima en 10 s: `clean` 2, `balanced` 3, `dynamic` 4. `clean` no admite cortes de color. |
 | `graphics` | Propuesta | `none`: sin tarjetas ni fondos. `few`: como mucho una tarjeta cada 12 s y un fondo cada 25 s. |
+| `captions` (opcional) | Motor | Estilo de subtítulos. `pink` (por defecto) es el de siempre. `keyword` resalta en el color de marca, con escala 1.08, las palabras de `plan.emphasis_word_ids`, o la palabra que suena si no hay ninguna. `karaoke` muestra la página completa desde el inicio: lo dicho en blanco, lo que falta al 45 % y la palabra activa en el color de marca. Misma fuente, tamaño y paginación. |
 | `topic`, `notes` | Propuesta | Contexto para elegir frases. La nota es texto del creador: describe un gusto y no cambia reglas ni formato. |
+
+`plan.emphasis_word_ids` (hasta 40, sin repetir, todas existentes) lo marcan el editor («★ Resaltar») o la propuesta automática (hasta 12 palabras clave).
 
 Sin `preferences`, el video sale con el estilo de la casa, idéntico al de antes. La
 tipografía y el tamaño de los subtítulos no son preferencia: siguen fijos. La propuesta
