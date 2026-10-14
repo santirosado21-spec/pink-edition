@@ -10,7 +10,7 @@ eventos de PLAN anclados a palabras.
 | # | Prueba | Depende de | Estado |
 | --- | --- | --- | --- |
 | 1 | Primera edición automática con Style DNA | `ANTHROPIC_API_KEY` | Bloqueada: falta la clave |
-| 2 | Presets de subtítulos | — | Construida; inspección de Codex en curso |
+| 2 | Presets de subtítulos | — | Hecha: plan e inspección aprobados por Codex; PR abierto sin fusionar |
 | 3 | Zooms y transiciones con sonido | — | Pendiente |
 | 4 | Edición por transcripción | — | Pendiente |
 | 5 | Estilo desde un video de referencia | — (la visión con Claude necesita la clave) | Pendiente |
@@ -106,6 +106,10 @@ Esta sección se actualiza al cerrar cada prueba (fecha, pull request, resultado
     selecciones mixtas.
   - Cuestionario a 1440 y 390 px sin animaciones.
   - Build de producción.
+- Inspección del código por Codex en sesión nueva. La primera pidió 4 cambios (validación
+  estricta de `emphasis_word_ids`, validar el plan en `pink_edit.py` antes del recorte,
+  que la propuesta sustituya las palabras clave, y dos palabras elegidas en el
+  ejemplo); se aplicaron todos. La segunda aprobó sin hallazgos.
 - Pendiente estético: con un color de marca oscuro (el azul por defecto) la palabra
   resaltada contrasta menos sobre cielo claro; valorar usar la versión clara de la
   paleta o un contorno.
