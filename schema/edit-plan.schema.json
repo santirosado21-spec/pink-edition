@@ -383,6 +383,54 @@
         "type": "string",
         "minLength": 1
       }
+    },
+    "zooms": {
+      "description": "Zooms tipo punch-in, anclados a una palabra. El encuadre (centro y escala segura) lo calcula el motor con la cabeza de cada toma del timeline.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "anchor_word_id",
+          "offset_frames",
+          "duration_frames",
+          "scale"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "anchor_word_id": {
+            "type": "string"
+          },
+          "offset_frames": {
+            "type": "integer"
+          },
+          "duration_frames": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "scale": {
+            "type": "number",
+            "minimum": 1.05,
+            "maximum": 1.35
+          },
+          "sample_frame": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    "take_transition": {
+      "enum": [
+        "none",
+        "punch",
+        "flash"
+      ],
+      "description": "Transición en cada cambio de toma. Sin el campo, ninguna."
     }
   },
   "required": [

@@ -231,6 +231,10 @@ def render(store, job, video, source):
     errors = check_plan(plan_row["config"], plan_row["timeline"])
     if errors:
         raise RuntimeError("El plan no es válido: " + " ".join(errors[:3]))
+    # El timeline guardado con esta versión del plan trae las cabezas con que se vio la
+    # vista previa: el motor las reutiliza en vez de medirlas otra vez en esta máquina.
+    (PROJECT / "work" / name).mkdir(parents=True, exist_ok=True)
+    (PROJECT / "work" / name / "timeline.json").write_text(json.dumps(plan_row["timeline"]))
     plan_file = PROJECT / "work" / "_cloud" / f"{plan_row['id']}.json"
     plan_file.parent.mkdir(parents=True, exist_ok=True)
     plan_file.write_text(json.dumps(plan_row["config"]))

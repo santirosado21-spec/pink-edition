@@ -11,7 +11,7 @@ eventos de PLAN anclados a palabras.
 | --- | --- | --- | --- |
 | 1 | Primera edición automática con Style DNA | `ANTHROPIC_API_KEY` | Bloqueada: falta la clave |
 | 2 | Presets de subtítulos | — | Hecha: plan e inspección aprobados por Codex; PR abierto sin fusionar |
-| 3 | Zooms y transiciones con sonido | — | Pendiente |
+| 3 | Zooms y transiciones con sonido | — | Construida; inspección de Codex en curso |
 | 4 | Edición por transcripción | — | Pendiente |
 | 5 | Estilo desde un video de referencia | — (la visión con Claude necesita la clave) | Pendiente |
 
@@ -113,3 +113,42 @@ Esta sección se actualiza al cerrar cada prueba (fecha, pull request, resultado
 - Pendiente estético: con un color de marca oscuro (el azul por defecto) la palabra
   resaltada contrasta menos sobre cielo claro; valorar usar la versión clara de la
   paleta o un contorno.
+
+### POC 3 · Zooms y transiciones — 14 de octubre de 2026
+
+- **Revisión del plan:** Codex en 4 rondas, con 6 hallazgos de severidad media, todos
+  aceptados: presupuesto de elementos, encuadre igual en nube y vista previa (la cabeza
+  por toma vive en el timeline), centros dentro del lienzo, política para no cortar la
+  cara, videos viejos sin datos de cabeza, y escala final con punch y desenfoque.
+  Aprobado.
+- **Construido:** `plan.zooms`, `plan.take_transition` (punch y destello),
+  `src/zooms.ts` (encuadre seguro y zooms automáticos) y `scripts/heads.py` (cabeza
+  por toma, reutilizada entre corridas y en el procesador). En el editor: carril
+  «Zooms», «Zooms automáticos», escala y transición.
+- **Verificado:**
+  - Piscina sin zooms: 10 cuadros y 10 s de audio idénticos.
+  - Render completo con 8 zooms automáticos y punch: QC pass (158/158 palabras,
+    −14.01 LUFS); la cara dentro del cuadro en 16 cuadros con zoom.
+  - Reutilización real de cabezas: una plantada distinta, una `null` y una toma
+    cambiada.
+  - Procesador con cola local: reutiliza las cabezas guardadas con el plan; QC pass.
+  - El editor rellena las cabezas de un video viejo al abrirlo.
+  - 18 pruebas de encuadre y zooms automáticos; validación en Python y en la web.
+  - Build de producción.
+- **Ritmo (criterio 8), no cumplido con la métrica acordada:**
+
+  | Render | Umbral 0.32 | Umbral 0.25 |
+  | --- | --- | --- |
+  | v9 sin zooms | 5.32 s | 5.3 s |
+  | Zooms 1.15 | 5.32 s | — |
+  | Zooms 1.25 | 5.32 s | — |
+  | Zooms 1.3 | 4.84 s | 3.13 s |
+  | Referencia | 2.2 s | 2.2 s |
+
+  El detector de FFmpeg puntúa la salida de un zoom en 0.29–0.31 y su entrada (3
+  frames) en 0.10–0.18, así que a 0.32 casi no los cuenta. Los zooms se ven en los
+  cuadros. Por eso la escala automática queda en 1.3. Si se quiere el ritmo de la
+  referencia, hace falta entrada instantánea o más zooms; es una decisión estética del
+  dueño (anotada en el README).
+- Limitación conocida: los clips muy cortos (≈10 s) siguen fallando el control de
+  volumen (−14.70 LUFS); no tiene que ver con los zooms.

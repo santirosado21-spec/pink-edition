@@ -13,6 +13,7 @@ import { ColorCuts } from "./ColorCuts";
 import { EditorialGraphics } from "./EditorialGraphics";
 import { SoundDesign } from "./SoundDesign";
 import { EditContext, asset, buildEdit, useEdit, type CaptionPage, type EditProps } from "./edit";
+import { frameTransform } from "./zooms";
 
 // Estilos «keyword» y «karaoke»: mismo tamaño, fuente y paginación que «pink»; sólo
 // cambian el color, la escala de la palabra resaltada y cuándo aparece cada palabra.
@@ -191,10 +192,24 @@ export const PinkEdit: React.FC<EditProps> = (props) => {
     extrapolateRight: "clamp",
     easing: Easing.bezier(0.22, 1, 0.36, 1),
   });
+  // Ritmo: zoom activo (sube en 3 frames y vuelve de golpe) y pulso de la transición de toma.
+  const take = clips.findIndex((clip) => frame >= clip.timeline_in_frame && frame < clip.timeline_in_frame + clip.duration_frames);
+  const zoom = (plan.zooms ?? []).reduce((current, event) => {
+    const start = edit.resolveFrame(event, event.id);
+    if (frame < start || frame >= start + event.duration_frames) return current;
+    return interpolate(frame, [start, start + 3], [1, event.scale], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  }, 1);
+  const takeStart = take > 0 ? clips[take].timeline_in_frame : -1;
+  const punch = plan.take_transition === "punch" && take > 0 && frame < takeStart + 8
+    ? interpolate(frame, [takeStart, takeStart + 8], [1.06, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.bezier(0.22, 1, 0.36, 1) })
+    : 1;
+  // Sin efecto, la imagen conserva exactamente la transformación de siempre.
+  const framed = frameTransform(take >= 0 ? clips[take].head : null, 1 + blur / 400, zoom, punch, style);
+  const flash = plan.take_transition === "flash" && take > 0 && frame < takeStart + 5 ? interpolate(frame, [takeStart, takeStart + 5], [0.55, 0]) : 0;
   return (
     <EditContext.Provider value={edit}>
       {/* El filtro sólo existe mientras desenfoca: después apagaría el vidrio de las tarjetas. */}
-      <div style={{ ...fill, filter: blur > 0 ? `blur(${blur}px)` : undefined, scale: String(1 + blur / 400) }}>
+      <div style={{ ...fill, filter: blur > 0 ? `blur(${blur}px)` : undefined, scale: String(framed ? framed.scale : 1 + blur / 400), transformOrigin: framed ? `${framed.originX}px ${framed.originY}px` : undefined }}>
         <ClipSeries
           label="Fondo"
           render={() =>
@@ -215,6 +230,7 @@ export const PinkEdit: React.FC<EditProps> = (props) => {
           />
         )}
       </div>
+      {flash > 0 ? <div style={{ ...fill, background: "#ffffff", opacity: flash }} /> : null}
       <ClipSeries
         label="Captions"
         render={(index) => (

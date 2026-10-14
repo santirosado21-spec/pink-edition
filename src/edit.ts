@@ -2,6 +2,7 @@ import { createContext, useContext } from "react";
 import { staticFile } from "remotion";
 import styleJson from "../style/pink-demo-v1.json";
 import { applyPreferences, type CaptionPreset, type Preferences } from "./preferences";
+import type { Head, TakeTransition, ZoomEvent } from "./zooms";
 
 export type AlignedWord = {
   id: string;
@@ -22,6 +23,8 @@ export type SpeechClip = {
   timeline_in_frame: number;
   words: AlignedWord[];
   pages: CaptionPage[];
+  // Caja de la cabeza en la toma (scripts/heads.py); encuadra zooms y transiciones.
+  head?: Head | null;
 };
 export type Timeline = { is_sample?: boolean; duration_frames: number; clips: SpeechClip[] };
 // El estilo es fijo por look; el plan son las decisiones de un video
@@ -45,6 +48,9 @@ export type Plan = {
   preferences?: Preferences;
   // Palabras que el estilo «keyword» resalta; sin ellas resalta la palabra activa.
   emphasis_word_ids?: string[];
+  // Ritmo: zooms tipo «punch-in» y transición en cada cambio de toma (opcionales).
+  zooms?: ZoomEvent[];
+  take_transition?: TakeTransition;
 };
 // Rutas dentro de `public/`: el video original y el recorte de la persona.
 export type EditMedia = { source: string; person: string | null };

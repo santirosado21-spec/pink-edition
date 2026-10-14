@@ -63,6 +63,14 @@ ajustan dentro de límites fijos.
 | `captions` (opcional) | Motor | Estilo de subtítulos. `pink` (por defecto) es el de siempre. `keyword` resalta en el color de marca, con escala 1.08, las palabras de `plan.emphasis_word_ids`, o la palabra que suena si no hay ninguna. `karaoke` muestra la página completa desde el inicio: lo dicho en blanco, lo que falta al 45 % y la palabra activa en el color de marca. Misma fuente, tamaño y paginación. |
 | `topic`, `notes` | Propuesta | Contexto para elegir frases. La nota es texto del creador: describe un gusto y no cambia reglas ni formato. |
 
+**Ritmo.** `plan.zooms` son zooms tipo «punch-in» anclados a palabra (escala 1.05–1.35;
+entran en 3 frames y vuelven de golpe). El motor los encuadra con la cabeza de cada toma
+(`timeline.clips[].head`, de `scripts/heads.py`): centro en la cabeza y escala reducida
+para dejarla a 40 px de los bordes; sin datos de cabeza no se aplican.
+`plan.take_transition` (`none`, `punch`, `flash`) marca cada cambio de toma. «Zooms
+automáticos» en el editor los genera frase sí, frase no, separados 2.5 s (dinámico) o
+5 s (equilibrado), sin pisar cortes de color ni tarjetas; el estilo limpio no lleva.
+
 `plan.emphasis_word_ids` (hasta 40, sin repetir, todas existentes) lo marcan el editor («★ Resaltar») o la propuesta automática (hasta 12 palabras clave).
 
 Sin `preferences`, el video sale con el estilo de la casa, idéntico al de antes. La

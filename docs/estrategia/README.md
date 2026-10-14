@@ -35,5 +35,10 @@ Detalle en [04-arquitectura.md](04-arquitectura.md); matriz en [05-matriz.md](05
    «… 2» de archivos que rompen el build.
 4. **Exportar un mismo video desde Submagic o CapCut** para pasar de lo que ellos dicen
    a lo que medimos.
-5. **REA en Codex:** correr `npx rea-agents setup` y elegir Codex. Úsalo sólo en
+5. **Intensidad de los zooms.** Los automáticos usan escala 1.3. Con la medición de
+   escenas de FFmpeg, nuestro ritmo pasa de un cambio cada 5.3 s a uno cada 3.1 s (umbral
+   0.25); la referencia que te gusta va a 2.2 s. Para acercarse más habría que hacer los
+   zooms instantáneos o más frecuentes. Mira un render y dime si los quieres más o menos
+   marcados (`docs/estrategia/06-pocs-y-plan.md`, POC 3).
+6. **REA en Codex:** correr `npx rea-agents setup` y elegir Codex. Úsalo sólo en
    software propio o autorizado.

@@ -9,6 +9,9 @@ PREFERENCES = {"vibe": ("clean", "balanced", "dynamic"), "graphics": ("many", "f
                "sfx": ("full", "soft", "none")}
 TEXTS = {"topic": 80, "notes": 300}
 CAPTION_PRESETS = ("pink", "keyword", "karaoke")
+# Mismos valores que src/zooms.ts.
+ZOOM_MIN, ZOOM_MAX = 1.05, 1.35
+TAKE_TRANSITIONS = ("none", "punch", "flash")
 MAX_EMPHASIS = 40
 
 
@@ -58,6 +61,8 @@ def check_plan(plan, timeline):
               - clip["source_in_frame"] for clip in timeline["clips"] for word in clip["words"]}
     groups = [plan.get(name) if isinstance(plan, dict) else None
               for name in ("cuts", "cards", "backgrounds")]
+    if isinstance(plan, dict) and "zooms" in plan:
+        groups.append(plan["zooms"])
     if any(not isinstance(group, list) for group in groups):
         return ["El plan no tiene las listas cuts, cards y backgrounds."]
     events = [event for group in groups for event in group]
@@ -66,6 +71,11 @@ def check_plan(plan, timeline):
     if len(events) > MAX_EVENTS or any(not isinstance(event, dict) for event in events):
         return [f"El plan tiene elementos inválidos o más de {MAX_EVENTS}."]
     errors = []
+    for zoom in plan.get("zooms") or []:
+        if type(zoom.get("scale")) not in (int, float) or not ZOOM_MIN <= zoom["scale"] <= ZOOM_MAX:
+            errors.append(f"{zoom.get('id')}: escala de zoom fuera de {ZOOM_MIN}–{ZOOM_MAX}.")
+    if "take_transition" in plan and plan["take_transition"] not in TAKE_TRANSITIONS:
+        errors.append("take_transition: valor desconocido.")
     if "emphasis_word_ids" in plan:
         emphasis = plan["emphasis_word_ids"]
         if (not isinstance(emphasis, list) or not all(isinstance(word, str) for word in emphasis)
@@ -83,6 +93,22 @@ def check_plan(plan, timeline):
               or not 1 <= duration <= total or not 0 <= anchor + offset < total):
             errors.append(f"{name}: duración o posición fuera del video.")
     return errors
+
+
+def head_key(clip):
+    """Identidad de una toma para reutilizar su cabeza: id, inicio y duración en el original."""
+    return f"{clip['id']}|{clip['source_in_frame']}|{clip['duration_frames']}"
+
+
+def snapshot_heads(timeline_path, output):
+    """Guarda las cabezas del timeline actual antes de que la etapa de corte lo reescriba."""
+    output = Path(output)
+    output.unlink(missing_ok=True)
+    if not Path(timeline_path).exists():
+        return
+    timeline = json.loads(Path(timeline_path).read_text(encoding="utf-8"))
+    heads = {head_key(clip): clip["head"] for clip in timeline["clips"] if "head" in clip}
+    output.write_text(json.dumps(heads, ensure_ascii=False), encoding="utf-8")
 
 
 def load_plan(path):
