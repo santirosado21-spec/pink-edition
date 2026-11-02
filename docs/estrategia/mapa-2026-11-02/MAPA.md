@@ -101,7 +101,7 @@ Nube y VPS, pagos, app con Capacitor, generación de video por IA y música. Nad
 |---|---|
 | W1 | Hecha. Codex construyó, Claude inspeccionó y pidió una ronda de correcciones: la review a ciegas se filtraba vía `status` y había un mensaje engañoso en `next`. Hay 7 pruebas y un gate «loop de evaluación». |
 | W2 | Hecha. Codex construyó y Claude inspeccionó. 6 pruebas, más una prueba real con Gemma que etiquetó bien el tema. |
-| W3 | En curso con Codex: `run --split/--preset/--dry-run`, brief leído de `src/intakePresets.ts` y holdout protegido. |
+| W3 | Hecha. Codex construyó y Claude inspeccionó. `run --split dev --preset explain [--dry-run]`; el brief sale de `src/intakePresets.ts` y el holdout exige `--holdout-cycle`. 12 pruebas. |
 | Push | Hay commits locales en `claude/plataforma-v2`. Están retenidos porque el repo de GitHub es **público** y el dueño debe decidir la visibilidad. |
 
 Pregunta abierta para el dueño: los presets del 28 de octubre llevan `musicMood`, y eso choca con la decisión del 10 de octubre de no poner música en el producto.
