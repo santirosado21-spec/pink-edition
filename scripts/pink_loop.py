@@ -27,6 +27,8 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 ROUNDS = pathlib.Path(os.environ.get('PINK_LOOP_ROUNDS', ROOT / 'work/fran-loop'))
 STATE = pathlib.Path(os.environ.get('PINK_LOOP_STATE', ROOT / 'work/pink-loop'))
 LEDGER = STATE / 'ledger.jsonl'
+RUNS = STATE / 'runs.jsonl'
+CORPUS = pathlib.Path(os.environ.get('PINK_CORPUS_DIR', ROOT / 'work/corpus'))
 PY = str(ROOT / '.venv/bin/python') if (ROOT / '.venv/bin/python').exists() else sys.executable
 
 GATES = [
@@ -347,8 +349,130 @@ def server_up(origin):
         return False
 
 
-def run(config_path, yes):
-    config = load(config_path)
+def load_jsonl(path, label):
+    """Lee un JSONL pequeño con diagnósticos que se puedan corregir."""
+    if not path.exists():
+        return []
+    rows = []
+    try:
+        with path.open(encoding='utf-8') as stream:
+            for number, line in enumerate(stream, 1):
+                if not line.strip():
+                    continue
+                value = json.loads(line)
+                if not isinstance(value, dict):
+                    raise ValueError('no es un objeto')
+                rows.append(value)
+    except (OSError, ValueError, json.JSONDecodeError) as error:
+        raise SystemExit(f'No puedo leer {label} ({path}): línea inválida o inaccesible ({error}).')
+    return rows
+
+
+def corpus_source(row, corpus):
+    """Devuelve un origen absoluto sin aceptar rutas que salgan del corpus."""
+    relative = row.get('file')
+    if not isinstance(relative, str) or not relative:
+        raise SystemExit('El manifiesto del corpus contiene un clip sin ruta de archivo válida.')
+    base = corpus.resolve()
+    source = (base / relative).resolve()
+    try:
+        source.relative_to(base)
+    except ValueError:
+        raise SystemExit('El manifiesto del corpus contiene una ruta fuera del corpus; se bloqueó la ronda.')
+    return source
+
+
+def preset_brief(preset, topic):
+    """Carga preferencias desde intakePresets.ts; Python no replica ese catálogo."""
+    helper = ROOT / 'scripts/preset_brief.mjs'
+    completed = subprocess.run(['node', str(helper), preset], cwd=ROOT, capture_output=True, text=True)
+    if completed.returncode:
+        detail = (completed.stderr or completed.stdout).strip()
+        raise SystemExit(f'No pude leer el preset {preset} desde TypeScript: {detail or "falló el helper Node"}.')
+    try:
+        selected = json.loads(completed.stdout)
+        preferences = selected['preferences']
+        if not isinstance(preferences, dict):
+            raise ValueError('preferences no es un objeto')
+        objective, audience, music_mood = selected['objective'], selected['audience'], selected['musicMood']
+        if not all(isinstance(value, str) for value in (objective, audience, music_mood)):
+            raise ValueError('campos de texto inválidos')
+    except (KeyError, TypeError, ValueError, json.JSONDecodeError) as error:
+        raise SystemExit(f'El helper de presets devolvió JSON inválido: {error}.')
+    if topic is not None:
+        if not isinstance(topic, str):
+            raise SystemExit('El manifiesto del corpus contiene un tema inválido.')
+        preferences = {**preferences, 'topic': topic}
+    # Estos valores son los del brief de inicio rápido de LocalIntake.tsx. Los
+    # demás (preferencias, música, objetivo y audiencia) vienen del helper TS.
+    return {
+        'version': 1,
+        'objective': objective,
+        'audience': audience,
+        'preferences': preferences,
+        'musicMood': music_mood,
+        'musicSource': 'licensed-library',
+        'brollSource': 'licensed-library',
+        'resourceNotes': '',
+        'confirmed': True,
+        'resourcePolicy': 'relevant-only',
+    }
+
+
+def build_corpus_config(split, preset, batch):
+    """Arma una ronda del corpus sin modificar el manifiesto ni sus originales."""
+    manifest = load_jsonl(CORPUS / 'manifest.jsonl', 'el manifiesto del corpus')
+    previous = load_jsonl(RUNS, 'el registro de rondas')
+    launched = {
+        entry.get('sha256') for entry in previous
+        if entry.get('preset') == preset and entry.get('state') == 'launched' and isinstance(entry.get('sha256'), str)
+    }
+    eligible = [row for row in manifest if row.get('split') == split and isinstance(row.get('sha256'), str)
+                and row['sha256'] not in launched]
+    eligible.sort(key=lambda row: str(row.get('addedAt', '')))
+    chosen = eligible[:batch]
+    if not chosen:
+        print(f'No quedan clips de {split} para el preset {preset}; no se lanzó ninguna ronda.')
+        return None
+
+    next_config = load(STATE / 'next-config.json', {}) if split == 'dev' else {}
+    feedback = next_config.get('feedback', '') if isinstance(next_config, dict) else ''
+    if not isinstance(feedback, str):
+        feedback = ''
+    videos = []
+    for row in chosen:
+        digest = row['sha256']
+        videos.append({
+            'title': f'Clip · {digest[:8]}',
+            'sources': [str(corpus_source(row, CORPUS))],
+            'brief': preset_brief(preset, row.get('topic')),
+            'split': split,
+            'preset': preset,
+            'corpusSha256': digest,
+        })
+    return {
+        # Sólo las pruebas usan PINK_LOOP_ORIGIN para poder arrancar un servidor
+        # temporal en un puerto libre; la ronda normal conserva este valor por defecto.
+        'origin': os.environ.get('PINK_LOOP_ORIGIN', 'http://localhost:3001'),
+        'timeoutSeconds': 3600,
+        'feedback': feedback,
+        'targetRawProjects': len(videos),
+        'videos': videos,
+    }
+
+
+def append_run_states(config, state, exit_code=None):
+    for video in config['videos']:
+        entry = {'sha256': video['corpusSha256'], 'preset': video['preset'], 'split': video['split'], 'state': state}
+        if exit_code is not None:
+            entry['exitCode'] = exit_code
+        STATE.mkdir(parents=True, exist_ok=True)
+        with RUNS.open('a', encoding='utf-8') as stream:
+            stream.write(json.dumps({'at': time.strftime('%Y-%m-%dT%H:%M:%S'), **entry}, ensure_ascii=False) + '\n')
+
+
+def execute_config(config_path, yes, corpus_config=None):
+    config = corpus_config if corpus_config is not None else load(config_path)
     if not config:
         raise SystemExit(f'No puedo leer {config_path}.')
     origin = config.get('origin', 'http://localhost:3001')
@@ -360,7 +484,41 @@ def run(config_path, yes):
         print(f'El servidor no responde en {origin}. Arráncalo (next start/dev en el puerto indicado) y repite.')
         return 2
     append({'event': 'run', 'config': str(config_path)})
-    return subprocess.run([PY, 'scripts/fran_loop.py', '--config', str(config_path)], cwd=ROOT).returncode
+    if corpus_config is not None:
+        append_run_states(config, 'launched')
+    fran = pathlib.Path(os.environ.get('PINK_LOOP_FRAN', ROOT / 'scripts/fran_loop.py'))
+    try:
+        exit_code = subprocess.run([PY, str(fran), '--config', str(config_path)], cwd=ROOT).returncode
+    except OSError as error:
+        print(f'No se pudo ejecutar fran_loop.py: {error}', file=sys.stderr)
+        exit_code = 127
+    if corpus_config is not None:
+        append_run_states(config, 'finished' if exit_code == 0 else 'failed', exit_code)
+    return exit_code
+
+
+def run(config_path, yes, split=None, preset='explain', batch=2, dry_run=False, holdout_cycle=False):
+    if split is None:
+        return execute_config(config_path, yes)
+    if split == 'holdout' and not holdout_cycle:
+        print('El split holdout exige --holdout-cycle; no se construyó ninguna ronda.', file=sys.stderr)
+        return 2
+    config = build_corpus_config(split, preset, batch)
+    if config is None:
+        return 0
+    generated = STATE / 'planned-config.json'
+    if dry_run:
+        save(generated, config)
+        print(f'Plan guardado: {generated}')
+        print(f"Resumen: {len(config['videos'])} clips · preset {preset} · split {split} · "
+              f"feedback trasladado: {'sí' if bool(config['feedback']) else 'no'}.")
+        return 0
+    if not yes:
+        print('`run` ejecuta el flujo real: Whisper y render locales, pero el texto y los fotogramas '
+              'seleccionados viajan a Sol (ChatGPT/Codex). Repite con --yes para autorizarlo.')
+        return 2
+    save(generated, config)
+    return execute_config(generated, yes, corpus_config=config)
 
 
 def loop():
@@ -399,7 +557,16 @@ def main():
     sub.add_parser('history')
     sub.add_parser('gates')
     runner = sub.add_parser('run')
-    runner.add_argument('--config', type=pathlib.Path, default=STATE / 'next-config.json')
+    source = runner.add_mutually_exclusive_group()
+    source.add_argument('--config', type=pathlib.Path, help='config existente; por defecto, next-config.json')
+    source.add_argument('--split', choices=('dev', 'holdout'), help='arma la ronda desde el corpus local')
+    runner.add_argument('--preset', choices=('clean', 'explain', 'impact'), default='explain',
+                        help='preset del cuestionario; por defecto explain')
+    runner.add_argument('--batch', type=int, choices=(1, 2), default=2,
+                        help='clips por ronda (1 o 2; por defecto 2)')
+    runner.add_argument('--holdout-cycle', action='store_true',
+                        help='confirma un ciclo explícito con clips reservados')
+    runner.add_argument('--dry-run', action='store_true', help='guarda la config planificada sin lanzar nada')
     runner.add_argument('--yes', action='store_true', help='autoriza el envío a Sol y el gasto de cómputo')
     sub.add_parser('loop')
     args = parser.parse_args()
@@ -415,7 +582,8 @@ def main():
     elif cmd == 'history':
         history()
     elif cmd == 'run':
-        sys.exit(run(args.config, args.yes))
+        config_path = args.config or STATE / 'next-config.json'
+        sys.exit(run(config_path, args.yes, args.split, args.preset, args.batch, args.dry_run, args.holdout_cycle))
     else:
         loop()
 
