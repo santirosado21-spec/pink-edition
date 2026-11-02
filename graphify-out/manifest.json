@@ -1337,12 +1337,6 @@
     "ast_hash": "014231d7bd6456931ff542253367264f",
     "semantic_hash": ""
   },
-  "supabase/.temp/linked-project.json": {
-    "mtime": 1792027952.5334826,
-    "seen": 1793148579.462952,
-    "ast_hash": "d61e1378ada5c14bcfe1a1860d960111",
-    "semantic_hash": ""
-  },
   "tsconfig.json": {
     "mtime": 1791811299.324261,
     "seen": 1793148579.4629529,
@@ -2064,9 +2058,9 @@
     "semantic_hash": ""
   },
   "scripts/pink_loop.py": {
-    "mtime": 1793651740.9446054,
-    "seen": 1793651758.7190259,
-    "ast_hash": "5870f831e837cfec33d3dc6e49914a07",
+    "mtime": 1793653190.3259256,
+    "seen": 1793653203.954633,
+    "ast_hash": "32c5896e7fa6fc7064903c7cfae9687b",
     "semantic_hash": ""
   },
   "scripts/test_director_controls.py": {
@@ -2175,6 +2169,30 @@
     "mtime": 1793150564.7166731,
     "seen": 1793651758.7215118,
     "ast_hash": "4a0a96a6e0cc6752a309cc61a3498949",
+    "semantic_hash": ""
+  },
+  "scripts/corpus_add.py": {
+    "mtime": 1793653190.3486958,
+    "seen": 1793653203.954389,
+    "ast_hash": "bf377646ed8fd2ebc38c64d4b6117e97",
+    "semantic_hash": ""
+  },
+  "scripts/test_corpus_add.py": {
+    "mtime": 1793653190.3489046,
+    "seen": 1793653203.954874,
+    "ast_hash": "f5ba2f779d25cc30149b12d05457c1c3",
+    "semantic_hash": ""
+  },
+  "scripts/test_pink_loop.py": {
+    "mtime": 1793653190.3260725,
+    "seen": 1793653203.955171,
+    "ast_hash": "1a4d5a7f3bd71756a97aa2c1aaa7c05a",
+    "semantic_hash": ""
+  },
+  "docs/estrategia/mapa-2026-11-02/MAPA.md": {
+    "mtime": 1793652613.527394,
+    "seen": 1793653203.956584,
+    "ast_hash": "327996533f0de0c258170a9fefca4e89",
     "semantic_hash": ""
   }
 }

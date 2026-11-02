@@ -1,87 +1,87 @@
 # Graph Report - motion  (2026-11-02)
 
 ## Corpus Check
-- 319 files · ~214,849 words
+- 322 files · ~219,109 words
 - Verdict: corpus is large enough that graph structure adds value.
-- Unclassified: 32 file(s) not represented in the graph (top: .ttf 14, (none) 5, .css 4)
+- Unclassified: 30 file(s) not represented in the graph (top: .ttf 14, (none) 4, .css 4)
 
 ## Summary
-- 2168 nodes · 4563 edges · 156 communities (126 shown, 30 thin omitted)
-- Extraction: 98% EXTRACTED · 2% INFERRED · 0% AMBIGUOUS · INFERRED: 80 edges (avg confidence: 0.9)
+- 2255 nodes · 4773 edges · 140 communities (115 shown, 25 thin omitted)
+- Extraction: 98% EXTRACTED · 2% INFERRED · 0% AMBIGUOUS · INFERRED: 84 edges (avg confidence: 0.9)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `271e604a`
+- Built from commit: `c564f359`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
-- supabaseServer
+- profile.ts
 - dependencies
 - contextualProposal.ts
-- json
+- pink_edit.py
 - 03 · Cómo resuelven CapCut, Submagic, Captions, Descript y OpusClip cinco problemas
 - properties
 - test_personalization_contract.mjs
 - prepare_full_demo.py
 - localUploadSession.ts
 - cards.tsx
-- remotion
-- cloud.ts
-- edit.ts
-- load_ts.mjs
+- package.json
 - jobs.ts
+- Editor.tsx
+- load_ts.mjs
+- zooms.ts
 - Plan de implementación pendiente: Cutkind
-- pathlib
+- corpus_add.py
 - Cloud
 - Motor con Sol y preferencias editoriales antes de editar
-- StyleQuiz.tsx
+- app/estilo/page.tsx
 - worker.py
 - verify
 - ref_node_assert
 - stockPhotos.ts
-- argparse
+- test_brand_catalog.py
 - properties
-- propose/route.ts
+- CorpusAddTests
 - app/page.tsx
-- one_shot_worker.py
-- ref_node_child_process
+- PinkLoopTests
+- test_local_export.mjs
 - subprocess
 - pink_loop.py
 - native_layout.py
-- test_editorial_render.mjs
+- ref_node_os
 - StylePlayground.tsx
 - OneShotVideo.tsx
-- ref_node_path
+- Pink Edition / Pink.ai
 - supabase/config.ts
-- fran_loop.py
+- json
 - compilerOptions
 - Preferences
-- FullDemo.tsx
-- ref_node_fs
+- edit.ts
+- test_pixabay_photos.mjs
 - Pink.ai: catálogo editorial de tarjetas
 - De los videos de la agencia de Fran a producción independiente del Mac
 - intro_blur
-- motif
 - properties
+- beat
 - items
 - Conseguir una edición real antes de ampliar la autonomía
 - Registro de implementación
-- PinkEdit
+- Pink.ai — análisis previo al desarrollo
 - properties
 - SolModelTests
 - test_contextual_proposal.mjs
 - compilerOptions
-- review_frames.py
+- test_intake_presets.mjs
 - test_caption_pages.mjs
 - PinkEdit.tsx
-- CatalogPreview.tsx
+- test_personalization_contract.py
 - Investigación: autonomía basada en el estilo del creador
-- unittest
+- one_shot_worker.py
 - test_personalization_browser.mjs
-- setup-local.mjs
+- ref_node_path
 - Brand
-- package.json
+- edit-plan.schema.json
 - Pink.ai: reglas de edición y contrato STYLE / PLAN
 - Umbral — estilo adicional 001
 - LocalIntake.tsx
@@ -94,7 +94,7 @@
 - Fidelidad a la personalización: primer incremento
 - StockRelevanceTest
 - Reglas para agentes y colaboradores
-- StyleQuestionnaire.tsx
+- editorFont
 - Cutkind: cuentas y pagos
 - Cutkind — identidad e interfaz
 - Evidencia de la investigación
@@ -103,7 +103,7 @@
 - Pink Edition
 - preferences.ts
 - test_style_selection.mjs
-- layout.tsx
+- test_editorial_step.mjs
 - Registro Claudex — autonomía personalizada
 - Paquetes propuestos, en orden
 - Requisitos de cierre incorporados tras revisión Opus 5.5
@@ -111,7 +111,7 @@
 - Revisión del plan de edición real
 - Primer incremento — versiones y exportación
 - Probar Pink.ai con otro video
-- editorFont
+- Catálogo y memoria de marca — prueba local
 - Propuesta de precios de Cutkind
 - CapCut y Canva: muestras estáticas para Cutkind
 - Landing de Pink.ai
@@ -124,7 +124,7 @@
 - Revisión del plan Fran → producción
 - Integración local — 20 octubre 2026
 - duration_frames
-- stripeClient
+- billing.ts
 - text
 - top
 - Despliegue web en Hostinger
@@ -139,34 +139,18 @@
 - INSPECCION.md
 - PRUEBAS.md
 - next.config.mjs
-- cuenta/page.tsx
-- Composition.tsx
-- scripts
+- make_style_examples.py
+- test_local_execution.mjs
+- test_photo_contract.mjs
 - test_brand_catalog.mjs
-- billing.ts
+- Corrección de dirección visual del loop de Fran
 - Prueba local con tarjetas e integración de modelos
-- test_one_shot_intake.mjs
+- test_commons_photos.mjs
 - test_static_style_samples.mjs
 - Recursos visuales: CapCut y Canva
-- devDependencies
-- graphic_kinds
+- label
 - Cuestionario rápido con decisiones ejecutables
-- preferences
-- last_word_id
-- scale
-- brand_color
-- brand_name
-- captions
-- notes
-- topic
-- vocabulary
 - CUESTIONARIO-CLAUDE-GRAFICOS-2026-10-27.md
-- emphasis_mode
-- font
-- graphics
-- sfx
-- support_media
-- transition
 
 ## God Nodes (most connected - your core abstractions)
 1. `react` - 29 edges
@@ -183,183 +167,179 @@
 ## Surprising Connections (you probably didn't know these)
 - `Compatibilidad de archivos` --references--> `readActiveEdit()`  [INFERRED]
   docs/implementacion/editor-autonomo-2026-10-20/AVANCE.md → app/_lib/planStore.ts
+- `Ollama conectado al editor — 19 de octubre de 2026` --references--> `evaluateProposal()`  [INFERRED]
+  docs/estrategia/edicion-real-2026-10-19/IMPLEMENTACION.md → app/_lib/proposalPlan.ts
 - `A. Perfil editorial versionado y compilador determinista (sin nuevos medios)` --references--> `feedback()`  [INFERRED]
   docs/estrategia/autonomia-2026-10-15/PLAN.md → scripts/media_intake.py
-- `Punto de partida comprobado` --references--> `analyze()`  [INFERRED]
-  docs/estrategia/piloto-fran-a-produccion-2026-10-19/PLAN.md → scripts/worker.py
-- `Hallazgos comprobados` --references--> `OneShotVideo()`  [INFERRED]
-  docs/implementacion/engine-sol-estilos-2026-10-26/ANALISIS.md → src/OneShotVideo.tsx
-- `Pipeline previsto` --references--> `PinkEdit()`  [INFERRED]
-  docs/EDITING_GUIDELINES.md → src/PinkEdit.tsx
+- `W2 · Codex + Gemma — ingreso al corpus` --references--> `inspect()`  [INFERRED]
+  docs/estrategia/mapa-2026-11-02/MAPA.md → scripts/media_intake.py
+- `OpenCut Classic` --references--> `history()`  [INFERRED]
+  docs/estrategia/autonomia-2026-10-15/INSPECCION-CODIGO-ABIERTO.md → scripts/pink_loop.py
 
 ## Import Cycles
 - None detected.
 
-## Communities (156 total, 30 thin omitted)
+## Communities (140 total, 25 thin omitted)
 
-### Community 0 - "supabaseServer"
-Cohesion: 0.20
-Nodes (19): dynamic, GET(), PUT(), POST(), billingUser(), readProfile(), saveProfile(), profileFile() (+11 more)
+### Community 0 - "profile.ts"
+Cohesion: 0.19
+Nodes (17): dynamic, GET(), PUT(), dynamic, Page(), ENGINE_HERE, readProfile(), saveProfile() (+9 more)
 
 ### Community 1 - "dependencies"
 Cohesion: 0.12
 Nodes (16): dependencies, @anthropic-ai/sdk, next, react, react-dom, remotion, @remotion/captions, @remotion/cli (+8 more)
 
 ### Community 2 - "contextualProposal.ts"
-Cohesion: 0.10
-Nodes (26): contextualFormat, exec, literalPhotoMoment(), locateQuote(), normalize(), PHOTO_INTENTS, photoQueries, proposeContextualPlan() (+18 more)
+Cohesion: 0.07
+Nodes (48): contextualFormat, exec, literalPhotoMoment(), locateQuote(), normalize(), PHOTO_INTENTS, photoQueries, proposeContextualPlan() (+40 more)
 
-### Community 3 - "json"
+### Community 3 - "pink_edit.py"
 Cohesion: 0.08
-Nodes (23): Base de datos, check_limits(), conform(), enter(), main(), parse(), probe(), render_output() (+15 more)
+Nodes (25): main(), measure(), main(), probe(), check_limits(), conform(), enter(), main() (+17 more)
 
 ### Community 4 - "03 · Cómo resuelven CapCut, Submagic, Captions, Descript y OpusClip cinco problemas"
 Cohesion: 0.04
 Nodes (39): 01 · Auditoría técnica de Pink.ai, 1. Qué hay hoy, 2. Cómo fluye un video, 3. Tiempos medidos, 4. Verificaciones de esta auditoría, 5. Riesgos y deuda, por prioridad, 6. Lo que hay que conservar, 02 · Mapa de dependencias y licencias (+31 more)
 
 ### Community 5 - "properties"
-Cohesion: 0.15
-Nodes (13): const, type, enum, enum, properties, catalog_version, context_colors, graphic_material (+5 more)
+Cohesion: 0.04
+Nodes (49): pattern, type, maxLength, type, description, enum, const, type (+41 more)
 
 ### Community 6 - "test_personalization_contract.mjs"
 Cohesion: 0.05
 Nodes (36): atomicDir, before, bg, blockedUpload, card, cases, { checkPreferences }, client (+28 more)
 
 ### Community 7 - "prepare_full_demo.py"
-Cohesion: 0.09
-Nodes (21): loudness(), main(), run(), font_style(), repaginate(), align_all_words(), caption_face(), caption_pages() (+13 more)
+Cohesion: 0.08
+Nodes (24): align_all_words(), caption_face(), caption_pages(), layout_tokens(), main(), normalize(), phrase_ranges(), repaginate() (+16 more)
 
 ### Community 8 - "localUploadSession.ts"
-Cohesion: 0.16
-Nodes (29): PUT(), run, runtime, GET(), runtime, DELETE(), POST(), runtime (+21 more)
+Cohesion: 0.15
+Nodes (30): PUT(), run, runtime, GET(), runtime, DELETE(), POST(), runtime (+22 more)
 
 ### Community 9 - "cards.tsx"
 Cohesion: 0.12
 Nodes (38): useTheme(), Alert(), BeforeAfter(), Bill(), Body(), Canvas(), CardProps, cards (+30 more)
 
-### Community 10 - "remotion"
-Cohesion: 0.30
-Nodes (19): remotion, styleLabSchema, DiagramScene(), Icon(), CalloutScene(), MosaicScene(), clamp, Footage() (+11 more)
-
-### Community 11 - "cloud.ts"
-Cohesion: 0.13
-Nodes (28): Context, GET(), Context, POST(), Context, dynamic, GET(), dynamic (+20 more)
-
-### Community 12 - "edit.ts"
+### Community 10 - "package.json"
 Cohesion: 0.05
-Nodes (56): CandidateReview(), AnyEvent, CAPTION_NAMES, clock(), CUT_STYLES, Editor(), Group, GROUPS (+48 more)
+Nodes (63): metadata, viewport, description, devDependencies, prettier, @types/node, @types/react, @types/web (+55 more)
+
+### Community 11 - "jobs.ts"
+Cohesion: 0.06
+Nodes (86): POST(), runtime, dynamic, GET(), runtime, Context, GET(), Context (+78 more)
+
+### Community 12 - "Editor.tsx"
+Cohesion: 0.07
+Nodes (31): CandidateReview(), AnyEvent, CAPTION_NAMES, clock(), CUT_STYLES, Editor(), Group, GROUPS (+23 more)
 
 ### Community 13 - "load_ts.mjs"
-Cohesion: 0.07
-Nodes (28): typescript, load, previousCwd, { editorAiFingerprint }, load, plan, { proposePlan }, response (+20 more)
+Cohesion: 0.08
+Nodes (22): load, previousCwd, { editorAiFingerprint }, load, plan, { proposePlan }, response, timeline (+14 more)
 
-### Community 14 - "jobs.ts"
-Cohesion: 0.14
-Nodes (29): POST(), Context, PUT(), cloudSavePlan(), run, withFaceSafety(), alive(), at() (+21 more)
+### Community 14 - "zooms.ts"
+Cohesion: 0.13
+Nodes (13): Measurement, pending, run, withFaceSafety(), autoZooms(), Head, Phrase, phraseStarts() (+5 more)
 
 ### Community 15 - "Plan de implementación pendiente: Cutkind"
 Cohesion: 0.06
-Nodes (31): Almacenamiento temporal: recepción implementada, ejecución/exportación pendientes, Ampliación: múltiples videos sin tope de peso, Cambio de contrato: primera edición completa, Cambios y comprobación de este turno, Flujo acordado, Mínimos de esta prueba, Prioridad revisada de implementación, Qwen: decisión basada en una prueba válida (+23 more)
+Nodes (32): Almacenamiento temporal: recepción implementada, ejecución/exportación pendientes, Ampliación: múltiples videos sin tope de peso, Cambio de contrato: primera edición completa, Cambios y comprobación de este turno, Flujo acordado, Mínimos de esta prueba, Prioridad revisada de implementación, Qwen: decisión basada en una prueba válida (+24 more)
 
-### Community 16 - "pathlib"
-Cohesion: 0.11
-Nodes (12): pcm(), pcm(), pcm(), main(), measure(), main(), probe(), prepare_sound_events() (+4 more)
+### Community 16 - "corpus_add.py"
+Cohesion: 0.17
+Nodes (15): add_clip(), append_manifest(), build_parser(), choose_split(), corpus_dir(), CorpusError, fraction_to_fps(), infer_topic() (+7 more)
 
 ### Community 18 - "Motor con Sol y preferencias editoriales antes de editar"
 Cohesion: 0.06
 Nodes (28): Arquitectura online propuesta, Cinco direcciones editoriales para la primera prueba, Contrato entre cuestionario, Sol y render, Criterios de aceptación, Experiencia previa a la edición, Hallazgos comprobados, Límites de este análisis, Motor con Sol y preferencias editoriales antes de editar (+20 more)
 
-### Community 19 - "StyleQuiz.tsx"
-Cohesion: 0.11
-Nodes (22): ProfileRecovery(), CAPTIONS, Choice, CONTEXT, GRAPHICS, Options(), PRESETS, SOUNDS (+14 more)
+### Community 19 - "app/estilo/page.tsx"
+Cohesion: 0.22
+Nodes (11): ProfileRecovery(), Options(), StyleQuiz(), titleOf(), DemoStyle(), metadata, dynamic, metadata (+3 more)
 
 ### Community 20 - "worker.py"
-Cohesion: 0.10
-Nodes (9): Base comprobada y supuestos, C1. Persistencia y contratos remotos, digest(), main(), fit(), main(), process(), shrink() (+1 more)
+Cohesion: 0.12
+Nodes (9): Base comprobada y supuestos, Base de datos, analyze(), fit(), main(), process(), render(), shrink() (+1 more)
+
+### Community 21 - "verify"
+Cohesion: 0.12
+Nodes (5): kept_intervals(), map_time(), Coverage, SpeechCuts, verify()
 
 ### Community 22 - "ref_node_assert"
 Cohesion: 0.10
-Nodes (15): catalog, {chromium}, require, captions, labels, {chromium}, require, [session,folder] (+7 more)
+Nodes (14): {chromium}, require, [session,folder], { chromium }, output, require, brief, {checkOneShotBrief} (+6 more)
 
 ### Community 23 - "stockPhotos.ts"
 Cohesion: 0.15
 Nodes (24): GET(), local(), POST(), runtime, COMMONS_CC0, commonsImageAllowed(), commonsPhoto(), Info (+16 more)
 
-### Community 24 - "argparse"
-Cohesion: 0.08
-Nodes (16): Catálogo y memoria de marca — prueba local, Colaboración y continuidad, Comprobaciones, Imagen y subtítulos, Opciones disponibles, main(), run(), voice_gain() (+8 more)
+### Community 24 - "test_brand_catalog.py"
+Cohesion: 0.09
+Nodes (15): loudness(), main(), run(), font_style(), repaginate(), check_preferences(), utf16_length(), BrandCatalogTests (+7 more)
 
 ### Community 25 - "properties"
 Cohesion: 0.07
-Nodes (28): additionalProperties, description, type, description, type, description, type, description (+20 more)
-
-### Community 26 - "propose/route.ts"
-Cohesion: 0.11
-Nodes (28): Context, GET(), POST(), EditorAiError, editorAiFingerprint(), EditorAiStatus, validatePlan(), validStockPhoto() (+20 more)
+Nodes (27): description, type, description, type, additionalProperties, description, required, type (+19 more)
 
 ### Community 27 - "app/page.tsx"
 Cohesion: 0.21
 Nodes (15): Chat(), MESSAGES, definedOrPending(), getPrimaryAction(), landingConfig, Plan, Heading(), PrimaryAction() (+7 more)
 
-### Community 28 - "one_shot_worker.py"
-Cohesion: 0.17
-Nodes (13): atomic(), clean(), command(), editorial_model(), find_stock(), get_json(), main(), music() (+5 more)
-
-### Community 29 - "ref_node_child_process"
-Cohesion: 0.14
-Nodes (8): brief, {DEFAULT_PREFERENCES}, dir, headers, {DEFAULT_PREFERENCES,catalog,checkPreferences}, {editorialFamilies}, load, {styleDemo,demoModes}
+### Community 29 - "test_local_export.mjs"
+Cohesion: 0.33
+Nodes (4): brief, {DEFAULT_PREFERENCES}, dir, headers
 
 ### Community 30 - "subprocess"
-Cohesion: 0.14
-Nodes (13): apply_feedback(), digest(), feedback(), inspect(), record_feedback(), reference_directions(), schema(), write() (+5 more)
+Cohesion: 0.09
+Nodes (18): pcm(), pcm(), pcm(), archive(), gallery(), main(), preflight(), request() (+10 more)
 
 ### Community 31 - "pink_loop.py"
-Cohesion: 0.22
-Nodes (15): append(), ask(), gates(), load(), loop(), main(), next_config(), pick_round() (+7 more)
+Cohesion: 0.10
+Nodes (35): Cada vuelta del loop, Dónde estamos, Fases y puertas de salida, Fuera de alcance por ahora, Mapa de trabajo: de «QC técnico en verde» a «lo publicarías», Métrica, Próximo paso, W1 · Codex — loop v2 (pequeña, la primera) (+27 more)
 
 ### Community 32 - "native_layout.py"
 Cohesion: 0.18
 Nodes (8): longest_safe_run(), overlay_top(), prepare_native_layout(), framing_for_faces(), interpolate_framing(), prepare_portrait_framing(), LayoutTest, FramingTests
 
-### Community 33 - "test_editorial_render.mjs"
-Cohesion: 0.15
-Nodes (11): [folder, origin], status(), statusQueue, write(), edit, evidence, [folder,origin='http://localhost:3001'], inputProps (+3 more)
+### Community 33 - "ref_node_os"
+Cohesion: 0.11
+Nodes (16): [folder, origin], status(), statusQueue, write(), edit, evidence, [folder,origin='http://localhost:3001'], inputProps (+8 more)
 
 ### Community 34 - "StylePlayground.tsx"
 Cohesion: 0.36
 Nodes (6): StylePlayground(), metadata, Page(), DEFAULT_PREFERENCES, keys, styleSelectionUrl()
 
 ### Community 35 - "OneShotVideo.tsx"
-Cohesion: 0.12
-Nodes (23): Causa y cambio, Corrección de dirección visual del loop de Fran, Prueba local, Rostro y recursos, @remotion/captions, captionIndex(), captionPage(), captionPhrasePage() (+15 more)
+Cohesion: 0.18
+Nodes (18): @remotion/captions, captionIndex(), captionPage(), captionPhrasePage(), hangingWords, token(), EditorialPanel(), editorMedia() (+10 more)
 
-### Community 36 - "ref_node_path"
-Cohesion: 0.19
-Nodes (19): runtime, dynamic, GET(), runtime, Candidate, CandidateSummary, createCandidate(), listCandidates() (+11 more)
+### Community 36 - "Pink Edition / Pink.ai"
+Cohesion: 0.25
+Nodes (7): Contrato de edición, Editar un video, Exportar y verificar, Instalar y abrir, Pink Edition / Pink.ai, Preparar la demo paso a paso, Web
 
 ### Community 37 - "supabase/config.ts"
-Cohesion: 0.22
-Nodes (11): dynamic, Page(), GET(), GET(), requireOnboarding(), profileDestination(), CLOUD, SUPABASE_KEY (+3 more)
+Cohesion: 0.27
+Nodes (7): GET(), GET(), profileDestination(), SUPABASE_KEY, SUPABASE_URL, next, @supabase/ssr
 
-### Community 38 - "fran_loop.py"
-Cohesion: 0.18
-Nodes (11): archive(), gallery(), main(), preflight(), request(), save(), sha256(), wait() (+3 more)
+### Community 38 - "json"
+Cohesion: 0.17
+Nodes (11): apply_feedback(), digest(), feedback(), inspect(), record_feedback(), reference_directions(), route(), schema() (+3 more)
 
 ### Community 39 - "compilerOptions"
 Cohesion: 0.10
 Nodes (19): compilerOptions, allowJs, esModuleInterop, forceConsistentCasingInFileNames, incremental, isolatedModules, jsx, lib (+11 more)
 
 ### Community 40 - "Preferences"
-Cohesion: 0.33
-Nodes (9): StaticStyleSample(), StylePreview(), editorialFamily(), EditBeat, FramingKey, Preferences, DemoMode, demoModes (+1 more)
+Cohesion: 0.41
+Nodes (7): StaticStyleSample(), editorialFamily(), editorialVariant(), Preferences, DemoMode, demoModes, styleDemo()
 
-### Community 41 - "FullDemo.tsx"
-Cohesion: 0.22
-Nodes (3): @remotion/player, EditProps, poolDefaults
+### Community 41 - "edit.ts"
+Cohesion: 0.09
+Nodes (18): Preview, CatalogPreview, @remotion/player, AlignedWord, Anchor, BackgroundEvent, CaptionPage, CardEvent (+10 more)
 
-### Community 42 - "ref_node_fs"
-Cohesion: 0.07
-Nodes (20): runtime, load, page, {searchPhotos, downloadPhoto}, {DEFAULT_PREFERENCES}, output, brief, {DEFAULT_PREFERENCES} (+12 more)
+### Community 42 - "test_pixabay_photos.mjs"
+Cohesion: 0.25
+Nodes (6): env, globals, item, load, {searchPhotos, downloadPhoto}, {stockProviderStatus}
 
 ### Community 43 - "Pink.ai: catálogo editorial de tarjetas"
 Cohesion: 0.11
@@ -373,17 +353,17 @@ Nodes (17): De los videos de la agencia de Fran a producción independiente del 
 Cohesion: 0.11
 Nodes (18): description, minimum, type, additionalProperties, description, properties, required, type (+10 more)
 
-### Community 46 - "motif"
-Cohesion: 0.40
-Nodes (5): description, enum, minLength, type, motif
+### Community 46 - "properties"
+Cohesion: 0.11
+Nodes (18): properties, description, minLength, type, description, minLength, type, description (+10 more)
 
-### Community 47 - "properties"
-Cohesion: 0.10
-Nodes (22): description, minLength, type, additionalProperties, description, properties, required, type (+14 more)
+### Community 47 - "beat"
+Cohesion: 0.12
+Nodes (17): description, minLength, type, additionalProperties, description, properties, required, type (+9 more)
 
 ### Community 48 - "items"
 Cohesion: 0.19
-Nodes (17): items, items, items, description, items, type, items, additionalProperties (+9 more)
+Nodes (17): description, items, type, items, items, description, items, type (+9 more)
 
 ### Community 49 - "Conseguir una edición real antes de ampliar la autonomía"
 Cohesion: 0.12
@@ -393,9 +373,9 @@ Nodes (15): 0. Prueba de conexión y diagnóstico visible, 1. Un video de refere
 Cohesion: 0.12
 Nodes (14): Correcciones tras inspección1, Implementación y pruebas del host, Inspección1 (sesión fresca), Inspección final 2 — cierre, Plan ronda2, Plan ronda3 aprobado, Plan, ronda 1, Registro de implementación (+6 more)
 
-### Community 51 - "PinkEdit"
-Cohesion: 0.09
-Nodes (24): Pink Edition / Pink.ai — instrucciones compartidas, 1. Que el motor edite cualquier video — hecho, 2. Propuesta editorial automática, 3. Catálogo de gráficos genéricos, 4. Editor, 5. Procesador, 6. Servidor (a cargo de Santiago), Acceso por invitación (modo nube) (+16 more)
+### Community 51 - "Pink.ai — análisis previo al desarrollo"
+Cohesion: 0.12
+Nodes (15): 1. Que el motor edite cualquier video — hecho, 2. Propuesta editorial automática, 3. Catálogo de gráficos genéricos, 4. Editor, 5. Procesador, 6. Servidor (a cargo de Santiago), Acceso por invitación (modo nube), Correcciones tras la revisión del 11 de octubre de 2026 (+7 more)
 
 ### Community 52 - "properties"
 Cohesion: 0.12
@@ -413,57 +393,53 @@ Nodes (12): {DEFAULT_PREFERENCES}, direction, env, fakePhoto, {flatWords}, load,
 Cohesion: 0.13
 Nodes (14): compilerOptions, esModuleInterop, forceConsistentCasingInFileNames, jsx, lib, module, moduleResolution, noEmit (+6 more)
 
-### Community 56 - "review_frames.py"
-Cohesion: 0.16
-Nodes (11): caption_at(), caption_warnings(), contact_sheets(), extract_reference(), key_frames(), main(), still(), resolve() (+3 more)
+### Community 56 - "test_intake_presets.mjs"
+Cohesion: 0.25
+Nodes (7): after, before, briefs, {checkOneShotBrief}, {INTAKE_PRESETS,quickPreferences,QUICK_OBJECTIVE,QUICK_AUDIENCE}, load, result
 
 ### Community 57 - "test_caption_pages.mjs"
 Cohesion: 0.29
 Nodes (6): captions, long, phraseCaptions, phraseSeen, seen, texts
 
 ### Community 58 - "PinkEdit.tsx"
-Cohesion: 0.22
-Nodes (15): @remotion/media, BackgroundEffects(), Motif(), ColorCuts(), Cut(), CaptionPage, useEdit(), ClipSeries() (+7 more)
-
-### Community 59 - "CatalogPreview.tsx"
-Cohesion: 0.22
-Nodes (10): Scene(), CatalogPreview, asset(), buildEdit(), EditContext, ThemeContext, EditorialGraphics(), cards (+2 more)
+Cohesion: 0.14
+Nodes (26): Scene(), Pink Edition / Pink.ai — instrucciones compartidas, Separación y migración, BackgroundEffects(), Motif(), ColorCuts(), Cut(), asset() (+18 more)
 
 ### Community 60 - "Investigación: autonomía basada en el estilo del creador"
 Cohesion: 0.15
 Nodes (13): Base de conocimiento propuesta, Cierre de revisión independiente, Conclusión, Diseño conceptual, Fuentes complementarias, Investigación: autonomía basada en el estilo del creador, Lo que cambió después de la revisión de Claude, Lo que puedo avanzar antes de las grabaciones (+5 more)
 
-### Community 61 - "unittest"
-Cohesion: 0.12
-Nodes (9): constrain_events(), director_input(), event_limits(), DirectorTest, ControlsTest, VisualPreferencesTest, allowed_event(), materialize_stills() (+1 more)
+### Community 61 - "one_shot_worker.py"
+Cohesion: 0.07
+Nodes (23): constrain_events(), director_input(), event_limits(), atomic(), clean(), command(), editorial_model(), find_stock() (+15 more)
 
 ### Community 62 - "test_personalization_browser.mjs"
 Cohesion: 0.17
 Nodes (8): card, initial, output, preferences, require, server, style, words
 
-### Community 63 - "setup-local.mjs"
-Cohesion: 0.17
-Nodes (9): folder, root, sounds, clips, full, lengths, preview, root (+1 more)
+### Community 63 - "ref_node_path"
+Cohesion: 0.12
+Nodes (12): folder, root, sounds, clips, full, lengths, preview, root (+4 more)
 
 ### Community 64 - "Brand"
 Cohesion: 0.17
-Nodes (18): Brand(), Home(), videoInfo(), InstallButton(), InstallEvent, statusLabel(), Theme, ThemePicker() (+10 more)
+Nodes (16): Brand(), Home(), videoInfo(), InstallButton(), InstallEvent, Theme, ThemePicker(), validTheme() (+8 more)
 
-### Community 65 - "package.json"
-Cohesion: 0.12
-Nodes (14): description, license, name, private, repository, version, @anthropic-ai/sdk, prettier (+6 more)
+### Community 65 - "edit-plan.schema.json"
+Cohesion: 0.29
+Nodes (6): additionalProperties, description, required, $schema, title, type
 
 ### Community 66 - "Pink.ai: reglas de edición y contrato STYLE / PLAN"
-Cohesion: 0.29
-Nodes (7): Capas y sonido, Límites y decisiones abiertas, Pink.ai: reglas de edición y contrato STYLE / PLAN, Pipeline previsto, Preferencias del creador, Reglas comprobables, Separación y migración
+Cohesion: 0.33
+Nodes (6): Capas y sonido, Límites y decisiones abiertas, Pink.ai: reglas de edición y contrato STYLE / PLAN, Pipeline previsto, Preferencias del creador, Reglas comprobables
 
 ### Community 67 - "Umbral — estilo adicional 001"
 Cohesion: 0.18
 Nodes (10): Análisis conjunto de los cuatro tutoriales, Biblioteca ampliada de referencias, Consejos de edición extraídos de la quinta referencia, Continuidad y fundamentos de captura — referencias sexta y séptima, Decisión de producto — 19 de octubre de 2026, Entrega, Recursos, Revisar localmente (+2 more)
 
 ### Community 68 - "LocalIntake.tsx"
-Cohesion: 0.21
-Nodes (13): LocalExecutionPanel(), LocalIntake(), moods, Readiness, react, INTAKE_PRESETS, QUICK_AUDIENCE, QUICK_OBJECTIVE (+5 more)
+Cohesion: 0.29
+Nodes (10): LocalExecutionPanel(), LocalIntake(), moods, Readiness, INTAKE_PRESETS, QUICK_AUDIENCE, QUICK_OBJECTIVE, quickPreferences() (+2 more)
 
 ### Community 69 - "Plan de autonomía personalizada — propuesta para revisión"
 Cohesion: 0.20
@@ -493,17 +469,17 @@ Nodes (7): Archivos localizados con Graphify y cobertura autorizada, Cierre de s
 Cohesion: 0.20
 Nodes (9): Clasificación de fuentes — 27 de octubre de 2026, Contrato de pruebas naturales — 27 de octubre de 2026, Cuestionario rápido — 28 de octubre de 2026, Cuestionario visual — decisión del usuario, 27 de octubre de 2026, Decisiones del usuario — 26 de octubre de 2026, Dirección editorial y variedad, Recursos elegidos en el cuestionario, Reglas para agentes y colaboradores (+1 more)
 
-### Community 78 - "StyleQuestionnaire.tsx"
-Cohesion: 0.20
-Nodes (10): EditorialFamilyPicker(), ResourceSampleKind, StyleQuestionnaire(), futureOptions, graphicOptions, mediaOptions, Option, textOptions (+2 more)
+### Community 78 - "editorFont"
+Cohesion: 0.16
+Nodes (18): EditorialFamilyPicker(), FontPicker(), descriptions, ResourceSample(), ResourceSampleKind, StylePreview(), StyleQuestionnaire(), futureOptions (+10 more)
 
 ### Community 79 - "Cutkind: cuentas y pagos"
 Cohesion: 0.29
 Nodes (6): Acceso temporal a la demo (15 de octubre de 2026), Antes de activar cobros, Cutkind: cuentas y pagos, Estado de esta entrega, Validación realizada, Variables
 
 ### Community 80 - "Cutkind — identidad e interfaz"
-Cohesion: 0.25
-Nodes (7): Cambios, Cutkind — identidad e interfaz, Dirección, Entrega y comprobaciones, Investigación de referencias, Retirada de la demo de Fran, Versión publicada
+Cohesion: 0.29
+Nodes (6): Cutkind — identidad e interfaz, Dirección, Entrega y comprobaciones, Investigación de referencias, Retirada de la demo de Fran, Versión publicada
 
 ### Community 81 - "Evidencia de la investigación"
 Cohesion: 0.29
@@ -522,12 +498,16 @@ Cohesion: 0.29
 Nodes (6): Archivos principales, Colaborar con Claude, Exportar y verificar, Instalar y abrir, Material local y preparación, Pink Edition
 
 ### Community 85 - "preferences.ts"
-Cohesion: 0.26
-Nodes (13): applyPreferences(), brandTheme(), CAPTION_PRESETS, clamp(), contrastWithWhite(), fromHsl(), GRAPHICS, luminance() (+5 more)
+Cohesion: 0.09
+Nodes (26): runtime, CAPTIONS, Choice, CONTEXT, GRAPHICS, PRESETS, SOUNDS, STEPS (+18 more)
 
 ### Community 86 - "test_style_selection.mjs"
 Cohesion: 0.22
 Nodes (8): choice, {DEFAULT_PREFERENCES}, load, prefs, resourceChoice, resources, {styleSelectionUrl,readStyleSelection}, url
+
+### Community 87 - "test_editorial_step.mjs"
+Cohesion: 0.38
+Nodes (5): captions, labels, activeEditorialStep(), normalize(), TimedWord
 
 ### Community 88 - "Registro Claudex — autonomía personalizada"
 Cohesion: 0.33
@@ -557,9 +537,9 @@ Nodes (5): Compatibilidad de archivos, Comportamiento disponible, Lo que todaví
 Cohesion: 0.33
 Nodes (5): Pasos, Probar Pink.ai con otro video, Qué mirar, Qué reportar, Qué video usar
 
-### Community 95 - "editorFont"
-Cohesion: 0.31
-Nodes (7): FontPicker(), descriptions, ResourceSample(), editorFont(), loadEditorFont(), pending, FullScreenWords()
+### Community 95 - "Catálogo y memoria de marca — prueba local"
+Cohesion: 0.33
+Nodes (5): Catálogo y memoria de marca — prueba local, Colaboración y continuidad, Comprobaciones, Imagen y subtítulos, Opciones disponibles
 
 ### Community 96 - "Propuesta de precios de Cutkind"
 Cohesion: 0.40
@@ -586,8 +566,8 @@ Cohesion: 0.40
 Nodes (5): description, enum, minLength, type, kind
 
 ### Community 102 - "theme"
-Cohesion: 0.19
-Nodes (9): description, minLength, type, meaning, theme, description, enum, minLength (+1 more)
+Cohesion: 0.40
+Nodes (5): theme, description, enum, minLength, type
 
 ### Community 104 - "vercel.json"
 Cohesion: 0.40
@@ -605,9 +585,9 @@ Nodes (3): Integración local — 20 octubre 2026, Pendiente del mapa original d
 Cohesion: 0.50
 Nodes (4): description, minimum, type, duration_frames
 
-### Community 108 - "stripeClient"
-Cohesion: 0.41
-Nodes (10): POST(), runtime, POST(), runtime, billingPlans(), billingReady(), ensureCustomer(), findCustomer() (+2 more)
+### Community 108 - "billing.ts"
+Cohesion: 0.17
+Nodes (26): POST(), runtime, POST(), runtime, POST(), runtime, BillingActions(), Account() (+18 more)
 
 ### Community 109 - "text"
 Cohesion: 0.50
@@ -617,33 +597,33 @@ Nodes (4): text, description, maxLength, type
 Cohesion: 0.50
 Nodes (4): top, description, minimum, type
 
-### Community 128 - "cuenta/page.tsx"
-Cohesion: 0.26
-Nodes (7): BillingActions(), Account(), dynamic, metadata, BillingPlan, allowedPriceIds(), isPaidCheckout()
+### Community 128 - "make_style_examples.py"
+Cohesion: 0.53
+Nodes (3): main(), run(), voice_gain()
 
-### Community 129 - "Composition.tsx"
-Cohesion: 0.18
-Nodes (9): CaptionEvent, events, LayoutLine, MyComposition(), Phrase(), PoolStylePreview(), Word, FullDemoComposition() (+1 more)
+### Community 129 - "test_local_execution.mjs"
+Cohesion: 0.33
+Nodes (5): brief, {DEFAULT_PREFERENCES}, dir, headers, load
 
-### Community 130 - "scripts"
-Cohesion: 0.18
-Nodes (11): scripts, build, dev, postinstall, render:demo, setup:audio, setup:local, typecheck (+3 more)
+### Community 130 - "test_photo_contract.mjs"
+Cohesion: 0.33
+Nodes (5): fixtures, python, samples, timeline, { validatePlan }
 
 ### Community 131 - "test_brand_catalog.mjs"
 Cohesion: 0.18
 Nodes (10): { checkPreferences, DEFAULT_PREFERENCES, applyPreferences, catalog }, load, old, plan, { proposalToPlan }, range, require, root (+2 more)
 
-### Community 132 - "billing.ts"
-Cohesion: 0.47
-Nodes (7): POST(), runtime, objectId(), syncCheckout(), supabaseAdmin(), stripe, @supabase/supabase-js
+### Community 132 - "Corrección de dirección visual del loop de Fran"
+Cohesion: 0.40
+Nodes (4): Causa y cambio, Corrección de dirección visual del loop de Fran, Prueba local, Rostro y recursos
 
 ### Community 133 - "Prueba local con tarjetas e integración de modelos"
-Cohesion: 0.20
-Nodes (9): Configuración de Anthropic (vía opcional), Corrección tras rechazo del usuario — 19 de octubre de 2026, Entrega, Límites y siguiente prueba, Modo sin clave con Wikimedia — 20 de octubre de 2026, Presupuesto de la prueba con Anthropic, Prueba local con tarjetas e integración de modelos, Sustitución de Pexels por Pixabay — 19 de octubre de 2026 (+1 more)
+Cohesion: 0.18
+Nodes (10): Configuración de Anthropic (vía opcional), Corrección tras rechazo del usuario — 19 de octubre de 2026, Entrega, Límites y siguiente prueba, Modo sin clave con Wikimedia — 20 de octubre de 2026, Ollama conectado al editor — 19 de octubre de 2026, Presupuesto de la prueba con Anthropic, Prueba local con tarjetas e integración de modelos (+2 more)
 
-### Community 134 - "test_one_shot_intake.mjs"
-Cohesion: 0.20
-Nodes (7): brief, { checkOneShotBrief, ONE_SHOT_REQUIREMENTS }, cwd, { DEFAULT_PREFERENCES }, load, route, sessions
+### Community 134 - "test_commons_photos.mjs"
+Cohesion: 0.40
+Nodes (3): load, page, {searchPhotos, downloadPhoto}
 
 ### Community 135 - "test_static_style_samples.mjs"
 Cohesion: 0.22
@@ -653,73 +633,33 @@ Nodes (8): react-dom, {DEFAULT_PREFERENCES,catalog}, {editorialFamilies}, load, 
 Cohesion: 0.25
 Nodes (7): Contrato de producto recomendado, Evidencia REA efectiva, Incógnitas y siguiente comprobación, Integración posterior del agente principal, Observación de interfaz y límites, Qué se comprobó, Recursos visuales: CapCut y Canva
 
-### Community 137 - "devDependencies"
-Cohesion: 0.33
-Nodes (6): devDependencies, prettier, @types/node, @types/react, @types/web, typescript
-
-### Community 138 - "graphic_kinds"
-Cohesion: 0.33
-Nodes (6): items, maxItems, type, uniqueItems, enum, graphic_kinds
+### Community 137 - "label"
+Cohesion: 0.50
+Nodes (4): description, minLength, type, label
 
 ### Community 139 - "Cuestionario rápido con decisiones ejecutables"
 Cohesion: 0.40
 Nodes (4): Cuestionario rápido con decisiones ejecutables, Flujo, Menor entrada para Sol, Validación
 
-### Community 140 - "preferences"
-Cohesion: 0.40
-Nodes (5): additionalProperties, description, required, type, preferences
-
-### Community 141 - "last_word_id"
-Cohesion: 0.50
-Nodes (4): description, minLength, type, last_word_id
-
-### Community 142 - "scale"
-Cohesion: 0.50
-Nodes (4): scale, maximum, minimum, type
-
-### Community 143 - "brand_color"
-Cohesion: 0.67
-Nodes (3): pattern, type, brand_color
-
-### Community 144 - "brand_name"
-Cohesion: 0.67
-Nodes (3): maxLength, type, brand_name
-
-### Community 145 - "captions"
-Cohesion: 0.67
-Nodes (3): description, enum, captions
-
-### Community 146 - "notes"
-Cohesion: 0.67
-Nodes (3): maxLength, type, notes
-
-### Community 147 - "topic"
-Cohesion: 0.67
-Nodes (3): topic, maxLength, type
-
-### Community 148 - "vocabulary"
-Cohesion: 0.67
-Nodes (3): vocabulary, maxLength, type
-
 ## Knowledge Gaps
 - **5 isolated node(s):** `@anthropic-ai/sdk`, `@types/node`, `@types/react`, `@types/web`, `prettier`
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 1061 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **30 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 1087 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **25 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `Correcciones tras la revisión del 11 de octubre de 2026` connect `PinkEdit` to `propose/route.ts`, `json`?**
-  _High betweenness centrality (0.176) - this node is a cross-community bridge._
+- **Why does `Correcciones tras la revisión del 11 de octubre de 2026` connect `Pink.ai — análisis previo al desarrollo` to `pink_edit.py`, `jobs.ts`?**
+  _High betweenness centrality (0.186) - this node is a cross-community bridge._
 - **What connects `@anthropic-ai/sdk`, `@types/node`, `@types/react` to the rest of the system?**
   _5 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `dependencies` be split into smaller, more focused modules?**
   _Cohesion score 0.125 - nodes in this community are weakly interconnected._
-- **Why does `validatePlan()` connect `propose/route.ts` to `supabaseServer`, `PinkEdit`, `cloud.ts`, `jobs.ts`?**
-  _High betweenness centrality (0.172) - this node is a cross-community bridge._
+- **Why does `validatePlan()` connect `jobs.ts` to `contextualProposal.ts`, `Pink.ai — análisis previo al desarrollo`?**
+  _High betweenness centrality (0.186) - this node is a cross-community bridge._
 - **Should `contextualProposal.ts` be split into smaller, more focused modules?**
-  _Cohesion score 0.10344827586206896 - nodes in this community are weakly interconnected._
-- **Why does `check_plan()` connect `json` to `PinkEdit`, `worker.py`?**
-  _High betweenness centrality (0.162) - this node is a cross-community bridge._
-- **Should `json` be split into smaller, more focused modules?**
-  _Cohesion score 0.07982583454281568 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.07268170426065163 - nodes in this community are weakly interconnected._
+- **Why does `check_plan()` connect `pink_edit.py` to `test_brand_catalog.py`, `Pink.ai — análisis previo al desarrollo`, `worker.py`, `one_shot_worker.py`?**
+  _High betweenness centrality (0.182) - this node is a cross-community bridge._
+- **Should `pink_edit.py` be split into smaller, more focused modules?**
+  _Cohesion score 0.07547169811320754 - nodes in this community are weakly interconnected._
