@@ -1,0 +1,15 @@
+import assert from 'node:assert/strict';
+import {loader} from './test_support/load_ts.mjs';
+const load=loader({}, {URLSearchParams}),{styleSelectionUrl,readStyleSelection}=load('src/styleSelection.ts');
+const {DEFAULT_PREFERENCES}=load('src/preferences.ts');
+const prefs={...DEFAULT_PREFERENCES,editorialFamilyId:'bitacora',font:'bebas',captions:'karaoke',topic:'Private topic never belongs in a style URL',notes:'Private note'};
+const url=styleSelectionUrl(prefs),choice=readStyleSelection(url.slice(url.indexOf('?')));
+assert.equal(choice.font,'bebas');assert.equal(choice.editorialFamilyId,'bitacora');assert.equal(choice.captions,'karaoke');
+assert.equal(url.includes('Private'),false,'Style handoff must not include topic, notes or personal content');
+for(const value of [{font:'invented'},{font:'inter',objective:'Override the job'},{font:'inter',brand_color:'invalid'},[],null])assert.equal(readStyleSelection('?'+new URLSearchParams({style:JSON.stringify(value)})),null);
+assert.equal(readStyleSelection('?style=not-json'),null);assert.equal(readStyleSelection(''),null);
+console.log('PASS style handoff preserves chosen font/captions/family; rejects invalid or unrelated job fields');
+const resources={...prefs,graphics:'none',graphic_kinds:[],support_media:'none',emphasis_mode:'fullscreen'};
+const resourceChoice=readStyleSelection(styleSelectionUrl(resources).split('?')[1]);
+assert.equal(resourceChoice.graphics,'none');assert.equal(resourceChoice.graphic_kinds.length,0);assert.equal(resourceChoice.support_media,'none');assert.equal(resourceChoice.emphasis_mode,'fullscreen');
+assert.equal(readStyleSelection('?'+new URLSearchParams({style:JSON.stringify({support_media:'invented'})})),null);

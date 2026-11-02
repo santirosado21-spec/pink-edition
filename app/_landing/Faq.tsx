@@ -9,7 +9,7 @@ export default function Faq() {
     ["¿Qué consume créditos?", `Las reglas todavía no están definidas (${pending(c.creditConsumption)}). Siempre verás el costo antes de confirmar una edición.`],
     ["¿Cómo descargo el resultado?", `Descargas un MP4 vertical de 1080 × 1920 listo para publicar. Conservación de las descargas: ${pending(c.downloadAvailability)}.`],
     ["¿La IA ya propone la primera edición?", "Todavía no está lista. Hoy el corte de pausas y los subtítulos son automáticos y los gráficos los eliges tú en el editor."],
-    ["¿Puedo ponerle música?", "Pink.ai no incluye música: la agregas desde Instagram o TikTok al publicar."],
+    ["¿Puedo ponerle música?", "Cutkind no incluye música: la agregas desde Instagram o TikTok al publicar."],
   ];
   return (
     <div className="faq">

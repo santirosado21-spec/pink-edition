@@ -1,0 +1,189 @@
+{
+  "date": "2026-10-27",
+  "method": "Local inert text extraction from byte-identical artifacts identified by REA. Labels are not runtime behavior or recovered algorithms.",
+  "canva": {
+    "source": "/tmp/cutkind-rea-capcut-canva-20261027/canva/public-0.js",
+    "sha256": "e18e2217ac76456ddef1888c3344e98200f228d7865ff3ab94cbf7f54517e3b1",
+    "rea_parent": "ev_8040956c4822e32c6edaab0c35646e53a3f320438f3ac29ef9605e725828ad43",
+    "labels": [
+      {
+        "key": "D/XX/A",
+        "label": "Add a photo"
+      },
+      {
+        "key": "cC0AGQ",
+        "label": "Background Remover"
+      },
+      {
+        "key": "sZkqag",
+        "label": "Background Remover"
+      },
+      {
+        "key": "b9yTng",
+        "label": "Chart styles"
+      },
+      {
+        "key": "TcPn3w",
+        "label": "Charts"
+      },
+      {
+        "key": "JST0SA",
+        "label": "Charts"
+      },
+      {
+        "key": "N+uRJw",
+        "label": "Charts"
+      },
+      {
+        "key": "W+HWVw",
+        "label": "Frame with multiple fills"
+      },
+      {
+        "key": "jMqWuQ",
+        "label": "Remove video background"
+      }
+    ]
+  },
+  "capcut": {
+    "source": "/tmp/cutkind-rea-visuals-20261027/capcut-localization/en.2e0c2c38edb09f9c9b0b32c33aa5e4d7.js",
+    "sha256": "9c14a9b2d8db453da03e4f5540ac7935e778a7952367f22dc4e9c423219e6208",
+    "rea_parent": "ev_668aa31724a1adadaff0c0cd1f8c137787da7742f494c65c30d4e7581df69620",
+    "labels": [
+      {
+        "key": "cc_web_designstudio_agent_status_removebackground",
+        "label": "Remove background",
+        "utf8_byte_offset": 201033
+      },
+      {
+        "key": "cc_web_designstudio_ppt_button_backgroundcolor",
+        "label": "Background color",
+        "utf8_byte_offset": 228602
+      },
+      {
+        "key": "cc_web_designstudio_ppt_chat_des_removebg",
+        "label": "Remove background",
+        "utf8_byte_offset": 229493
+      },
+      {
+        "key": "ccweb8_p4_promo1_title",
+        "label": "Remove background",
+        "utf8_byte_offset": 342974
+      },
+      {
+        "key": "stock_web_v",
+        "label": "Stock videos",
+        "utf8_byte_offset": 548287
+      },
+      {
+        "key": "text_overlay",
+        "label": "Text templates",
+        "utf8_byte_offset": 556681
+      },
+      {
+        "key": "text_template_ccug",
+        "label": "Text templates",
+        "utf8_byte_offset": 556882
+      },
+      {
+        "key": "web_Remove_background",
+        "label": "Remove background",
+        "utf8_byte_offset": 593560
+      },
+      {
+        "key": "web_ai_captions_boost_effects_text_templates",
+        "label": "Text templates",
+        "utf8_byte_offset": 607242
+      },
+      {
+        "key": "web_autocutout_title_cut_out",
+        "label": "Remove background",
+        "utf8_byte_offset": 658794
+      },
+      {
+        "key": "web_edit_keying",
+        "label": "Remove background",
+        "utf8_byte_offset": 765027
+      },
+      {
+        "key": "web_edit_video_name_text_templates",
+        "label": "Text templates",
+        "utf8_byte_offset": 771460
+      },
+      {
+        "key": "web_graphic_image_cutout",
+        "label": "Remove background",
+        "utf8_byte_offset": 843506
+      },
+      {
+        "key": "web_graphic_page_bg_color",
+        "label": "Background color",
+        "utf8_byte_offset": 853681
+      },
+      {
+        "key": "web_home_tools_remove_bg",
+        "label": "Remove background",
+        "utf8_byte_offset": 869945
+      },
+      {
+        "key": "web_image_smart_tools_bg",
+        "label": "Remove background",
+        "utf8_byte_offset": 882607
+      },
+      {
+        "key": "web_left_panel_tab_stock_videos",
+        "label": "Stock videos",
+        "utf8_byte_offset": 911845
+      },
+      {
+        "key": "web_materialSearch_title_background_color",
+        "label": "Background color",
+        "utf8_byte_offset": 992423
+      },
+      {
+        "key": "web_parameter_title_remove_background",
+        "label": "Remove background",
+        "utf8_byte_offset": 1025746
+      },
+      {
+        "key": "web_product_title_background_remove",
+        "label": "Remove background",
+        "utf8_byte_offset": 1055081
+      },
+      {
+        "key": "web_product_title_remove_background",
+        "label": "Remove background",
+        "utf8_byte_offset": 1055612
+      },
+      {
+        "key": "web_product_title_removing_back",
+        "label": "Remove background",
+        "utf8_byte_offset": 1055668
+      },
+      {
+        "key": "web_record_video_hover_background_blur",
+        "label": "Background blur",
+        "utf8_byte_offset": 1068010
+      },
+      {
+        "key": "web_stock_videos",
+        "label": "Stock videos",
+        "utf8_byte_offset": 1207911
+      },
+      {
+        "key": "web_tool_cut_out",
+        "label": "Remove background",
+        "utf8_byte_offset": 1298589
+      },
+      {
+        "key": "web_toolsIntergration_button_smart_keying",
+        "label": "Remove background",
+        "utf8_byte_offset": 1301046
+      },
+      {
+        "key": "web_video_title_remove_background",
+        "label": "Remove background",
+        "utf8_byte_offset": 1339151
+      }
+    ]
+  }
+}

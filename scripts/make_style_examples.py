@@ -21,6 +21,7 @@ ALL = None
 # (nombre, tramo en frames del montaje, elementos del plan que se conservan, preferencias,
 # segundo del clip que sirve de portada). Los tramos e identificadores son del plan de piscina.
 VIBE, GRAPHICS, COLOR, CONTEXT, SOUND = (260, 470), (700, 900), (330, 465), (262, 390), (255, 400)
+CAPTIONS = (470, 640)
 EXAMPLES = [
     ("vibe-dynamic", VIBE, ALL, {}, 0.7),
     ("vibe-balanced", VIBE, {"patients", "doctor"}, {"vibe": "balanced"}, 3.2),
@@ -35,7 +36,12 @@ EXAMPLES = [
     ("sfx-full", SOUND, ALL, {}, 2.9),
     ("sfx-soft", SOUND, ALL, {"sfx": "soft"}, 2.9),
     ("sfx-none", SOUND, ALL, {"sfx": "none"}, 2.9),
+    ("captions-pink", CAPTIONS, set(), {}, 0.8),
+    ("captions-keyword", CAPTIONS, set(), {"captions": "keyword"}, 0.8),
+    ("captions-karaoke", CAPTIONS, set(), {"captions": "karaoke"}, 0.8),
 ]
+# Palabras marcadas en el ejemplo de «palabra clave»: dos con el peso de la frase.
+EMPHASIS = {"captions-keyword": ("ansiedad", "estrés")}
 
 
 def run(arguments, **options):
@@ -73,6 +79,12 @@ def main():
         if args.only and not name.startswith(args.only):
             continue
         variant = {**plan, "preferences": {**HOUSE, **preferences}}
+        if name in EMPHASIS:
+            spoken = [word for clip in props["timeline"]["clips"] for word in clip["words"]
+                      if first <= clip["timeline_in_frame"] + word["source_start_frame"] - clip["source_in_frame"] < last]
+            chosen = [word for word in spoken if word["text"].strip(".,;:¡!¿?").lower() in EMPHASIS[name]]
+            assert len(chosen) == len(EMPHASIS[name]), f"{name}: no encontré {EMPHASIS[name]} en el tramo"
+            variant["emphasis_word_ids"] = [word["id"] for word in chosen]
         for group in ("cuts", "cards", "backgrounds"):
             variant[group] = [event for event in plan[group] if kept is ALL or event["id"] in kept]
         file = scratch / f"{name}.json"

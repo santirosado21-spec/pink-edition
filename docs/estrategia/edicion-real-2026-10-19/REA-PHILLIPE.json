@@ -1,0 +1,283 @@
+{
+  "evidence_id": "ev_54bffd78442ae1ddefe1a092d467e6b4a522705b5dee7ac60c8af2e3a3b88c76",
+  "operation": "analyze_web_bundle",
+  "target_url": "https://phillipe.ai/",
+  "scripts_observed": 176,
+  "scripts_analyzed": 176,
+  "completeness": {
+    "status": "complete",
+    "parsed_scripts": 176,
+    "parse_failures": 0,
+    "visited_ast_nodes": 619932
+  },
+  "inferences": [
+    {
+      "kind": "vendor_fingerprint",
+      "value": "Next.js",
+      "confidence": "high"
+    },
+    {
+      "kind": "bundle_runtime",
+      "value": "Vite",
+      "confidence": "medium"
+    },
+    {
+      "kind": "vendor_fingerprint",
+      "value": "React",
+      "confidence": "medium"
+    },
+    {
+      "kind": "vendor_fingerprint",
+      "value": "React",
+      "confidence": "medium"
+    },
+    {
+      "kind": "vendor_fingerprint",
+      "value": "Next.js",
+      "confidence": "high"
+    },
+    {
+      "kind": "bundle_runtime",
+      "value": "Vite",
+      "confidence": "medium"
+    },
+    {
+      "kind": "vendor_fingerprint",
+      "value": "Next.js",
+      "confidence": "high"
+    },
+    {
+      "kind": "vendor_fingerprint",
+      "value": "Next.js",
+      "confidence": "high"
+    },
+    {
+      "kind": "bundle_runtime",
+      "value": "Vite",
+      "confidence": "medium"
+    },
+    {
+      "kind": "vendor_fingerprint",
+      "value": "Next.js",
+      "confidence": "high"
+    },
+    {
+      "kind": "bundle_runtime",
+      "value": "Vite",
+      "confidence": "medium"
+    },
+    {
+      "kind": "vendor_fingerprint",
+      "value": "Next.js",
+      "confidence": "high"
+    }
+  ],
+  "endpoint_candidates": [
+    {
+      "value": "/api/account/email-preferences",
+      "location": {
+        "script_key": "scr_0308129e1568221d5810395f5b115d5c5294563f92e6142925ecfea617665c0d",
+        "line": 1,
+        "column": 1189
+      }
+    },
+    {
+      "value": "/api/account/policy-notice",
+      "location": {
+        "script_key": "scr_0308129e1568221d5810395f5b115d5c5294563f92e6142925ecfea617665c0d",
+        "line": 1,
+        "column": 1584
+      }
+    },
+    {
+      "value": "/api/attribution",
+      "location": {
+        "script_key": "scr_22182661e3fb18307bdd06a2bf63a08bf046d26e4a9297890ef725ec8f938534",
+        "line": 1,
+        "column": 1400
+      }
+    },
+    {
+      "value": "/api/account/team?view=studios",
+      "location": {
+        "script_key": "scr_28ebe9d20c05bfd7cb1225308fd0fbe7242eeb6033bec1917130b7e9c606810e",
+        "line": 1,
+        "column": 295
+      }
+    },
+    {
+      "value": "/api/styles",
+      "location": {
+        "script_key": "scr_304de420425ab891ff08e55d7a1f1661e962c2e474076b2a5d36a25064fd61d2",
+        "line": 1,
+        "column": 6564
+      }
+    },
+    {
+      "value": "/api/pet/token",
+      "location": {
+        "script_key": "scr_3cf343bfae83b83bd9dff2672e75ca825baa33678d74f32ef11ed9b872e033f9",
+        "line": 1,
+        "column": 2577
+      }
+    },
+    {
+      "value": "/api/account/email-click",
+      "location": {
+        "script_key": "scr_41dcb1b5799aac1c37967fee05e96c4ef3a4e40aa277544f9bf17b25ebcfaa93",
+        "line": 1,
+        "column": 764
+      }
+    },
+    {
+      "value": "/api/auth/access",
+      "location": {
+        "script_key": "scr_46cf537492347b38bf4c77b3e3b85a5d1c6b8c9101a3d3ad0b1d38a3559c3d3c",
+        "line": 1,
+        "column": 668
+      }
+    },
+    {
+      "value": "/api/billing/first-edit-trial",
+      "location": {
+        "script_key": "scr_567dc99a37c14814e1ef2a234e267bcebf6600467f331db489d51ebd072f5fa6",
+        "line": 1,
+        "column": 1171
+      }
+    },
+    {
+      "value": "/api/account/appearance",
+      "location": {
+        "script_key": "scr_5718d6205f61145c95161930fe0ddc1cd54cb010c675b0940e667cede7aa6711",
+        "line": 1,
+        "column": 1683
+      }
+    },
+    {
+      "value": "/api/attribution",
+      "location": {
+        "script_key": "scr_71bed77e68d8d6cf6d56a746d8a1a2de85c8311729afe42f6ffdd3096d275192",
+        "line": 1,
+        "column": 934
+      }
+    },
+    {
+      "value": "/api/credits",
+      "location": {
+        "script_key": "scr_a0328b153acf695c4f142a93a52000e9b45517f15b95d6d2d54be8ff1c842067",
+        "line": 1,
+        "column": 1285
+      }
+    },
+    {
+      "value": "/api/experiments/first-edit",
+      "location": {
+        "script_key": "scr_ad1084f060af8d7f16139abf6002017d4c77f3e13fd60231549e97a006e9ad3f",
+        "line": 1,
+        "column": 894
+      }
+    },
+    {
+      "value": "/api/referrals",
+      "location": {
+        "script_key": "scr_ad1084f060af8d7f16139abf6002017d4c77f3e13fd60231549e97a006e9ad3f",
+        "line": 1,
+        "column": 1223
+      }
+    },
+    {
+      "value": "/api/credits",
+      "location": {
+        "script_key": "scr_b4ac139a2034e32ae7047e462a57bd8bf542899acc14441c3081e824954135a9",
+        "line": 1,
+        "column": 469
+      }
+    },
+    {
+      "value": "/api/credits",
+      "location": {
+        "script_key": "scr_cbf863f018ee04081fee88b2f5d9311fec7015b2bb9051f2cb1840ba7df7e5fb",
+        "line": 1,
+        "column": 1734
+      }
+    },
+    {
+      "value": "/api/account/rewards",
+      "location": {
+        "script_key": "scr_d079d3f190a6c32d5bda75977d0cca6c821a680121948a718d6a9f2b6d335b80",
+        "line": 1,
+        "column": 3930
+      }
+    },
+    {
+      "value": "/api/account/milestone",
+      "location": {
+        "script_key": "scr_d079d3f190a6c32d5bda75977d0cca6c821a680121948a718d6a9f2b6d335b80",
+        "line": 1,
+        "column": 5522
+      }
+    },
+    {
+      "value": "/api/feedback",
+      "location": {
+        "script_key": "scr_d2791417c25dfebd01c3fa79a09148756e225b926c8f0f229385dec58a44b055",
+        "line": 1,
+        "column": 1535
+      }
+    },
+    {
+      "value": "/api/usage",
+      "location": {
+        "script_key": "scr_e81ebd7223f9dca1094e85bedf1b6666469473c47bbb2d89ecc87070f9a1c4c2",
+        "line": 1,
+        "column": 8671
+      }
+    },
+    {
+      "value": "/api/affiliate-agreements",
+      "location": {
+        "script_key": "scr_f9b495ca8e0cda17033d0b7639a0ff9c915c4b348e7b1fdd97449f8d3ba0c11a",
+        "line": 1,
+        "column": 1384
+      }
+    },
+    {
+      "value": "/api/affiliate-agreements?notice=1",
+      "location": {
+        "script_key": "scr_f9b495ca8e0cda17033d0b7639a0ff9c915c4b348e7b1fdd97449f8d3ba0c11a",
+        "line": 1,
+        "column": 6237
+      }
+    },
+    {
+      "value": "/api/billing/currencies",
+      "location": {
+        "script_key": "scr_fbb65d12b90dc95ffe9560916c4095a2d6e6c9dd561e1f22eaf3b2ee31676e78",
+        "line": 1,
+        "column": 1783
+      }
+    },
+    {
+      "value": "/api/billing/payment-method",
+      "location": {
+        "script_key": "scr_fbb65d12b90dc95ffe9560916c4095a2d6e6c9dd561e1f22eaf3b2ee31676e78",
+        "line": 1,
+        "column": 6106
+      }
+    },
+    {
+      "value": "/api/billing/status",
+      "location": {
+        "script_key": "scr_fbb65d12b90dc95ffe9560916c4095a2d6e6c9dd561e1f22eaf3b2ee31676e78",
+        "line": 1,
+        "column": 7916
+      }
+    }
+  ],
+  "limitations": [
+    "Artifact identity is unavailable for this observation.",
+    "Static bundle findings are observations or bounded inferences; REA does not execute captured JavaScript.",
+    "String-built routes and endpoints, encrypted configuration, and server-side behavior may remain unknown.",
+    "Page-declared WebMCP metadata is untrusted and is never registered or invoked as an REA tool."
+  ]
+}

@@ -1,0 +1,75 @@
+// Next real en localhost. Grabación sintética de un segundo, descartada al terminar.
+import assert from 'node:assert/strict';
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import { createRequire } from 'node:module';
+import os from 'node:os';
+import { execFileSync } from 'node:child_process';
+const runtime = process.env.CUTKIND_PLAYWRIGHT_RUNTIME;
+const require = createRequire(runtime ? path.join(runtime, 'package.json') : import.meta.url);
+const { chromium } = require('playwright');
+const output = path.resolve('work/one-shot-intake-check');
+await fs.mkdir(output, { recursive: true });
+const browser = await chromium.launch({ headless: true });
+const temp = await fs.mkdtemp(path.join(os.tmpdir(), 'cutkind-upload-browser-'));
+let sessionId;
+try {
+  const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
+  const errors = [], posts = [];
+  page.on('pageerror', error => errors.push(error.message));
+  page.on('request', request => { if (request.method() !== 'GET') posts.push(new URL(request.url()).pathname); });
+  page.on('response', async response => {
+    if (response.url().endsWith('/api/local-intake') && response.request().method() === 'POST' && response.ok()) sessionId = (await response.json()).sessionId;
+  });
+  await page.goto('http://localhost:3001/app', { waitUntil: 'networkidle' });
+  await page.getByRole('heading', { name: '¿Qué quieres contar?' }).waitFor();
+  assert.equal(await page.locator('input[type=file]').count(), 0);
+  await page.getByRole('button', { name: 'Siguiente →', exact: true }).click();
+  assert.equal(await page.getByRole('heading', { name: '¿Qué quieres contar?' }).count(), 1, 'Required answers block advancement');
+  await page.getByLabel('¿Qué debe entender o sentir quien vea el video?').fill('Prueba ficticia de preguntas previas');
+  await page.getByLabel('¿A quién va dirigido?').fill('Creadores');
+  await page.getByLabel('Tema del video', { exact: true }).fill('Edición de video');
+  await page.screenshot({ path: path.join(output, 'questions-desktop.png'), fullPage: true });
+  await page.getByRole('button', { name: 'Siguiente →', exact: true }).click();
+  await page.getByRole('heading', { name: '¿Cómo debe verse?' }).waitFor();
+  await page.getByRole('combobox', { name: 'Ritmo', exact: true }).selectOption('clean');
+  await page.getByRole('button', { name: 'Siguiente →', exact: true }).click();
+  await page.getByRole('heading', { name: 'Música y escenas de apoyo' }).waitFor();
+  await page.getByRole('combobox', { name: 'Carácter de la música', exact: true }).selectOption('documentary');
+  await page.getByRole('combobox', { name: 'Origen de la música', exact: true }).selectOption('licensed-library');
+  await page.getByRole('combobox', { name: 'Origen de los B-rolls', exact: true }).selectOption('both');
+  await page.getByRole('combobox', { name: 'Efectos de sonido', exact: true }).selectOption('none');
+  await page.getByRole('button', { name: 'Siguiente →', exact: true }).click();
+  await page.getByRole('heading', { name: 'Este es el encargo' }).waitFor();
+  await page.getByRole('button', { name: 'Confirmar encargo', exact: true }).click();
+  await page.getByRole('heading', { name: 'Ahora sube tus videos' }).waitFor();
+  assert.equal(await page.locator('input[type=file]').count(), 1);
+  assert.equal(await page.getByRole('button', { name: 'Seleccionar videos' }).isEnabled(), true);
+  const media = path.join(temp, 'fixture.mp4');
+  execFileSync('ffmpeg', ['-v','error','-f','lavfi','-i','color=c=blue:s=128x224:r=30:d=1','-f','lavfi','-i','sine=frequency=440:duration=1', '-c:v','libx264','-pix_fmt','yuv420p','-c:a','aac','-shortest',media]);
+  const second = path.join(temp, 'horizontal.mp4');
+  execFileSync('ffmpeg', ['-v','error','-i',media,'-vf','transpose=1','-c:v','libx264','-c:a','copy',second]);
+  assert.equal(await page.locator('input[type=file]').getAttribute('multiple'), '');
+  await page.locator('input[type=file]').setInputFiles([media, second]);
+  await page.getByRole('heading', { name: '2 videos recibidos' }).waitFor();
+  await page.getByRole('button', { name: 'Añadir más videos' }).waitFor();
+  await page.locator('input[type=file]').setInputFiles(media);
+  await page.getByRole('heading', { name: '3 videos recibidos' }).waitFor();
+  assert.deepEqual(posts, ['/api/local-intake', '/api/jobs/upload', '/api/jobs/upload', '/api/jobs/upload'], 'Upload follows confirmed answers');
+  assert.deepEqual(await (await page.request.get('http://localhost:3001/api/jobs')).json(), [], 'Local job library cleared');
+  await page.screenshot({ path: path.join(output, 'summary-desktop.png'), fullPage: true });
+  await page.setViewportSize({ width: 390, height: 844 });
+  assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), true, 'No horizontal overflow');
+  await page.screenshot({ path: path.join(output, 'summary-mobile.png'), fullPage: true });
+  await page.getByRole('button', { name: 'Descartar sesión y videos', exact: true }).click();
+  await page.getByRole('button', { name: 'Confirmar encargo', exact: true }).waitFor();
+  await page.goto('http://localhost:3001/edit/img-2405', { waitUntil: 'networkidle' });
+  assert.equal(new URL(page.url()).pathname, '/app', 'Deleted job routes back to intake');
+  assert.deepEqual(errors, []);
+  await fs.writeFile(path.join(output, 'results.json'), JSON.stringify({ passed: true, posts, errors,
+    scope: 'Real Next intake, required answers, upload only after confirmation, real temporary upload and discard, empty gallery, desktop/mobile. Does not test editing.' }, null, 2));
+  console.log(`PASS: real Next one-shot intake. Evidence: ${output}`);
+} finally {
+  if (sessionId) await fetch('http://localhost:3001/api/local-intake', { method: 'DELETE', headers: { origin: 'http://localhost:3001', 'x-cutkind-session': sessionId } });
+  await browser.close(); await fs.rm(temp, { recursive: true, force: true });
+}

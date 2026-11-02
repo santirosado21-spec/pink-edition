@@ -2,13 +2,14 @@
 
 import { useEffect, useRef, useState } from "react";
 
-export type Lane = "cuts" | "cards" | "backgrounds";
+export type Lane = "cuts" | "cards" | "backgrounds" | "zooms";
 export type Block = { id: string; group: Lane; label: string; theme: string; start: number; duration: number };
 
 const LANES: { group: Lane; name: string }[] = [
   { group: "cuts", name: "Cortes" },
   { group: "cards", name: "Tarjetas" },
   { group: "backgrounds", name: "Fondos" },
+  { group: "zooms", name: "Zooms" },
 ];
 const GUTTER = 74;
 const MIN_FRAMES = 10;

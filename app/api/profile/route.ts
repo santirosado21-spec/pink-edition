@@ -1,13 +1,23 @@
 import { readProfile, saveProfile } from "../../_lib/profile";
 import { checkPreferences, type Preferences } from "../../../src/preferences";
+import { CLOUD } from "../../_lib/supabase/config";
+import { supabaseServer } from "../../_lib/supabase/server";
+import { sameOrigin } from "../../_lib/request-security";
+import { profileFailure } from "../../_lib/profileState";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  return Response.json({ preferences: await readProfile() });
+  try { return Response.json({ preferences: await readProfile() }); }
+  catch (error) {
+    const failure = profileFailure(error);
+    return Response.json(failure, { status: failure.status });
+  }
 }
 
 export async function PUT(request: Request) {
+  if (!sameOrigin(request)) return Response.json({ error: "Solicitud no permitida." }, { status: 403 });
+  if (CLOUD && !(await (await supabaseServer()).auth.getUser()).data.user) return Response.json({ error: "Inicia sesión." }, { status: 401 });
   let preferences: unknown;
   try {
     preferences = await request.json();

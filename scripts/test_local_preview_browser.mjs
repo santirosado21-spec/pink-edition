@@ -1,0 +1,30 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import { createRequire } from 'node:module';
+const require=createRequire(path.join(process.env.CUTKIND_PLAYWRIGHT_RUNTIME,'package.json'));
+const {chromium}=require('playwright');
+const [session,folder]=process.argv.slice(2);
+const browser=await chromium.launch({headless:true});
+try {
+ const page=await browser.newPage({viewport:{width:1280,height:1000}});const errors=[];
+ page.on('pageerror', e=>errors.push(e.message));
+ await page.goto(`http://localhost:3001/app?session=${session}`,{waitUntil:'networkidle'});
+ await page.getByRole('heading',{name:'Vista previa de tu edición',exact:true}).waitFor({timeout:30000});
+ await page.getByRole('heading',{name:'Vista previa de tu edición',exact:true}).scrollIntoViewIfNeeded();
+ const play=page.getByRole('button',{name:'Play video',exact:true});
+ assert.equal(await play.count(),1,'Playback control is available');
+ await play.click(); await page.waitForTimeout(3500); await page.getByRole('button',{name:'Pause video',exact:true}).click();
+ assert.equal(await page.getByRole('button',{name:'Exportar MP4',exact:true}).isEnabled(),true);
+ await page.screenshot({path:path.join(folder,'review','app-desktop.png')});
+ await page.reload({waitUntil:'networkidle'});
+ await page.getByRole('heading',{name:'Vista previa de tu edición',exact:true}).waitFor();
+ assert.equal(await page.getByRole('heading',{name:'7 videos recibidos'}).count(),1);
+ await page.setViewportSize({width:390,height:844});
+ assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
+ await page.getByRole('heading',{name:'Vista previa de tu edición',exact:true}).scrollIntoViewIfNeeded();
+ await page.screenshot({path:path.join(folder,'review','app-mobile.png')});
+ assert.deepEqual(errors,[]);
+ await fs.writeFile(path.join(folder,'review','browser-qc.json'),JSON.stringify({passed:true,errors,restoredSources:7,exportEnabled:true}));
+ console.log('PASS: actual session restored, edited preview loaded, export enabled, reload and mobile layout.');
+} finally {await browser.close();}

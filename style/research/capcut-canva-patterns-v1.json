@@ -1,0 +1,143 @@
+{
+  "version": 1,
+  "date": "2026-10-27",
+  "scope": "public-reference-patterns",
+  "integrationStatus": "partially-implemented-static-previews",
+  "constraints": {
+    "localOnly": true,
+    "previewMedium": "static-images",
+    "previewFootage": "original-neutral-example-no-private-footage",
+    "palette": "canonical-cutkind-tokens-only",
+    "copyCompetitorAssets": false
+  },
+  "evidence": {
+    "capcut": {
+      "id": "ev_f4adec408418dd69a06f9fcfd25bbd5a92098b251834ee3f47346126015c0c2f",
+      "kind": "prior-static-analysis",
+      "runtime": "guest-navigation-reobserved-login-modal-blocked-details"
+    },
+    "canva": {
+      "id": "ev_8040956c4822e32c6edaab0c35646e53a3f320438f3ac29ef9605e725828ad43",
+      "summaryId": "ev_6de8835526e12bdad726f0e84c3c39d8ee95af4d546ed580ea59eeb1375848a1",
+      "artifactSha256": "2f385ecfc2677f7ee1602e0237a5303c04bedcd03efad1a650c13dcb5d66f4e8",
+      "coverage": "two-public-bundles-only",
+      "semanticCoverage": "unknown",
+      "semanticUnknowns": 24
+    }
+  },
+  "patterns": [
+    {
+      "id": "separate-font-treatment-layout",
+      "source": [
+        "capcut",
+        "canva"
+      ],
+      "observation": "Separate text/captions/effects panels; public brand font-combination controls.",
+      "cutkindProposal": "Keep font, caption treatment and composition independently selectable.",
+      "staticProof": "Same sentence and image across option cards.",
+      "status": "specified-not-integrated",
+      "acceptance": [
+        "Changing treatment preserves chosen font ID.",
+        "Selection summary matches exported preference IDs."
+      ]
+    },
+    {
+      "id": "brand-only-effect-cards",
+      "source": [
+        "canva"
+      ],
+      "observation": "Public Brand Kit illustration combines font samples and brand color swatches.",
+      "cutkindProposal": "Constrain all questionnaire examples, borders, shadows and active states to canonical Cutkind palette.",
+      "staticProof": "Text effect sample sheet using only approved brand tokens.",
+      "status": "implemented-static-preview",
+      "acceptance": [
+        "No competitor accents or arbitrary effect colors.",
+        "Do not imply palette controls were recovered from authenticated editor."
+      ],
+      "implementation": {
+        "files": [
+          "app/_components/StaticStyleSample.tsx",
+          "app/_components/StylePreview.tsx",
+          "app/_components/StylePreview.module.css"
+        ],
+        "scope": "Original Cutkind UI reconstruction only. No competitor assets or engine algorithms recovered.",
+        "humanAestheticApproval": "pending"
+      }
+    },
+    {
+      "id": "outline-and-shadow",
+      "source": [
+        "capcut",
+        "canva"
+      ],
+      "observation": "CapCut distinguishes text effects; Canva public strings mention Shadows and text effects.",
+      "cutkindProposal": "Original restrained outline and offset-shadow caption treatments.",
+      "staticProof": "One static image for each implemented treatment.",
+      "status": "specified-not-integrated",
+      "acceptance": [
+        "Only enable in questionnaire when engine export supports it.",
+        "Maintain Spanish accents and readability at mobile size."
+      ]
+    },
+    {
+      "id": "two-font-hierarchy",
+      "source": [
+        "capcut",
+        "canva"
+      ],
+      "observation": "CapCut title/body actions; Canva strings include applying font combination.",
+      "cutkindProposal": "Original title/body typography pairs from existing licensed local font catalog.",
+      "staticProof": "A title, caption and numeric example in the same card.",
+      "status": "specified-not-integrated",
+      "acceptance": [
+        "Expose actual font pairing.",
+        "Never replace manual font selection silently."
+      ]
+    },
+    {
+      "id": "transition-contact-sheet",
+      "source": [
+        "capcut"
+      ],
+      "observation": "Separate transitions catalog exists; previous guest observation exposed families.",
+      "cutkindProposal": "Explain implemented motion using three stills rather than playable previews.",
+      "staticProof": "Inicio/Durante/Final contact sheet.",
+      "status": "implemented-static-preview",
+      "acceptance": [
+        "No Player, video, GIF, autoplay or animated sample.",
+        "Stills describe actual implemented transition and do not claim measured competitor timings."
+      ],
+      "implementation": {
+        "files": [
+          "app/_components/StaticStyleSample.tsx",
+          "app/_components/StylePreview.tsx",
+          "app/_components/StylePreview.module.css"
+        ],
+        "scope": "Original Cutkind UI reconstruction only. No competitor assets or engine algorithms recovered.",
+        "humanAestheticApproval": "pending"
+      }
+    },
+    {
+      "id": "image-layout-selector",
+      "source": [
+        "canva",
+        "capcut"
+      ],
+      "observation": "Canva public galleries show template collections and visual example thumbnails; CapCut separates media and templates.",
+      "cutkindProposal": "Compare original framed-photo, editorial-card and side-by-side layouts.",
+      "staticProof": "Same original/licensed photograph in each geometry.",
+      "status": "specified-not-integrated",
+      "acceptance": [
+        "Do not copy stock photos, premium templates or brand graphics.",
+        "Show only layouts that can be honored by current engine, label research candidates separately."
+      ]
+    }
+  ],
+  "limitations": [
+    "No authenticated Canva editor inspected.",
+    "CapCut login modal blocked deeper current runtime observation.",
+    "Static strings do not prove execution or per-account availability.",
+    "No proprietary algorithms, fonts, templates or animation parameters recovered.",
+    "This file does not add functional engine effects."
+  ]
+}

@@ -280,21 +280,30 @@ def main():
         index = item["index"]
         if index < len(original) and original[index]["text"] == item["expected"]:
             original[index]["text"] = item["replacement"]
-    words = align_all_words(original, style, source_hash)
+    # No pasar un transcript bilingüe por un alineador monolingüe después:
+    # alteraba los tiempos y podía perder las palabras en inglés.
+    words = ([{**word, "alignment_score": None,
+               "timing_source": transcript.get("timing_source")} for word in original]
+             if transcript.get("language_mode") == "mixed"
+             else align_all_words(original, style, source_hash))
     face = caption_face(style)
     before = style["edit"]["speech_padding_before_seconds"]
     after = style["edit"]["speech_padding_after_seconds"]
     clips, offset, remapped_words = [], 0, []
-    for number, (first, last) in enumerate(phrase_ranges(
-            words, style["edit"]["minimum_pause_to_remove_seconds"]), 1):
+    mixed = transcript.get("language_mode") == "mixed"
+    ranges = [(0, len(words))] if mixed else phrase_ranges(words, style["edit"]["minimum_pause_to_remove_seconds"])
+    for number, (first, last) in enumerate(ranges, 1):
         selected = words[first:last]
         source_in = max(0, math.floor((selected[0]["start"] - before) * fps))
         source_out = math.ceil((selected[-1]["end"] + after) * fps)
+        if mixed:
+            # No eliminar voz que el ASR pudo omitir en un cambio de idioma.
+            source_in, source_out = 0, source_frame_count(SOURCE, fps)
         if clips and source_in < clips[-1]["source_out_frame"]:
             raise ValueError("Los cortes se superponen.")
         local_words = [
             {**word, "source_start_frame": math.floor(word["start"] * fps),
-             "source_end_frame": math.ceil(word["end"] * fps)}
+             "source_end_frame": max(math.floor(word["start"] * fps) + 1, math.ceil(word["end"] * fps))}
             for word in selected
         ]
         for word in local_words:
@@ -337,6 +346,7 @@ def main():
     removed.append({"start_frame": previous_end, "end_frame": source_frame_count(SOURCE, fps),
                     "reason": "trailing_no_speech"})
     data = {"fps": fps, "duration_frames": offset, "source_sha256": source_hash,
+            "transcription_review_required": mixed, "audio_preserved": mixed,
             "edit_mode": "all_speech_original_order", "clips": clips,
             "coverage": {"source_word_count": len(original),
                          "retained_word_count": len(remapped_words),

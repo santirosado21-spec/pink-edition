@@ -1,0 +1,1 @@
+Ambos hallazgos ronda2 aceptados: opción b para legacy y definición explícita de TODAS las ventanas. Ver apéndice final. Revisa sólo texto revisado y evidencia previa, sin herramientas ni exploración nueva. Es la última de 3 rondas; no reabrir hallazgos resueltos sin nueva evidencia. No construir.

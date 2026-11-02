@@ -1,0 +1,87 @@
+{
+  "requested_by_user": true,
+  "time": "2026-10-20T11:31:48.941136",
+  "deleted": [
+    {
+      "path": "work/img-2334",
+      "bytes": 85727136
+    },
+    {
+      "path": "public/work/img-2334",
+      "bytes": 116433617
+    },
+    {
+      "path": "work/img-2334-revision",
+      "bytes": 89501972
+    },
+    {
+      "path": "public/work/img-2334-revision",
+      "bytes": 57597160
+    },
+    {
+      "path": "work/img-2405",
+      "bytes": 71544109
+    },
+    {
+      "path": "public/work/img-2405",
+      "bytes": 104600335
+    },
+    {
+      "path": "work/prueba-junta-local",
+      "bytes": 5962990
+    },
+    {
+      "path": "public/work/prueba-junta-local",
+      "bytes": 4369258
+    },
+    {
+      "path": "work/revision-con-tarjetas",
+      "bytes": 136147475
+    },
+    {
+      "path": "public/work/revision-con-tarjetas",
+      "bytes": 116433617
+    },
+    {
+      "path": "public/work/piscina-e2e",
+      "bytes": 57020003
+    },
+    {
+      "path": "public/work/interiores-prueba",
+      "bytes": 56404230
+    },
+    {
+      "path": "work/_uploads/img-2405.mov",
+      "bytes": 38469852
+    },
+    {
+      "path": "work/_uploads/interiores-prueba.mp4",
+      "bytes": 130430654
+    },
+    {
+      "path": "work/_uploads/prueba-junta-local.mp4",
+      "bytes": 1264514
+    },
+    {
+      "path": "work/_uploads/img-2334.mov",
+      "bytes": 56029335
+    },
+    {
+      "path": "work/_cloud/interiores-prueba.mp4",
+      "bytes": 130430654
+    },
+    {
+      "path": "work/_cloud/revision-cola.mp4",
+      "bytes": 1496055
+    },
+    {
+      "path": "work/ollama-pilot/versioning-smoke/8fa3ff45-5c3d-4c7d-8179-1bb93fce8f77/render/out/render.mp4",
+      "bytes": 165246
+    },
+    {
+      "path": "work/ollama-pilot/versioning-smoke/8fa3ff45-5c3d-4c7d-8179-1bb93fce8f77/render/out/qa-snapshot-8fa3ff45.mp4",
+      "bytes": 106791
+    }
+  ],
+  "originals_and_references_outside_jobs_untouched": true
+}

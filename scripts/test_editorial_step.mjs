@@ -1,0 +1,12 @@
+import assert from 'node:assert/strict';
+import {activeEditorialStep} from '../src/editorialStep.ts';
+const captions='cuando caminas, o cuando te estás bañando y cuando caminas'.split(' ').map((text,i)=>({text,startMs:i*200,endMs:i*200+180}));
+const labels=['te estás bañando','cuando caminas'];
+assert.equal(activeEditorialStep(labels,captions,1,0,1900),1);
+assert.equal(activeEditorialStep(labels,captions,3,0,1900),-1,'A common word does not activate another occurrence');
+assert.equal(activeEditorialStep(labels,captions,6,0,1900),0);
+assert.equal(activeEditorialStep(labels,captions,1,400,2200),-1,'Do not activate an occurrence outside this beat');
+assert.equal(activeEditorialStep(labels,captions,-1,0,2200),-1,'No active item in a long pause');
+assert.equal(activeEditorialStep(labels,captions,9,0,2200),1);
+assert.equal(activeEditorialStep(labels,captions,5,0,1300),-1,'Do not use an incomplete quote cut by the beat boundary');
+console.log('PASS complete-quote list focus, repeated words, beat boundaries and pauses');

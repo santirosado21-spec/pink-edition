@@ -1,11 +1,17 @@
 import { execFile, spawn } from "node:child_process";
-import { existsSync, openSync, promises as fs } from "node:fs";
+import { existsSync, openSync, closeSync, readFileSync, promises as fs } from "node:fs";
+import { randomUUID } from "node:crypto";
 import path from "node:path";
 import { promisify } from "node:util";
 import schemaJson from "../../schema/edit-plan.schema.json";
 import styleJson from "../../style/pink-demo-v1.json";
 import type { Plan, Style, Timeline } from "../../src/edit";
 import { checkPreferences } from "../../src/preferences";
+import { TAKE_TRANSITIONS, ZOOM_SCALE } from "../../src/zooms";
+import { readProfileFile } from "./profileFile";
+import { withFaceSafety } from "./faceSafety";
+import { readActiveEdit, withJobWrite, contentHash, commitEdit, atomicJson, PlanConflict } from "./planStore";
+import { buildRunManifest } from "./runManifest";
 
 // La web corre en la misma máquina que el motor: lee y escribe `work/<id>/`.
 // Los comentarios evitan que el compilador rastree las carpetas del motor (work/, .venv/…)
@@ -58,7 +64,15 @@ const alive = (pid?: number) => {
   }
 };
 
-export const outputFile = (id: string) => join(dir(id), "out", `${id}.mp4`);
+export const outputFile = (id: string) => {
+  const pointer = join(dir(id), "current-render.json");
+  if (existsSync(pointer)) {
+    const run = JSON.parse(readFileSync(pointer, "utf8"));
+    if (!/^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/.test(run.id)) throw new Error("Registro de render inválido.");
+    return join(dir(id), "renders", run.id, "out", `${id}.mp4`);
+  }
+  return join(dir(id), "out", `${id}.mp4`);
+};
 // Estilo y esquema van dentro del programa: así existen también donde no hay motor.
 export const readStyle = async (): Promise<Style> => styleJson;
 
@@ -92,13 +106,34 @@ export const listJobs = async (): Promise<JobSummary[]> => {
   return jobs.sort((a, b) => b.status.updated_at - a.status.updated_at);
 };
 
+// Los videos analizados antes de los zooms no tienen la cabeza por toma: se mide una vez
+// y se guarda, para que la vista previa y el render encuadren igual.
+const backfillHeads = async (id: string, timeline: Timeline) => {
+  const person = join(MEDIA, id, "person.webm");
+  if (timeline.clips.every((clip) => "head" in clip) || !existsSync(person)) return timeline;
+  // Si el motor está procesando este video, él escribe el timeline: no se mide en paralelo.
+  if ((await jobStatus(id)).state === "running") return timeline;
+  try {
+    await run(at(".venv/bin/python"), ["scripts/heads.py", "--timeline", join(dir(id), "timeline.json"), "--person", person], { cwd: ROOT });
+    return (await readJson<Timeline>(join(dir(id), "timeline.json"))) ?? timeline;
+  } catch {
+    return timeline;
+  }
+};
+
 export const readJob = async (id: string): Promise<Job | null> => {
-  const timeline = await readJson<Timeline>(join(dir(id), "timeline.json"));
-  const plan = await readJson<Plan>(join(dir(id), "plan.json"));
+  let active;
+  try { active = await readActiveEdit(id); }
+  catch (error) { if ((error as NodeJS.ErrnoException).code === "ENOENT") return null; throw error; }
+  const stored = active.timeline;
+  const frozen = existsSync(join(dir(id), "active-edit.json"));
+  const headed = !frozen && ENGINE_HERE ? await backfillHeads(id, stored) : stored;
+  const timeline = !frozen && ENGINE_HERE && (await jobStatus(id)).state !== "running" ? await withFaceSafety(id, headed) : headed;
+  const plan = active.plan;
   if (!timeline || !plan) return null;
   let qc: string | null = null;
   try {
-    qc = await fs.readFile(join(dir(id), "out/QC.txt"), "utf-8");
+    qc = await fs.readFile(join(path.dirname(outputFile(id)), "QC.txt"), "utf-8");
   } catch {
     qc = null;
   }
@@ -114,11 +149,26 @@ export const readJob = async (id: string): Promise<Job | null> => {
 
 // Comprobación estructural del plan contra el esquema y contra las palabras reales.
 export const checkPlan = async (id: string, plan: Plan): Promise<string[]> => {
-  const timeline = await readJson<Timeline>(join(dir(id), "timeline.json"));
-  return timeline ? validatePlan(plan, timeline) : ["Falta el montaje del video."];
+  const timeline = (await readActiveEdit(id)).timeline;
+  if (!timeline) return ["Falta el montaje del video."];
+  const errors = await validatePlan(plan, timeline);
+  if (errors.length) return errors;
+  for (const card of plan.cards) {
+    if (card.kind !== "photo") continue;
+    const expected = `work/${id}/photos/${card.photo!.provider.toLowerCase()}-${card.photo!.id}.jpg`;
+    if (card.photo!.asset !== expected || !existsSync(at("public", expected)) || !existsSync(at("public", expected + ".json"))) {
+      errors.push("La foto debe descargarse desde el buscador para este video.");
+    }
+  }
+  return errors;
 };
 
+const validStockPhoto = (photo: NonNullable<Plan["cards"][number]["photo"]>) =>
+  photo.provider === "Wikimedia" ? typeof photo.id === "number" && Number.isSafeInteger(photo.id) && photo.id > 0 && photo.license === "https://creativecommons.org/publicdomain/zero/1.0/" :
+  (photo.provider === "Pexels" || photo.provider === "Pixabay") ? typeof photo.id === "number" && Number.isSafeInteger(photo.id) && photo.id > 0 && (photo.provider !== "Pixabay" || photo.license === "https://pixabay.com/service/license-summary/") :
+  photo.provider === "Openverse" && typeof photo.id === "string" && /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/.test(photo.id) && photo.license === "https://creativecommons.org/publicdomain/zero/1.0/";
 const MAX_EVENTS = 60;
+export const MAX_EMPHASIS = 40;
 type SchemaGroup = { items: { properties: Record<string, { enum?: string[] }> } };
 
 export const validatePlan = async (plan: Plan, timeline: Timeline): Promise<string[]> => {
@@ -137,7 +187,9 @@ export const validatePlan = async (plan: Plan, timeline: Timeline): Promise<stri
     if (!Array.isArray(plan[group])) return [`El plan no tiene la lista ${group}.`];
     if (plan[group].some((event) => typeof event !== "object" || event === null)) return [`La lista ${group} tiene un elemento que no es válido.`];
   }
-  if (plan.cuts.length + plan.cards.length + plan.backgrounds.length > MAX_EVENTS) return [`El plan tiene más de ${MAX_EVENTS} elementos.`];
+  if (plan.zooms !== undefined && (!Array.isArray(plan.zooms) || plan.zooms.some((event) => typeof event !== "object" || event === null))) return ["La lista de zooms no es válida."];
+  const zooms = plan.zooms ?? [];
+  if (plan.cuts.length + plan.cards.length + plan.backgrounds.length + zooms.length > MAX_EVENTS) return [`El plan tiene más de ${MAX_EVENTS} elementos.`];
   for (const group of ["cuts", "cards", "backgrounds"] as const) {
     for (const event of plan[group]) {
       const name = `${group}/${event.id}`;
@@ -157,6 +209,7 @@ export const validatePlan = async (plan: Plan, timeline: Timeline): Promise<stri
     if (!frames.has(cut.last_word_id)) errors.push(`cuts/${cut.id}: la última palabra no existe.`);
   }
   for (const card of plan.cards) {
+    if (card.kind === "photo" && (!card.photo || !validStockPhoto(card.photo) || typeof card.photo.asset !== "string" || !/^work\/[a-z0-9-]+\/photos\/(?:(?:pexels|pixabay|wikimedia)-[0-9]+|openverse-[a-f0-9-]{36})\.jpg$/.test(card.photo.asset))) errors.push(`cards/${card.id}: foto de archivo inválida.`);
     if (!allowed("cards", "kind").includes(card.kind)) errors.push(`cards/${card.id}: tarjeta desconocida «${card.kind}».`);
     if (!card.beat || !frames.has(card.beat.anchor_word_id) || !Number.isInteger(card.beat.offset_frames) || Math.abs(card.beat.offset_frames) > total) errors.push(`cards/${card.id}: la palabra de énfasis no existe.`);
     if (card.text !== undefined && (typeof card.text !== "string" || card.text.length > 12)) errors.push(`cards/${card.id}: el texto admite hasta 12 caracteres.`);
@@ -166,29 +219,62 @@ export const validatePlan = async (plan: Plan, timeline: Timeline): Promise<stri
   for (const background of plan.backgrounds) {
     if (!allowed("backgrounds", "motif").includes(background.motif)) errors.push(`backgrounds/${background.id}: motivo desconocido.`);
   }
+  // Zooms: mismas reglas de anclaje y tiempo que los demás elementos, y escala acotada.
+  for (const zoom of zooms) {
+    const name = `zooms/${zoom.id}`;
+    if (typeof zoom.id !== "string" || !zoom.id || ids.has(zoom.id)) errors.push(`${name}: identificador vacío o repetido.`);
+    ids.add(zoom.id);
+    const anchor = frames.get(zoom.anchor_word_id);
+    if (anchor === undefined) errors.push(`${name}: la palabra de anclaje no existe.`);
+    if (!Number.isInteger(zoom.duration_frames) || zoom.duration_frames < 1 || zoom.duration_frames > total) errors.push(`${name}: duración inválida.`);
+    if (!Number.isInteger(zoom.offset_frames) || Math.abs(zoom.offset_frames) > total) errors.push(`${name}: desfase inválido.`);
+    else if (anchor !== undefined && (anchor + zoom.offset_frames < 0 || anchor + zoom.offset_frames >= total)) errors.push(`${name}: empieza fuera del video.`);
+    if (typeof zoom.scale !== "number" || !(zoom.scale >= ZOOM_SCALE.min && zoom.scale <= ZOOM_SCALE.max)) errors.push(`${name}: la escala va de ${ZOOM_SCALE.min} a ${ZOOM_SCALE.max}.`);
+  }
+  if (plan.take_transition !== undefined && !TAKE_TRANSITIONS.includes(plan.take_transition)) errors.push("Transición entre tomas desconocida.");
+  if (plan.emphasis_word_ids !== undefined) {
+    const emphasis = plan.emphasis_word_ids;
+    if (!Array.isArray(emphasis) || emphasis.length > MAX_EMPHASIS || new Set(emphasis).size !== emphasis.length) errors.push(`Las palabras resaltadas deben ser una lista sin repetidos de hasta ${MAX_EMPHASIS}.`);
+    else if (emphasis.some((id) => typeof id !== "string" || !frames.has(id))) errors.push("Una palabra resaltada no existe en el video.");
+  }
   return errors;
 };
 
 // Cada guardado es una versión nueva; las tarjetas se recolocan sobre la persona.
-export const savePlan = async (id: string, incoming: Plan): Promise<Plan> => {
-  const file = join(dir(id), "plan.json");
-  const current = await readJson<Plan>(file);
-  const plan: Plan = { ...incoming, version: (current?.version ?? 0) + 1 };
-  await fs.mkdir(join(dir(id), "plans"), { recursive: true });
-  const text = JSON.stringify(plan, null, 2) + "\n";
-  await fs.writeFile(file, text, "utf-8");
+export const savePlan = async (id: string, incoming: Plan, expected?: { planHash: string; timelineHash: string; timeline: Timeline }): Promise<Plan> => {
+  const base = await readActiveEdit(id);
+  if (expected && contentHash(base.plan) !== expected.planHash) throw new PlanConflict("La base de esta candidata cambió.");
+  if (incoming.version !== base.plan.version) throw new PlanConflict("Tu borrador parte de otra versión. Conservamos tus cambios; recarga la versión actual antes de guardar.");
+  if ((await jobStatus(id)).state === "running") throw new PlanConflict("Espera a que termine el procesamiento antes de guardar. Tu borrador sigue intacto.");
+  const errors = await checkPlan(id, incoming);
+  if (errors.length) throw new Error(errors.join(" "));
   const person = join(MEDIA, id, "person.webm");
-  if (plan.cards.length > 0 && existsSync(person)) {
-    await run(at(".venv/bin/python"), [
-      "scripts/place_graphics.py",
-      "--style", "style/pink-demo-v1.json",
-      "--plan", file,
-      "--timeline", join(dir(id), "timeline.json"),
-      "--person", person,
-    ], { cwd: ROOT });
+  if (incoming.cards.length > 0 && !existsSync(person)) {
+    throw new Error("Falta el recorte de la persona. Prepara el video antes de guardar tarjetas; no se modificó el plan.");
   }
-  await fs.copyFile(file, join(dir(id), "plans", `plan-v${plan.version}.json`));
-  return (await readJson<Plan>(file)) as Plan;
+  const stage = await fs.mkdtemp(join(dir(id), ".save-"));
+  try {
+    const file = join(stage, "plan.json"), timelineFile = join(stage, "timeline.json");
+    const plan: Plan = { ...incoming, version: base.plan.version + 1 };
+    // Preparar fuera del lock y fuera de los archivos activos. Un fallo no cambia el video.
+    const headed = await readJob(id);
+    if (expected && contentHash(headed?.timeline) !== expected.timelineHash) throw new PlanConflict("El montaje de esta candidata cambió.");
+    await fs.writeFile(file, JSON.stringify(plan));
+    await fs.writeFile(timelineFile, JSON.stringify(expected?.timeline ?? headed?.timeline ?? base.timeline));
+    if (!expected) {
+      await run(at(".venv/bin/python"), ["scripts/layout_captions.py", "--timeline", timelineFile, "--plan", file], { cwd: ROOT });
+      if (plan.cards.length > 0) await run(at(".venv/bin/python"), ["scripts/place_graphics.py", "--style", "style/pink-demo-v1.json",
+        "--plan", file, "--timeline", timelineFile, "--person", person], { cwd: ROOT });
+    }
+    const edit = { format: 1 as const, plan: JSON.parse(await fs.readFile(file, "utf8")) as Plan,
+      timeline: JSON.parse(await fs.readFile(timelineFile, "utf8")) as Timeline };
+    await withJobWrite(id, async () => {
+      if ((await jobStatus(id)).state === "running") throw new PlanConflict("Empezó un procesamiento mientras guardabas. Conserva tu borrador e intenta después.");
+      if (expected && contentHash((await readActiveEdit(id)).timeline) !== expected.timelineHash) throw new PlanConflict("El montaje cambió mientras aplicabas la candidata.");
+      await commitEdit(id, contentHash(base.plan), edit);
+    });
+    return edit.plan;
+  } finally { await fs.rm(stage, { recursive: true, force: true }); }
 };
 
 export const runningJob = async () => (await listJobs()).find((job) => job.status.state === "running") ?? null;
@@ -196,21 +282,59 @@ export const runningJob = async () => (await listJobs()).find((job) => job.statu
 // Lanza el motor en segundo plano; su avance queda en `status.json` y `job.log`.
 export const startPipeline = async (id: string, source: string, mode: "prepare" | "render") => {
   if (!ENGINE_HERE) throw new Error(NO_ENGINE);
+  const preferences = mode === "prepare" ? await readProfileFile() : null;
   const busy = await runningJob();
   if (busy) throw new Error(`Ya hay un video en proceso (${busy.id}). Esta versión procesa uno a la vez.`);
+  await fs.mkdir(dir(id), { recursive: true });
+  return withJobWrite(id, async () => {
+  if ((await jobStatus(id)).state === "running") throw new PlanConflict("Este video ya está en proceso.");
+  if (mode === "prepare" && existsSync(join(dir(id), "active-edit.json"))) throw new PlanConflict("Este video ya tiene versiones editadas. Sube el original como un trabajo nuevo para volver a prepararlo.");
   await fs.mkdir(join(dir(id), "out"), { recursive: true });
-  const log = openSync(join(dir(id), "job.log"), "a");
   // Un video nuevo nace con el estilo del creador (cuestionario); el motor lo copia al plan inicial.
-  const profile = at("work", "_profile.json");
-  const prepare = ["--prepare-only", ...(existsSync(profile) ? ["--preferences", profile] : [])];
-  const child = spawn("python3", ["scripts/pink_edit.py", source, "--id", id, ...(mode === "prepare" ? prepare : [])], {
-    cwd: ROOT,
-    detached: true,
-    stdio: ["ignore", log, log],
+  const profile = join(dir(id), "preferences-snapshot.json");
+  if (preferences !== null) await fs.writeFile(profile, JSON.stringify(preferences), "utf-8");
+  const prepare = ["--prepare-only", ...(preferences !== null ? ["--preferences", profile] : [])];
+  // Exportar exactamente el montaje revisado, sin volver a alinear las palabras.
+  let render: string[] = [];
+  if (mode === "render") {
+    const active = await readJob(id);
+    if (!active) throw new Error("El video todavía no está preparado.");
+    const problems = await checkPlan(id, active.plan);
+    if (problems.length) throw new Error(problems.join(" "));
+    const runId = randomUUID(), input = join(dir(id), "renders", runId, "input");
+    await fs.mkdir(input, { recursive: true });
+    await fs.writeFile(join(input, "plan.json"), JSON.stringify(active.plan));
+    await fs.writeFile(join(input, "timeline.json"), JSON.stringify(active.timeline));
+    await fs.writeFile(join(input, "style.json"), JSON.stringify(active.style));
+    await fs.writeFile(join(input, "manifest.json"), JSON.stringify(await buildRunManifest(id, active.plan, active.timeline, active.style, Date.now()), null, 2));
+    render = ["--execution-id", runId, "--plan", join(input, "plan.json"), "--timeline-from", join(input, "timeline.json"), "--style", join(input, "style.json")];
+    await atomicJson(join(dir(id), "current-render.json"), { id: runId, plan_version: active.plan.version, plan_hash: contentHash(active.plan) });
+  }
+  const status: JobStatus = { state: "running", stage: "start", error: null, updated_at: Date.now() / 1000, pid: process.pid };
+  await atomicJson(join(dir(id), "status.json"), status);
+  const log = openSync(join(dir(id), "job.log"), "a");
+  try {
+    const child = spawn("python3", ["scripts/pink_edit.py", source, "--id", id, ...(mode === "prepare" ? prepare : render)], {
+      cwd: ROOT, detached: true, stdio: ["ignore", log, log],
+    });
+    child.once("exit", () => {
+      // También cubrir fallos de importación anteriores al primer estado de Python.
+      void (async () => {
+        const latest = await readJson<JobStatus>(join(dir(id), "status.json"));
+        if (latest?.state === "running" && (latest.pid === child.pid || latest.pid === process.pid)) {
+          await atomicJson(join(dir(id), "status.json"), { ...latest, state: "failed",
+            error: "El motor terminó sin confirmar el resultado. Revisa el registro del trabajo." });
+        }
+      })().catch(() => { /* La recuperación durable tras reinicios pertenece a la cola. */ });
+    });
+    await new Promise<void>((resolve, reject) => { child.once("spawn", resolve); child.once("error", reject); });
+    // Python publica su propio PID antes de trabajar; no sobrescribir sus etapas.
+    child.unref();
+  } catch (error) {
+    await atomicJson(join(dir(id), "status.json"), { ...status, state: "failed", error: "No se pudo iniciar el motor." });
+    throw error;
+  } finally { closeSync(log); }
   });
-  const status: JobStatus = { state: "running", stage: "start", error: null, updated_at: Date.now() / 1000, pid: child.pid };
-  await fs.writeFile(join(dir(id), "status.json"), JSON.stringify(status), "utf-8");
-  child.unref();
 };
 
 export const sourceFile = (id: string) => join(MEDIA, id, "source.mp4");

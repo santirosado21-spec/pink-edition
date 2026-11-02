@@ -1,0 +1,381 @@
+{
+  "version": 1,
+  "updated_on": "2026-10-27",
+  "purpose": "Recetas originales derivadas de evidencia pública de CapCut e InVideo para pruebas locales de Cutkind. No registra recursos renderizables nuevos.",
+  "sources": [
+    {
+      "id": "capcut-ui",
+      "kind": "ui-observation",
+      "url": "https://www.capcut.com/editor?scenario=custom",
+      "scope": "Paneles invitados de texto, captions y transiciones; sin subir videos ni exportar."
+    },
+    {
+      "id": "capcut-rea",
+      "kind": "static-artifact",
+      "evidence_id": "ev_f4adec408418dd69a06f9fcfd25bbd5a92098b251834ee3f47346126015c0c2f",
+      "module_evidence_id": "ev_9dc183bd8799d0d3a47bd78dbeb6900e6d13ffecbe55f06c52e32ab0ac4f3e38",
+      "scope": "Bundles públicos y módulo de localización; cobertura semántica parcial. Un texto de interfaz no demuestra ejecución."
+    },
+    {
+      "id": "capcut-captions",
+      "kind": "official-documentation",
+      "url": "https://www.capcut.com/resource/types-of-captions"
+    },
+    {
+      "id": "capcut-subtitles",
+      "kind": "official-documentation",
+      "url": "https://www.capcut.com/resource/how-to-add-subtitle-in-capcut"
+    },
+    {
+      "id": "invideo-captions",
+      "kind": "official-documentation",
+      "url": "https://invideo.io/blog/how-to-add-captions-to-videos/"
+    },
+    {
+      "id": "invideo-editor",
+      "kind": "official-documentation",
+      "url": "https://invideo.io/editor/"
+    },
+    {
+      "id": "invideo-rea",
+      "kind": "static-artifact",
+      "evidence_id": "ev_51dd0235c32ad8bc66bc960d424b73c9cc9012a0a70b238f5548be518aeed981",
+      "scope": "Cliente público de registro; no demuestra cómo opera el editor autenticado."
+    }
+  ],
+  "patterns": [
+    {
+      "id": "speech-keyword",
+      "title": "Palabra clave limpia",
+      "familyId": "enlace",
+      "sourceIds": [
+        "capcut-captions",
+        "capcut-rea",
+        "invideo-captions"
+      ],
+      "principle": "Destacar el significado sin convertir cada palabra en un efecto.",
+      "status": "specified-not-integrated",
+      "parametersOrigin": "Cutkind original design proposal; not measured in the other applications",
+      "proposedParameters": {
+        "groupWords": 5,
+        "maxEmphasisPerGroup": 1,
+        "emphasisSource": "Sol returns existing word IDs"
+      },
+      "existingBuildingBlocks": [
+        "Preset keyword y tiempos de palabras",
+        "Color de marca y tipografía local"
+      ],
+      "implementationMissing": [
+        "Selección semántica de énfasis en el flujo completo",
+        "Comportamiento específico de keyword en OneShotVideo"
+      ],
+      "acceptance": [
+        "La palabra seleccionada existe en la transcripción",
+        "El resto de la frase sigue legible",
+        "El efecto no tapa cara ni gráficos"
+      ]
+    },
+    {
+      "id": "speech-marker",
+      "title": "Subrayado a mano",
+      "familyId": "estampa",
+      "sourceIds": [
+        "invideo-captions"
+      ],
+      "principle": "Usar un trazo discreto para reforzar una expresión central.",
+      "status": "specified-not-integrated",
+      "parametersOrigin": "Cutkind original design proposal; not measured in the other applications",
+      "proposedParameters": {
+        "entryFrames": 8,
+        "exitFrames": 6,
+        "maxLines": 2,
+        "stroke": "brand accent"
+      },
+      "existingBuildingBlocks": [
+        "Variante underline para tarjetas",
+        "Animación por frame"
+      ],
+      "implementationMissing": [
+        "Aplicar trazo a captions y sincronizar con la palabra elegida"
+      ],
+      "acceptance": [
+        "Trazo estable por frame",
+        "No altera tiempos ni palabras",
+        "Se diferencia del resaltado por fondo"
+      ]
+    },
+    {
+      "id": "speech-contrast",
+      "title": "Contraste durante el habla",
+      "familyId": "bitacora",
+      "sourceIds": [
+        "invideo-captions",
+        "capcut-captions"
+      ],
+      "principle": "Separar la palabra activa mediante contraste sin desplazar la composición.",
+      "status": "specified-not-integrated",
+      "parametersOrigin": "Cutkind original design proposal; not measured in the other applications",
+      "proposedParameters": {
+        "maxGroupWords": 5,
+        "activeContrast": "brand accent with readable ink",
+        "inactiveContrast": "readable neutral"
+      },
+      "existingBuildingBlocks": [
+        "Tiempos de captions",
+        "Preset karaoke"
+      ],
+      "implementationMissing": [
+        "Separar contraste de texto y fondo karaoke",
+        "Validar contraste sobre video claro y oscuro"
+      ],
+      "acceptance": [
+        "La palabra activa sigue el audio",
+        "El texto inactivo mantiene legibilidad",
+        "No depende de una fuente de reemplazo"
+      ]
+    },
+    {
+      "id": "editorial-type-duo",
+      "title": "Jerarquía con dos tipografías",
+      "familyId": "estampa",
+      "sourceIds": [
+        "invideo-captions",
+        "capcut-subtitles",
+        "capcut-ui"
+      ],
+      "principle": "Contrastar un título editorial con subtítulos sencillos.",
+      "status": "specified-not-integrated",
+      "parametersOrigin": "Cutkind original design proposal; not measured in the other applications",
+      "proposedParameters": {
+        "titleFontId": "editorial",
+        "captionRole": "caption font of selected pair",
+        "maxTitleLines": 3
+      },
+      "existingBuildingBlocks": [
+        "Parejas DM Serif Display/DM Sans y Cormorant/Manrope",
+        "Carga de fuentes por función"
+      ],
+      "implementationMissing": [
+        "Elección independiente de tipografía por función en el brief",
+        "Muestras del mismo mensaje con cada pareja"
+      ],
+      "acceptance": [
+        "Misma pareja en cuestionario, preview y MP4",
+        "Cambiar letra no cambia la familia sin elección del usuario"
+      ]
+    },
+    {
+      "id": "speech-reveal",
+      "title": "Revelado por frase corta",
+      "familyId": "pulso",
+      "sourceIds": [
+        "capcut-captions",
+        "capcut-ui"
+      ],
+      "principle": "Acompañar la voz con apariciones progresivas y un tiempo de lectura estable.",
+      "status": "specified-not-integrated",
+      "parametersOrigin": "Cutkind original design proposal; not measured in the other applications",
+      "proposedParameters": {
+        "entryFrames": 5,
+        "maxGroupWords": 4,
+        "exitFrames": 4,
+        "scaleRange": [
+          0.98,
+          1
+        ]
+      },
+      "existingBuildingBlocks": [
+        "Tiempos de palabras",
+        "Revelado por líneas en tarjetas"
+      ],
+      "implementationMissing": [
+        "Revelado específico para captions y agrupación por pausa/puntuación"
+      ],
+      "acceptance": [
+        "No aparecen palabras antes de su ventana",
+        "No hay saltos bruscos de posición",
+        "No recorta la voz"
+      ]
+    },
+    {
+      "id": "transition-editorial",
+      "title": "Unión editorial discreta",
+      "familyId": "umbral",
+      "sourceIds": [
+        "capcut-ui",
+        "capcut-rea",
+        "invideo-editor"
+      ],
+      "principle": "Usar una transición sólo en una unión real entre tomas.",
+      "status": "specified-not-integrated",
+      "parametersOrigin": "Cutkind original design proposal; not measured in the other applications",
+      "proposedParameters": {
+        "durationFrames": 8,
+        "allowedVariants": [
+          "soft-focus",
+          "none"
+        ],
+        "preserveAudio": true
+      },
+      "existingBuildingBlocks": [
+        "Eventos explícitos de transición en uniones",
+        "soft-focus implementado"
+      ],
+      "implementationMissing": [
+        "Control previo de intensidad y desactivación por video",
+        "Decidir continuidad según la toma"
+      ],
+      "acceptance": [
+        "Una sola toma no obliga a insertar transición",
+        "No altera duración ni voz",
+        "No se cuenta una tarjeta como cambio de toma"
+      ]
+    },
+    {
+      "id": "transition-motion",
+      "title": "Cambio con movimiento breve",
+      "familyId": "pulso",
+      "sourceIds": [
+        "capcut-ui",
+        "invideo-editor"
+      ],
+      "principle": "Reservar acercamientos o barridos para un cambio de énfasis.",
+      "status": "specified-not-integrated",
+      "parametersOrigin": "Cutkind original design proposal; not measured in the other applications",
+      "proposedParameters": {
+        "durationFrames": 10,
+        "allowedVariants": [
+          "zoom-blur",
+          "mask-wipe"
+        ],
+        "maximumPerTenSeconds": 1
+      },
+      "existingBuildingBlocks": [
+        "zoom-blur y mask-wipe implementados",
+        "Familia Pulso"
+      ],
+      "implementationMissing": [
+        "Densidad configurable y respeto de movimiento reducido"
+      ],
+      "acceptance": [
+        "El patrón está anclado a una unión",
+        "El movimiento no se aplica a todos los recursos por defecto",
+        "Las transiciones pueden apagarse"
+      ]
+    },
+    {
+      "id": "broll-literal",
+      "title": "B-roll que explica la frase",
+      "familyId": "enlace",
+      "sourceIds": [
+        "invideo-editor"
+      ],
+      "principle": "Escoger un recurso por su relación con lo dicho y conservar la voz original.",
+      "status": "specified-not-integrated",
+      "parametersOrigin": "Cutkind original design proposal; not measured in the other applications",
+      "proposedParameters": {
+        "density": "selective",
+        "sourcePolicy": [
+          "stock",
+          "own",
+          "both"
+        ],
+        "reviewModel": "Sol",
+        "fallback": "keep original shot and report missing resource"
+      },
+      "existingBuildingBlocks": [
+        "Sol elige y revisa candidatos",
+        "B-roll con procedencia",
+        "Presentación enmarcada"
+      ],
+      "implementationMissing": [
+        "Carga y asignación de material propio",
+        "Densidad opcional en vez de cuota fija",
+        "Búsquedas más amplias dentro de un catálogo validado"
+      ],
+      "acceptance": [
+        "Sol explica qué frase ilustra",
+        "No se usa stock como prueba de un dato",
+        "Si no hay recurso pertinente se conserva la toma"
+      ]
+    },
+    {
+      "id": "broll-context-panel",
+      "title": "Toma y contexto en paralelo",
+      "familyId": "bitacora",
+      "sourceIds": [
+        "invideo-editor"
+      ],
+      "principle": "Mantener visible al hablante mientras un panel aporta contexto.",
+      "status": "specified-not-integrated",
+      "parametersOrigin": "Cutkind original design proposal; not measured in the other applications",
+      "proposedParameters": {
+        "layout": "split or framed",
+        "showOriginal": true,
+        "minimumGapToCaptionsPx": 24
+      },
+      "existingBuildingBlocks": [
+        "Variantes split y framed",
+        "Separación geométrica de cara y captions"
+      ],
+      "implementationMissing": [
+        "Preferencia explícita de formato del B-roll",
+        "Variedad de composición ligada a la familia"
+      ],
+      "acceptance": [
+        "Se ven toma y recurso simultáneamente",
+        "No se deforma ninguno de los dos",
+        "No se sobrepone al área reservada de subtítulos"
+      ]
+    },
+    {
+      "id": "sound-semantic-accent",
+      "title": "Acentos de sonido con propósito",
+      "familyId": "pulso",
+      "sourceIds": [
+        "invideo-editor"
+      ],
+      "principle": "Acompañar un evento importante con un sonido discreto, manteniendo la voz dominante.",
+      "status": "specified-not-integrated",
+      "parametersOrigin": "Cutkind original design proposal; not measured in the other applications",
+      "proposedParameters": {
+        "intensity": [
+          "none",
+          "soft",
+          "present"
+        ],
+        "maximumPerTenSeconds": 1,
+        "timing": "anchor word or real transition"
+      },
+      "existingBuildingBlocks": [
+        "Catálogo de sonidos locales con procedencia",
+        "Preferencia sfx"
+      ],
+      "implementationMissing": [
+        "Pistas SFX en el flujo OneShotVideo",
+        "Ganancias y tiempos explícitos por evento"
+      ],
+      "acceptance": [
+        "none produce cero eventos SFX",
+        "La voz sigue inteligible",
+        "Cada sonido tiene procedencia y motivo"
+      ]
+    }
+  ],
+  "deferred": [
+    {
+      "id": "text-behind-subject",
+      "reason": "Documentado por InVideo; requiere segmentación y máscaras temporales que no se comprobaron ni implementaron en este motor."
+    },
+    {
+      "id": "free-roaming-captions",
+      "reason": "Mover captions por toda la pantalla puede invadir cara o gráficos; posponer hasta disponer de composición segura por frame."
+    }
+  ],
+  "executionPolicy": {
+    "testing": "local",
+    "editorialInference": "Sol through ChatGPT",
+    "rentServer": false,
+    "preserveSpeechAndOrder": true
+  }
+}

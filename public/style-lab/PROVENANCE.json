@@ -1,0 +1,41 @@
+{
+  "purpose": "Style lab local preview, original text; not an automated edit",
+  "video": [
+    {
+      "file": "forest.mp4",
+      "source": "https://www.pexels.com/video/11265968/",
+      "download": "https://www.pexels.com/download/video/11265968/",
+      "license": "https://www.pexels.com/license/",
+      "downloaded": "2026-10-19",
+      "sha256": "8679b0cb0258679ab272a65af5013685e3459e9c53dc403b1bccfee56e1f65f4"
+    },
+    {
+      "file": "forest-tracking.mp4",
+      "source": "https://www.pexels.com/video/11899038/",
+      "download": "https://www.pexels.com/download/video/11899038/",
+      "license": "https://www.pexels.com/license/",
+      "downloaded": "2026-10-19",
+      "sha256": "d8a74fd1ec0257861055d1c5ce496d08c4218cb4937ac2efdae75a915456351c"
+    },
+    {
+      "file": "forest-dawn.mp4",
+      "source": "https://www.pexels.com/video/10978942/",
+      "download": "https://www.pexels.com/download/video/10978942/",
+      "license": "https://www.pexels.com/license/",
+      "downloaded": "2026-10-19",
+      "sha256": "4566030b3f7a32e2a4e1152733d97c066c41552e266ec5974633414e87ab0b46"
+    }
+  ],
+  "font": {
+    "file": "Italianno-Regular.ttf",
+    "source": "https://github.com/google/fonts/tree/main/ofl/italianno",
+    "license_file": "Italianno-OFL.txt"
+  },
+  "audio": {
+    "file": "ambient-original.wav",
+    "origin": "Original mathematical synthesis; no external samples",
+    "duration_seconds": 20,
+    "playback_gain": 0.55
+  },
+  "reference": "Mogul demo.mp4 supplied by user; no reference footage or audio reused"
+}

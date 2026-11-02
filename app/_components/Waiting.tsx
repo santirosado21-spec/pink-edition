@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { Brand } from "./Brand";
+import { ThemePicker } from "./ThemePicker";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import type { JobStatus } from "../_lib/jobs";
@@ -25,7 +27,7 @@ export const Waiting: React.FC<{ id: string; initial: JobStatus | null }> = ({ i
   return (
     <div className="waiting">
       <div>
-        <div className="brand"><img src="/logo.png" alt="" /><b>Pink<span>.ai</span></b></div>
+        <div className="waiting-brand"><Brand href="/app" /><ThemePicker /></div>
         <h2>{id}</h2>
         {status ? <span className={`chip ${status.state}`}><i className="dot" />{statusLabel(status)}</span> : <span className="chip failed">No existe este video</span>}
         {status?.error && <div className="notice">{status.error}</div>}

@@ -1,0 +1,1 @@
+review_id,run_id,client_id,timestamp_seconds,element_id,action,reason,scope_video_or_brand,explicit_or_inferred,user_confirmed,rule_version,rollback_version,brand_id,change_family

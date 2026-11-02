@@ -2,18 +2,30 @@
 
 import type { PlayerRef } from "@remotion/player";
 import dynamic from "next/dynamic";
-import Link from "next/link";
+import { Brand } from "./Brand";
+import { ThemePicker } from "./ThemePicker";
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { BackgroundEvent, CardEvent, CutEvent, Plan } from "../../src/edit";
+import type { BackgroundEvent, CardEvent, CutEvent, Plan, StockPhoto } from "../../src/edit";
+import { StockPhotos } from "./StockPhotos";
+import { CandidateReview } from "./CandidateReview";
+import type { Candidate } from "../_lib/candidates";
 import type { Job, JobStatus } from "../_lib/jobs";
 import type { Preferences } from "../../src/preferences";
+import type { EditorAiStatus } from "../_lib/editorAi";
+import type { ProposalReport } from "../_lib/proposalPlan";
+import { autoZooms, type TakeTransition, type ZoomEvent } from "../../src/zooms";
 import { STAGE_ORDER, stageName, statusLabel } from "./stages";
 import { Timeline, type Block } from "./Timeline";
 
 const Preview = dynamic(() => import("./Preview"), { ssr: false, loading: () => <div className="preview-loading">Cargando vista previa…</div> });
 
-type Group = "cuts" | "cards" | "backgrounds";
-type AnyEvent = CutEvent | CardEvent | BackgroundEvent;
+type Group = "cuts" | "cards" | "backgrounds" | "zooms";
+// Los zooms no tienen etiqueta ni color: en pantalla se muestran con unos de cortesía.
+type AnyEvent = CutEvent | CardEvent | BackgroundEvent | (ZoomEvent & { label: string; theme: string });
+const GROUPS: Group[] = ["cuts", "cards", "backgrounds", "zooms"];
+const listOf = (plan: Plan, group: Group) => (plan[group] ?? []) as AnyEvent[];
+const ZOOM_SCALES = [1.1, 1.15, 1.2, 1.3];
+const TRANSITIONS: Record<TakeTransition, string> = { none: "Ninguna", punch: "Punch (zoom breve)", flash: "Destello" };
 type Word = { id: string; text: string; frame: number; clip: number; until: number };
 
 const THEMES: Record<string, string> = { base: "Base (color de marca)", health: "Salud (verde)", stress: "Estrés (rojo)" };
@@ -36,9 +48,12 @@ const MOTIFS: Record<string, string> = { network: "Red de puntos", rings: "Ondas
 const CUT_STYLES: Record<string, string> = { paper: "Papel (fondo claro)", solid: "Sólido (fondo de color)" };
 const VIBE_NAMES = { clean: "limpio", balanced: "equilibrado", dynamic: "dinámico" };
 const SFX_NAMES = { full: "completo", soft: "suave", none: "sin efectos" };
-const NAMES: Record<Group, string> = { cuts: "Corte de color", cards: "Tarjeta", backgrounds: "Fondo" };
+const CAPTION_NAMES = { pink: "subtítulos clásicos", keyword: "palabra clave", karaoke: "karaoke" };
+// Mismo límite que valida el servidor (`MAX_EMPHASIS` en app/_lib/jobs.ts).
+const MAX_EMPHASIS = 40;
+const NAMES: Record<Group, string> = { cuts: "Corte de color", cards: "Tarjeta", backgrounds: "Fondo", zooms: "Zoom" };
 // Pisos propuestos en docs/EDITING_GUIDELINES.md; son avisos, no bloqueos.
-const MINIMUM: Record<Group, number> = { cuts: 25, cards: 43, backgrounds: 66 };
+const MINIMUM: Record<Group, number> = { cuts: 25, cards: 43, backgrounds: 66, zooms: 15 };
 
 const clock = (frame: number, fps: number) => {
   const seconds = frame / fps;
@@ -46,7 +61,8 @@ const clock = (frame: number, fps: number) => {
 };
 
 export const Editor: React.FC<{ initial: Job }> = ({ initial }) => {
-  const { id, style, timeline, media } = initial;
+  const { id, style, media } = initial;
+  const [timeline, setTimeline] = useState(initial.timeline);
   const fps = style.fps;
   const [plan, setPlan] = useState<Plan>(initial.plan);
   const [dirty, setDirty] = useState(false);
@@ -63,6 +79,20 @@ export const Editor: React.FC<{ initial: Job }> = ({ initial }) => {
   const [nowFrame, setNowFrame] = useState(0);
   const [playing, setPlaying] = useState(false);
   const [profile, setProfile] = useState<Preferences | null>(null);
+  const [profileError, setProfileError] = useState<string | null>(null);
+  const [proposalReport, setProposalReport] = useState<ProposalReport | null>(null);
+  const [aiStatus, setAiStatus] = useState<EditorAiStatus | null>(null);
+  const [comparison, setComparison] = useState<{ candidate: Candidate; baseline: boolean } | null>(null);
+  useEffect(() => { setComparison(null); }, [plan]);
+  useEffect(() => {
+    const controller = new AbortController();
+    fetch(`/api/jobs/${id}/propose`, { cache: "no-store", signal: controller.signal })
+      .then(async (response) => { if (!response.ok) throw new Error(); return response.json(); })
+      .then((body) => { if (!controller.signal.aborted && typeof body.ready === "boolean") setAiStatus(body); })
+      .catch(() => { if (!controller.signal.aborted) setAiStatus({ ready: false, provider: "OpenAI", model: "", message: "No se pudo comprobar la edición IA. Recarga para volver a comprobarla." }); });
+    return () => controller.abort();
+  }, [id, busy]);
+  const proposalPending = useRef(false);
   const playerRef = useRef<PlayerRef | null>(null);
   // Historial para deshacer y rehacer; cada gesto guarda el plan anterior una vez.
   const planRef = useRef(plan);
@@ -89,8 +119,8 @@ export const Editor: React.FC<{ initial: Job }> = ({ initial }) => {
 
   const items = useMemo(
     () =>
-      (["cuts", "cards", "backgrounds"] as Group[])
-        .flatMap((group) => (plan[group] as AnyEvent[]).map((event) => ({ group, event, start: startOf(event) })))
+      GROUPS
+        .flatMap((group) => listOf(plan, group).map((event) => ({ group, event: group === "zooms" ? ({ ...event, label: `Zoom ×${(event as ZoomEvent).scale}`, theme: "base" } as AnyEvent) : event, start: startOf(event) })))
         .sort((a, b) => a.start - b.start),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [plan, words],
@@ -100,7 +130,7 @@ export const Editor: React.FC<{ initial: Job }> = ({ initial }) => {
   const marks = useMemo(() => {
     const map = new Map<number, { cut?: string; card?: string }>();
     for (const { group, event, start } of items) {
-      if (group === "backgrounds") continue;
+      if (group === "backgrounds" || group === "zooms") continue;
       words.forEach((word, index) => {
         if (word.frame >= start && word.frame < start + event.duration_frames) {
           map.set(index, { ...map.get(index), [group === "cuts" ? "cut" : "card"]: event.theme });
@@ -112,7 +142,7 @@ export const Editor: React.FC<{ initial: Job }> = ({ initial }) => {
 
   const warnings = useMemo(() => {
     const list: string[] = [];
-    const main = items.filter((item) => item.group !== "backgrounds");
+    const main = items.filter((item) => item.group === "cuts" || item.group === "cards");
     for (const item of items) {
       if (item.event.duration_frames < MINIMUM[item.group]) {
         list.push(`${NAMES[item.group]} «${item.event.label}» dura ${item.event.duration_frames} frames; menos de ${MINIMUM[item.group]} se lee con dificultad.`);
@@ -170,7 +200,13 @@ export const Editor: React.FC<{ initial: Job }> = ({ initial }) => {
 
   // El estilo de la cuenta puede haber cambiado después de subir este video.
   useEffect(() => {
-    fetch("/api/profile").then((response) => (response.ok ? response.json() : null)).then((body) => setProfile(body?.preferences ?? null)).catch(() => undefined);
+    let active = true;
+    fetch("/api/profile").then(async (response) => {
+      const body = await response.json();
+      if (!response.ok) throw new Error(body.error || "No se pudo cargar tu estilo.");
+      if (active) setProfile(body.preferences);
+    }).catch((error) => { if (active) setProfileError((error as Error).message); });
+    return () => { active = false; };
   }, []);
 
   // El navegador avisa antes de cerrar o recargar con cambios sin guardar.
@@ -194,24 +230,33 @@ export const Editor: React.FC<{ initial: Job }> = ({ initial }) => {
     bump((count) => count + 1);
   };
   const change = (next: Plan) => {
+    setComparison(null);
     record();
+    planRef.current = next;
     setPlan(next);
     setDirty(true);
+    setProposalReport(null);
   };
   const undo = () => {
     const previous = past.current.pop();
     if (!previous) return;
     future.current.push(planRef.current);
-    setPlan(previous);
+    const restored = { ...previous, version: planRef.current.version };
+    planRef.current = restored;
+    setPlan(restored);
     setDirty(true);
+    setProposalReport(null);
     bump((count) => count + 1);
   };
   const redo = () => {
     const next = future.current.pop();
     if (!next) return;
     past.current.push(planRef.current);
-    setPlan(next);
+    const restored = { ...next, version: planRef.current.version };
+    planRef.current = restored;
+    setPlan(restored);
     setDirty(true);
+    setProposalReport(null);
     bump((count) => count + 1);
   };
 
@@ -228,8 +273,11 @@ export const Editor: React.FC<{ initial: Job }> = ({ initial }) => {
   // Mover y redimensionar actúan en vivo sobre el último plan, sin registrar cada paso.
   const live = (group: Group, eventId: string, build: (event: AnyEvent) => AnyEvent) => {
     const current = planRef.current;
-    setPlan({ ...current, [group]: (current[group] as AnyEvent[]).map((event) => (event.id === eventId ? build(event) : event)) });
+    const next = { ...current, [group]: listOf(current, group).map((event) => (event.id === eventId ? build(event) : event)) };
+    planRef.current = next;
+    setPlan(next);
     setDirty(true);
+    setProposalReport(null);
   };
   const moveBlock = (group: Group, eventId: string, newStart: number) =>
     live(group, eventId, (event) => {
@@ -250,9 +298,9 @@ export const Editor: React.FC<{ initial: Job }> = ({ initial }) => {
       return resized;
     });
   const update = (group: Group, eventId: string, patch: Partial<AnyEvent>) =>
-    change({ ...plan, [group]: (plan[group] as AnyEvent[]).map((event) => (event.id === eventId ? { ...event, ...patch } : event)) });
+    change({ ...plan, [group]: listOf(plan, group).map((event) => (event.id === eventId ? { ...event, ...patch } : event)) });
   const remove = (group: Group, eventId: string) => {
-    change({ ...plan, [group]: (plan[group] as AnyEvent[]).filter((event) => event.id !== eventId) });
+    change({ ...plan, [group]: listOf(plan, group).filter((event) => event.id !== eventId) });
     if (selected === eventId) setSelected(null);
   };
 
@@ -283,6 +331,23 @@ export const Editor: React.FC<{ initial: Job }> = ({ initial }) => {
     if (!extend) seek(words[index].frame);
   };
 
+  // Marca o desmarca las palabras elegidas para el estilo «palabra clave».
+  const toggleEmphasis = () => {
+    if (!selection) return;
+    const ids = words.slice(selection[0], selection[1] + 1).map((word) => word.id);
+    const current = new Set(plan.emphasis_word_ids ?? []);
+    const next = new Set(current);
+    if (ids.every((id) => current.has(id))) ids.forEach((id) => next.delete(id));
+    else {
+      ids.forEach((id) => next.add(id));
+      // Una adición que pase del límite se rechaza entera: el plan no cambia.
+      if (next.size > MAX_EMPHASIS) return setToast(`Puedes resaltar hasta ${MAX_EMPHASIS} palabras por video; quita algunas antes de agregar más.`);
+    }
+    const ordered = words.map((word) => word.id).filter((id) => next.has(id));
+    change({ ...plan, emphasis_word_ids: ordered });
+    setSelection(null);
+  };
+
   const add = (group: Group) => {
     if (!selection) return;
     const first = words[selection[0]];
@@ -296,6 +361,10 @@ export const Editor: React.FC<{ initial: Job }> = ({ initial }) => {
       offset_frames: 0,
       duration_frames: Math.max(1, last.until - first.frame),
     };
+    if (group === "zooms") {
+      const zoom: ZoomEvent = { id: base.id, anchor_word_id: base.anchor_word_id, offset_frames: 0, duration_frames: base.duration_frames, scale: 1.2 };
+      change({ ...plan, zooms: [...(plan.zooms ?? []), zoom] });
+    }
     if (group === "cuts") change({ ...plan, cuts: [...plan.cuts, { ...base, style: "paper", last_word_id: last.id }] });
     if (group === "backgrounds") change({ ...plan, backgrounds: [...plan.backgrounds, { ...base, motif: "network" }] });
     if (group === "cards") {
@@ -306,19 +375,44 @@ export const Editor: React.FC<{ initial: Job }> = ({ initial }) => {
     setSelection(null);
   };
 
+  const addPhoto = (photo: StockPhoto) => {
+    if (!selection) return;
+    const first = words[selection[0]], last = words[selection[1]];
+    const current = planRef.current;
+    const card: CardEvent = { id: `photo_${Date.now().toString(36)}`, kind: "photo", photo,
+      label: `Foto: ${photo.alt || photo.photographer}`.slice(0, 80), theme,
+      anchor_word_id: first.id, offset_frames: 0, duration_frames: Math.max(1, last.until - first.frame),
+      beat: { anchor_word_id: first.id, offset_frames: 0 }, top: 300 };
+    change({ ...current, cards: [...current.cards, card] });
+    setSelection(null);
+  };
+
   const save = async (): Promise<boolean> => {
+    const submitted = planRef.current;
     setBusy("Guardando…");
-    const response = await fetch(`/api/jobs/${id}/plan`, { method: "PUT", body: JSON.stringify(plan) });
+    try {
+    const response = await fetch(`/api/jobs/${id}/plan`, { method: "PUT", body: JSON.stringify(submitted) });
     const body = await response.json();
     setBusy(null);
     if (!response.ok) {
       setToast([body.error, ...(body.errors ?? [])].join(" "));
       return false;
     }
+    setComparison(null);
+    if (planRef.current !== submitted) {
+      setPlan({ ...planRef.current, version: body.plan.version });
+      if (body.timeline) setTimeline(body.timeline);
+      setDirty(true);
+      setToast("Se guardó la versión enviada. Tus cambios posteriores siguen en el borrador.");
+      return false;
+    }
     setPlan(body.plan);
+    if (body.timeline) setTimeline(body.timeline);
     setDirty(false);
     setToast(`Guardado como versión ${body.plan.version}.`);
     return true;
+    } catch { setToast("No se pudo guardar. Tu borrador sigue intacto."); return false; }
+    finally { setBusy(null); }
   };
 
   const render = async () => {
@@ -331,43 +425,63 @@ export const Editor: React.FC<{ initial: Job }> = ({ initial }) => {
   };
 
   const propose = async () => {
+    if (proposalPending.current) return;
+    proposalPending.current = true;
+    const submitted = planRef.current;
     setBusy("Proponiendo…");
-    const response = await fetch(`/api/jobs/${id}/propose`, { method: "POST" });
-    const body = await response.json();
-    setBusy(null);
-    if (!response.ok) return setToast(body.error);
-    change(body.plan);
-    setToast(`Propuesta lista, sin guardar. ${body.notes ?? ""}`);
+    setProposalReport(null);
+    try {
+      const response = await fetch(`/api/jobs/${id}/propose`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ plan: submitted }) });
+      const body = await response.json();
+      if (!response.ok) return setToast(body.error);
+      if (planRef.current !== submitted) return setToast("Seguiste editando mientras llegaba la propuesta. Conservamos tus cambios; vuelve a proponer cuando termines.");
+      change(body.plan);
+      setProposalReport(body.report ?? null);
+      setToast(`Propuesta conservada en el historial, sin cambiar la versión activa. ${body.notes ?? ""}`);
+    } catch { setToast("No se pudo recibir la propuesta. Tus cambios siguen intactos; inténtalo de nuevo."); }
+    finally { proposalPending.current = false; setBusy(null); }
   };
 
   const props = useMemo(() => ({ style, plan, timeline, media }), [style, plan, timeline, media]);
+  const previewProps = comparison ? { style: comparison.candidate.style, timeline: comparison.candidate.timeline,
+    plan: comparison.baseline ? comparison.candidate.base : comparison.candidate.plan, media } : props;
   // Las marcas del editor usan el color de marca del video, como el render.
   const brand = plan.preferences?.brand_color;
   const brandMarks = (brand ? { "--base": brand, ...(plan.preferences?.context_colors ? {} : { "--health": brand, "--stress": brand }) } : undefined) as React.CSSProperties | undefined;
   const outdated = profile !== null && JSON.stringify(profile) !== JSON.stringify(plan.preferences ?? null);
   const running = status.state === "running";
+  const emphasized = useMemo(() => new Set(plan.emphasis_word_ids ?? []), [plan.emphasis_word_ids]);
   const quote = selection ? words.slice(selection[0], selection[1] + 1).map((word) => word.text).join(" ") : null;
 
   return (
     <div className="editor" data-tab={tab} style={brandMarks}>
       <div className="topbar">
-        <Link href="/app" className="brand"><img src="/logo.png" alt="" /><b>Pink<span>.ai</span></b></Link>
+        <Brand href="/app" />
         <span className="muted">/</span>
         <span className="title">{id}</span>
         <span className={`chip ${status.state}`}><i className="dot" />{statusLabel(status)}</span>
         {dirty && <span className="chip">Cambios sin guardar</span>}
-        <span className="spacer" />
+        <span className="spacer" /><ThemePicker />
         <button className="button ghost icon" onClick={undo} disabled={past.current.length === 0} title="Deshacer (⌘Z)" aria-label="Deshacer">↶</button>
         <button className="button ghost icon" onClick={redo} disabled={future.current.length === 0} title="Rehacer (⇧⌘Z)" aria-label="Rehacer">↷</button>
-        <button className="button ghost" onClick={propose} disabled={running || busy !== null}>✦ Proponer con IA</button>
-        <button className="button" onClick={save} disabled={!dirty || running || busy !== null}>{busy === "Guardando…" ? busy : "Guardar"}</button>
-        <button className="button primary" onClick={render} disabled={running || busy !== null}>{running ? "Renderizando…" : "Renderizar"}</button>
+        <button className="button ghost" onClick={propose} disabled={comparison !== null || running || busy !== null || !aiStatus?.ready}>✦ Proponer con IA</button>
+        <button className="button" onClick={save} disabled={comparison !== null || !dirty || running || busy !== null}>{busy === "Guardando…" ? busy : "Guardar"}</button>
+        <button className="button primary" onClick={render} disabled={comparison !== null || running || busy !== null}>{running ? statusLabel(status) : "Renderizar"}</button>
         {hasOutput && !running && <a className="button" href={`/api/jobs/${id}/download`}>↓ Descargar MP4</a>}
       </div>
 
       <div className="workspace">
         <div className="stage">
-          <div className="frame"><Preview props={props} playerRef={playerRef} /></div>
+          {comparison && <div role="status">Comparando: {comparison.baseline ? "punto de partida" : "propuesta conservada"}.
+            <span> Vuelve al borrador para guardar o renderizar.</span>
+            <button className="button" onClick={() => setComparison(null)}>Volver al borrador</button>
+          </div>}
+          <div className="frame"><Preview props={previewProps} playerRef={playerRef} /></div>
+          <div className="muted" role="status" data-testid="editor-ai-status">
+            {aiStatus ? <>{aiStatus.message}{aiStatus.model && <> · {aiStatus.provider} / {aiStatus.model}</>}</> : "Comprobando edición IA…"}
+            {!timeline.is_sample && timeline.clips.some(clip => !clip.face) && <p>Falta una medición fiable del rostro en alguna toma. Sus tarjetas y fondos se ocultan para evitar taparlo.</p>}
+            {items.length === 0 && <p>Este montaje todavía no tiene tarjetas, cortes de color, fondos ni zooms. Puedes añadirlos o pedir una propuesta cuando la IA esté disponible.</p>}
+          </div>
           <div className="transport">
             <button className="button" onClick={() => playerRef.current?.toggle()} aria-label={playing ? "Pausar" : "Reproducir"}>{playing ? "❚❚" : "▶"}</button>
             <span className="muted">{clock(nowFrame, fps)} / {clock(timeline.duration_frames, fps)} · versión {plan.version}</span>
@@ -390,6 +504,8 @@ export const Editor: React.FC<{ initial: Job }> = ({ initial }) => {
                 <button className="button" onClick={() => add("cuts")}>＋ Corte de color</button>
                 <button className="button" onClick={() => add("cards")} disabled={!media.person} title={media.person ? "" : "Este video no tiene recorte de la persona"}>＋ Tarjeta</button>
                 <button className="button" onClick={() => add("backgrounds")} disabled={!media.person}>＋ Fondo</button>
+                <button className="button" onClick={() => add("zooms")}>＋ Zoom</button>
+                <button className="button" onClick={toggleEmphasis} title="Para el estilo de subtítulos «palabra clave»">★ Resaltar</button>
                 <button className="button ghost" onClick={() => setSelection(null)}>Cancelar</button>
               </>
             ) : (
@@ -407,7 +523,7 @@ export const Editor: React.FC<{ initial: Job }> = ({ initial }) => {
                 {words.map((word, index) => {
                   if (word.clip !== clipIndex) return null;
                   const mark = marks.get(index);
-                  const classes = ["word", index === nowIndex && "now", selection && index >= selection[0] && index <= selection[1] && "selected", mark?.cut && "cut", mark?.card && "card"].filter(Boolean).join(" ");
+                  const classes = ["word", index === nowIndex && "now", selection && index >= selection[0] && index <= selection[1] && "selected", mark?.cut && "cut", mark?.card && "card", emphasized.has(word.id) && "emph"].filter(Boolean).join(" ");
                   return (
                     <span key={word.id}>
                       <span className={classes} style={mark ? ({ "--mark": `var(--${mark.cut ?? mark.card})` } as React.CSSProperties) : undefined} onClick={(event) => pick(index, event.shiftKey)}>
@@ -422,6 +538,17 @@ export const Editor: React.FC<{ initial: Job }> = ({ initial }) => {
         </div>
 
         <div className="column col-items">
+          {profileError && <p role="alert" className="notice">{profileError} Este video conserva su propio estilo. <a href="/estilo">Revisar mi estilo</a></p>}
+          {proposalReport && <div role="status" className="warnings">
+            <b>{proposalReport.status === "degraded" ? "La propuesta necesita revisión" : proposalReport.status === "no_new_elements" ? "No se añadieron elementos" : "Revisa las sugerencias"}</b>
+            <p>{proposalReport.accepted} nuevos · {proposalReport.preserved} conservados · {proposalReport.invalid + proposalReport.blocked} descartados.</p>
+            {proposalReport.summary && <p><b>Lo que entendió del video:</b> {proposalReport.summary}</p>}
+            {proposalReport.assets?.map((asset, index) => <p key={index}><b>{asset.provider} · {asset.query}</b><br />«{asset.quote}» — {asset.purpose}<br />{asset.detail}</p>)}
+            <ul>{proposalReport.reasons.map((reason, index) => <li key={index}>{reason}</li>)}</ul>
+          </div>}
+          {timeline.transcription_review_required && <p className="notice">Revisa los subtítulos, especialmente nombres y cambios de idioma. En modo mixto conservamos el audio completo para evitar recortar palabras no reconocidas.</p>}
+          <CandidateReview job={id} refresh={busy} onPreview={(candidate, baseline) => { playerRef.current?.pause(); setComparison({ candidate, baseline }); }} />
+          <StockPhotos job={id} disabled={!selection || running} onSelect={addPhoto} />
           {(running || status.state === "failed") && (
             <div className="steps-box">
               <h3 className="section" style={{ margin: "0 0 10px" }}>Progreso</h3>
@@ -438,11 +565,21 @@ export const Editor: React.FC<{ initial: Job }> = ({ initial }) => {
           {(plan.preferences || outdated) && (
             <div className="style-box">
               {plan.preferences ? (
-                <span className="grow"><i className="dot-color" style={{ background: plan.preferences.brand_color }} /> Estilo de este video: {VIBE_NAMES[plan.preferences.vibe]} · sonido {SFX_NAMES[plan.preferences.sfx]}</span>
-              ) : <span className="grow muted">Este video usa el estilo Pink de origen.</span>}
-              {outdated && <button className="button" onClick={() => change({ ...plan, preferences: profile! })}>Usar mi estilo actual</button>}
+                <span className="grow"><i className="dot-color" style={{ background: plan.preferences.brand_color }} /> Estilo de este video: {VIBE_NAMES[plan.preferences.vibe]} · {CAPTION_NAMES[plan.preferences.captions ?? "pink"]} · sonido {SFX_NAMES[plan.preferences.sfx]}</span>
+              ) : <span className="grow muted">Este video usa el estilo clásico de origen.</span>}
+              {outdated && <button className="button" onClick={() => change({ ...plan, preferences: profile!, take_transition: profile?.transition ?? "none" })}>Usar mi estilo actual</button>}
             </div>
           )}
+          <div className="style-box">
+            <span className="grow">Ritmo: {(plan.zooms ?? []).length} zooms</span>
+            <button className="button" title="Reemplaza los zooms por unos automáticos según tu estilo de edición" onClick={() => change({ ...plan, zooms: autoZooms(timeline, plan, plan.preferences?.vibe ?? "dynamic") })}>Zooms automáticos</button>
+            <label>Transición entre tomas{" "}
+              <select className="button" value={plan.take_transition ?? plan.preferences?.transition ?? "none"} onChange={(event) => change({ ...plan, take_transition: event.target.value as TakeTransition })}>
+                {Object.entries(TRANSITIONS).map(([key, label]) => <option key={key} value={key}>{label}</option>)}
+              </select>
+            </label>
+            {timeline.clips.every((clip) => !clip.head) && <span className="muted">Este video no tiene recorte de la persona: los zooms no se aplican.</span>}
+          </div>
           {warnings.length > 0 && (
             <div className="warnings">
               <b>Avisos de las guías de edición</b>
@@ -467,7 +604,10 @@ export const Editor: React.FC<{ initial: Job }> = ({ initial }) => {
                     </select>
                   </label>
                 )}
-                {group === "cards" && (
+                {group === "cards" && (event as CardEvent).kind === "photo" && (
+                  <p>Foto de <a href={(event as CardEvent).photo?.url} target="_blank" rel="noreferrer">{(event as CardEvent).photo?.photographer} · {(event as CardEvent).photo?.provider}</a><br />{(event as CardEvent).meaning}</p>
+                )}
+                {group === "cards" && (event as CardEvent).kind !== "photo" && (
                   <label>Tarjeta
                     <select value={(event as CardEvent).kind} onChange={(change) => update(group, event.id, { kind: change.target.value })}>
                       {Object.entries(KINDS).map(([key, label]) => <option key={key} value={key}>{label}</option>)}
@@ -479,6 +619,13 @@ export const Editor: React.FC<{ initial: Job }> = ({ initial }) => {
                     <input maxLength={12} value={(event as CardEvent).text ?? ""} placeholder="200" onChange={(change) => update(group, event.id, { text: change.target.value })} />
                   </label>
                 )}
+                {group === "zooms" && (
+                  <label>Escala
+                    <select value={(event as ZoomEvent).scale} onChange={(change) => update(group, event.id, { scale: Number(change.target.value) } as Partial<AnyEvent>)}>
+                      {ZOOM_SCALES.map((scale) => <option key={scale} value={scale}>×{scale}</option>)}
+                    </select>
+                  </label>
+                )}
                 {group === "backgrounds" && (
                   <label>Motivo
                     <select value={(event as BackgroundEvent).motif} onChange={(change) => update(group, event.id, { motif: change.target.value })}>
@@ -486,11 +633,11 @@ export const Editor: React.FC<{ initial: Job }> = ({ initial }) => {
                     </select>
                   </label>
                 )}
-                <label>Color
+                {group !== "zooms" && <label>Color
                   <select value={event.theme} onChange={(change) => update(group, event.id, { theme: change.target.value })}>
                     {Object.entries(THEMES).map(([key, label]) => <option key={key} value={key}>{label}</option>)}
                   </select>
-                </label>
+                </label>}
                 <label>Duración (frames)
                   <input type="number" min={1} value={event.duration_frames} onChange={(change) => update(group, event.id, { duration_frames: Math.max(1, Math.round(Number(change.target.value)) || 1) })} />
                 </label>
