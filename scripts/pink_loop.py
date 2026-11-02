@@ -17,6 +17,7 @@ import argparse
 import json
 import os
 import pathlib
+import random
 import subprocess
 import sys
 import time
@@ -39,10 +40,16 @@ GATES = [
     ('paso editorial', ['node', 'scripts/test_editorial_step.mjs']),
     ('política de recursos', ['node', 'scripts/test_resource_policy.mjs']),
     ('catálogo de marca', ['node', 'scripts/test_brand_catalog.mjs']),
+    ('loop de evaluación', [sys.executable, 'scripts/test_pink_loop.py']),
 ]
-DIMENSIONS = [('claridad', 'se lee y se entiende'), ('pertinencia', 'tarjetas/B-roll vienen al caso'),
-              ('ritmo', 'cortes y énfasis'), ('estilo', 'fiel al preset elegido'),
-              ('publicable', 'lo publicarías tal cual')]
+DIMENSIONS = [
+    ('editorial', 'qué apoyo eligió y en qué momento'),
+    ('visual', 'cómo se ve: tarjeta, letra y composición'),
+    ('ritmo', 'cortes y énfasis'),
+    ('publicable', 'lo publicarías tal cual'),
+]
+LEGACY_DIMENSION_KEYS = ('claridad', 'pertinencia', 'ritmo', 'estilo', 'publicable')
+CURRENT_DIMENSION_KEYS = tuple(key for key, _ in DIMENSIONS)
 FEEDBACK_LIMIT = 500  # fran_loop recorta resourceNotes a 600 caracteres
 
 
@@ -119,36 +126,93 @@ def video_rows(folder):
         yield quality.parent, q, feedback, failing, qc
 
 
+def split_for(folder, target, quality, config=None):
+    """Devuelve el split válido de un video sin modificar sus archivos históricos."""
+    quality_split = quality.get('split')
+    if quality_split in ('dev', 'holdout'):
+        return quality_split
+    if quality_split is None:
+        config = config if config is not None else load(folder / 'config.json', {})
+        try:
+            index = int(target.name.removeprefix('video-')) - 1
+            config_split = config.get('videos', [])[index].get('split')
+        except (AttributeError, IndexError, TypeError, ValueError):
+            config_split = None
+        if config_split in ('dev', 'holdout'):
+            return config_split
+    return 'dev'
+
+
+def blind_map(folder):
+    """Asigna etiquetas estables sin usar los metadatos editoriales de los videos."""
+    targets = [target for target, _, _, _, _ in video_rows(folder)]
+    random.Random(folder.name).shuffle(targets)
+    mapping = {
+        f'Video {chr(ord("A") + index)}': target.name
+        for index, target in enumerate(targets)
+    }
+    save(STATE / 'blind' / f'{folder.name}.json', mapping)
+    return mapping
+
+
+def label_for(mapping, target):
+    return next((label for label, name in mapping.items() if name == target.name), target.name)
+
+
+def has_hard_failure(quality):
+    raw_checks = quality.get('checks')
+    if raw_checks is not None and not isinstance(raw_checks, dict):
+        return True
+    checks = raw_checks or {}
+    if any(value is not True for value in checks.values()):
+        return True
+    if quality.get('editorialIssues'):
+        return True
+    for key in ('audioQc', 'fullVoiceQc', 'visualModelReview'):
+        review = quality.get(key)
+        if isinstance(review, dict) and 'exitCode' in review and review['exitCode'] != 0:
+            return True
+    return False
+
+
 def status(name=None):
     folder = pick_round(name)
     print(f'RONDA {folder.name}')
+    config = load(folder / 'config.json', {})
+    mapping = blind_map(folder)
     pending = []
     for target, q, feedback, failing, qc in video_rows(folder):
         title = q.get('title') or target.name
+        label = label_for(mapping, target)
+        split = split_for(folder, target, q, config)
         technical = 'técnico OK' if not failing and not q.get('editorialIssues') and all(v in (0, None) for v in qc.values()) else 'técnico con pendientes'
         scores = feedback.get('scores')
+        display_name = title if scores else label
         human = f"tu nota media {sum(scores.values()) / len(scores):.1f}/5" if scores else 'SIN VEREDICTO TUYO'
-        print(f"  - {title} · {q.get('durationSeconds')} s · {technical} · {human}")
+        if scores:
+            print(f"  - {label}: {title} · split {split} · {q.get('durationSeconds')} s · {technical} · {human}")
+        else:
+            print(f"  - {label} · split {split} · {q.get('durationSeconds')} s · {technical} · {human}")
         for k in failing:
             print(f'      check en rojo: {k}')
-            pending.append(f'{title}: arreglar check «{k}»')
+            pending.append(f'{display_name}: arreglar check «{k}»')
         for issue in q.get('editorialIssues') or []:
             print(f'      pendiente del motor: {issue}')
-            pending.append(f'{title}: {issue}')
-        for label, code in qc.items():
+            pending.append(f'{display_name}: {issue}')
+        for qc_label, code in qc.items():
             if code is None:
-                print(f'      sin ejecutar: {label}')
-                pending.append(f'{title}: ejecutar {label}')
+                print(f'      sin ejecutar: {qc_label}')
+                pending.append(f'{display_name}: ejecutar {qc_label}')
             elif code != 0:
-                print(f'      FALLÓ: {label} (código {code})')
-                pending.append(f'{title}: corregir {label}')
+                print(f'      FALLÓ: {qc_label} (código {code})')
+                pending.append(f'{display_name}: corregir {qc_label}')
         if not scores:
-            pending.append(f'{title}: puntuarlo (`review`)')
+            pending.append(f'{display_name}: puntuarlo (`review`)')
         elif min(scores.values()) <= 2:
             low = [k for k, v in scores.items() if v <= 2]
-            pending.append(f"{title}: mejorar {', '.join(low)} (nota ≤2)")
+            pending.append(f"{display_name}: mejorar {', '.join(low)} (nota ≤2)")
         for change in feedback.get('nextRoundChanges') or []:
-            pending.append(f'{title}: {change}')
+            pending.append(f'{display_name}: {change}')
     print('\nPENDIENTES, por orden de acción:')
     for i, item in enumerate(pending, 1) if pending else []:
         print(f'  {i}. {item}')
@@ -159,9 +223,14 @@ def status(name=None):
 
 def review(name=None):
     folder = pick_round(name)
-    print(f'REVIEW de {folder.name}. Abre el MP4 (work/fran-loop/{folder.name}/video-XX/session/review/preview.mp4) y puntúa 1-5.')
-    for target, q, feedback, _, _ in video_rows(folder):
-        print(f"\n== {q.get('title') or target.name} ({q.get('durationSeconds')} s)")
+    mapping = blind_map(folder)
+    targets = {target.name: (target, q, feedback) for target, q, feedback, _, _ in video_rows(folder)}
+    print('REVIEW A CIEGAS. Abre cada ruta de preview y puntúa 1-5.')
+    for label, target_name in mapping.items():
+        target, q, feedback = targets[target_name]
+        preview = folder / target.name / 'session/review/preview.mp4'
+        print(f'\n== {label}')
+        print(f'  MP4: {preview}')
         if feedback.get('scores') and ask('  Ya tiene veredicto. ¿Rehacer? [s/N] ').lower() != 's':
             continue
         scores = {}
@@ -178,7 +247,7 @@ def review(name=None):
         save(target / 'feedback.json', record)
         q['aestheticApproval'] = 'approved' if min(scores.values()) >= 4 else 'needs-changes'
         save(target / 'quality.json', q)
-        append({'event': 'review', 'round': folder.name, 'video': target.name, 'title': q.get('title'), **record})
+        append({'event': 'review', 'round': folder.name, 'video': target.name, **record})
         print(f"  guardado: {q['aestheticApproval']}")
 
 
@@ -188,14 +257,25 @@ def next_config(name=None):
     if not config:
         raise SystemExit('La ronda no conserva config.json; no puedo derivar la siguiente.')
     notes = []
+    ignored_holdout = 0
+    dev_feedback = 0
     for target, q, feedback, _, _ in video_rows(folder):
         scores = feedback.get('scores') or {}
+        if not scores:
+            continue
+        if split_for(folder, target, q, config) == 'holdout':
+            ignored_holdout += 1
+            continue
+        dev_feedback += 1
         low = [k for k, v in scores.items() if v <= 3]
         parts = [c for c in feedback.get('nextRoundChanges') or [] if c]
         if low:
             parts.append('mejorar: ' + ', '.join(low))
         if parts:
             notes.append(f"{q.get('title') or target.name}: " + '; '.join(parts))
+    print(f'Se ignoraron {ignored_holdout} feedback de holdout.')
+    if not dev_feedback and ignored_holdout:
+        raise SystemExit('Sólo hay feedback de holdout; no se generó next-config.json.')
     if not notes:
         raise SystemExit('No hay feedback que trasladar. Ejecuta `review` primero (o aprueba la ronda).')
     feedback_text = (' | '.join(notes))[:FEEDBACK_LIMIT]
@@ -209,6 +289,54 @@ def next_config(name=None):
     append({'event': 'next-config', 'from': folder.name, 'feedback': feedback_text})
     print(f'Config lista: {STATE / "next-config.json"}\nFeedback incluido ({len(feedback_text)} car.): {feedback_text}')
     return STATE / 'next-config.json'
+
+
+def score_schema(scores):
+    """Conserva separadas las escalas históricas y la escala actual."""
+    if any(key in scores for key in ('claridad', 'pertinencia', 'estilo')):
+        return 'antiguas', LEGACY_DIMENSION_KEYS
+    return 'nuevas', CURRENT_DIMENSION_KEYS
+
+
+def mean_text(values, keys):
+    means = []
+    for key in keys:
+        scored = [scores[key] for scores in values if isinstance(scores.get(key), int)]
+        if scored:
+            means.append(f'{key}={sum(scored) / len(scored):.1f}')
+    return ', '.join(means) or '—'
+
+
+def history():
+    found = list(reversed(rounds()))
+    if not found:
+        print('No hay rondas con resultados para mostrar en el historial.')
+        return
+    print('HISTORIAL (de la ronda más antigua a la más reciente)')
+    for folder in found:
+        config = load(folder / 'config.json', {})
+        grouped = {}
+        for target, quality, feedback, _, _ in video_rows(folder):
+            split = split_for(folder, target, quality, config)
+            group = grouped.setdefault(split, {'scores': {'nuevas': [], 'antiguas': []}, 'hard': 0})
+            scores = feedback.get('scores') or {}
+            if scores:
+                schema, _ = score_schema(scores)
+                group['scores'][schema].append(scores)
+            if has_hard_failure(quality):
+                group['hard'] += 1
+        for split in ('dev', 'holdout'):
+            if split not in grouped:
+                continue
+            group = grouped[split]
+            current = group['scores']['nuevas']
+            legacy = group['scores']['antiguas']
+            all_scores = current + legacy
+            publicable = [scores['publicable'] for scores in all_scores if isinstance(scores.get('publicable'), int)]
+            percent = f'{100 * sum(value >= 4 for value in publicable) / len(publicable):.1f}%' if publicable else '—'
+            media = f"nuevas [{mean_text(current, CURRENT_DIMENSION_KEYS)}]; antiguas [{mean_text(legacy, LEGACY_DIMENSION_KEYS)}]"
+            print(f'  {folder.name} · {split} · puntuados: {len(all_scores)} · medias: {media} · '
+                  f'publicable ≥4: {percent} · fallos duros: {group["hard"]}')
 
 
 def server_up(origin):
@@ -268,6 +396,7 @@ def main():
     sub = parser.add_subparsers(dest='cmd')
     for name in ('status', 'review', 'next'):
         sub.add_parser(name).add_argument('round', nargs='?', help='nombre de ronda; por defecto la última')
+    sub.add_parser('history')
     sub.add_parser('gates')
     runner = sub.add_parser('run')
     runner.add_argument('--config', type=pathlib.Path, default=STATE / 'next-config.json')
@@ -283,6 +412,8 @@ def main():
         review(args.round)
     elif cmd == 'next':
         next_config(args.round)
+    elif cmd == 'history':
+        history()
     elif cmd == 'run':
         sys.exit(run(args.config, args.yes))
     else:
