@@ -32,3 +32,10 @@ public/work/
 next-env.d.ts
 *.tsbuildinfo
 .next-*/
+
+# Estado local de herramientas.
+supabase/.temp/
+:memory:*
+graphify-out/cache/
+graphify-out/.graphify_labels*
+graphify-out/.graphify_root
