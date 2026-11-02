@@ -1,0 +1,482 @@
+{
+  "date": "2026-10-27",
+  "scope": "Public unauthenticated CapCut editor and InVideo signup bundles; static REA analysis plus separately identified UI observations and official documentation.",
+  "applications": {
+    "capcut": {
+      "parent_evidence_id": "ev_f4adec408418dd69a06f9fcfd25bbd5a92098b251834ee3f47346126015c0c2f",
+      "summary_evidence_id": "ev_7bbe8f03ce0f27b7d22f81234c531b7c28e590dc9db5836595557e5d707a8ec3",
+      "artifact": {
+        "path": "/private/tmp/cutkind-rea-capcut-invideo-20261027/capcut",
+        "sha256": "357c690724b7762091f467490f66625d833cd4784d7e64b2034f0f3e5f98e6af"
+      },
+      "statistics": {
+        "relevant_files": 10,
+        "nested_asar_containers": 0,
+        "text_bytes_read": 6585129,
+        "invalid_utf8_files": 0,
+        "parsed_javascript_files": 9,
+        "visited_ast_nodes": 1396640,
+        "findings": 378,
+        "modules": 0,
+        "parse_failures": 0
+      },
+      "coverage": {
+        "application": {
+          "status": "partial",
+          "truncated": false,
+          "omitted_count": null,
+          "limits": [
+            {
+              "name": "javascript_analysis_parent_result_budget_bytes",
+              "value": 1976894472,
+              "unit": "bytes"
+            },
+            {
+              "name": "javascript_analysis_worker_heap_limit_bytes",
+              "value": 1098907648,
+              "unit": "bytes"
+            },
+            {
+              "name": "javascript_analysis_worker_timeout_ms",
+              "value": 30000,
+              "unit": "milliseconds"
+            }
+          ]
+        },
+        "semantic": {
+          "status": "partial",
+          "truncated": true,
+          "omitted_nodes": null,
+          "omitted_relations": null,
+          "limits": [
+            {
+              "name": "javascript_analysis_parent_result_budget_bytes",
+              "value": 1976894472,
+              "unit": "bytes"
+            },
+            {
+              "name": "javascript_analysis_worker_heap_limit_bytes",
+              "value": 1098907648,
+              "unit": "bytes"
+            },
+            {
+              "name": "javascript_analysis_worker_timeout_ms",
+              "value": 30000,
+              "unit": "milliseconds"
+            },
+            {
+              "name": "semantic_graph_node_ceiling",
+              "value": 100000,
+              "unit": "items"
+            }
+          ],
+          "families": [
+            {
+              "family": "boundary",
+              "status": "partial",
+              "retained_relations": 0,
+              "omitted_relations": null,
+              "unknown_count": 6
+            },
+            {
+              "family": "call-flow",
+              "status": "partial",
+              "retained_relations": 585,
+              "omitted_relations": null,
+              "unknown_count": 7714
+            },
+            {
+              "family": "child-process",
+              "status": "partial",
+              "retained_relations": 0,
+              "omitted_relations": null,
+              "unknown_count": 6
+            },
+            {
+              "family": "closure",
+              "status": "partial",
+              "retained_relations": 4014,
+              "omitted_relations": null,
+              "unknown_count": 6
+            },
+            {
+              "family": "configuration",
+              "status": "partial",
+              "retained_relations": 0,
+              "omitted_relations": null,
+              "unknown_count": 6
+            },
+            {
+              "family": "data-flow",
+              "status": "partial",
+              "retained_relations": 24156,
+              "omitted_relations": null,
+              "unknown_count": 6607
+            },
+            {
+              "family": "event",
+              "status": "partial",
+              "retained_relations": 0,
+              "omitted_relations": null,
+              "unknown_count": 6
+            },
+            {
+              "family": "object-flow",
+              "status": "partial",
+              "retained_relations": 0,
+              "omitted_relations": null,
+              "unknown_count": 16317
+            },
+            {
+              "family": "promise-ownership",
+              "status": "partial",
+              "retained_relations": 0,
+              "omitted_relations": null,
+              "unknown_count": 6
+            },
+            {
+              "family": "request",
+              "status": "partial",
+              "retained_relations": 0,
+              "omitted_relations": null,
+              "unknown_count": 6
+            },
+            {
+              "family": "resource-lifecycle",
+              "status": "partial",
+              "retained_relations": 0,
+              "omitted_relations": null,
+              "unknown_count": 6
+            },
+            {
+              "family": "timer",
+              "status": "partial",
+              "retained_relations": 0,
+              "omitted_relations": null,
+              "unknown_count": 6
+            }
+          ]
+        },
+        "application_unknowns": 6,
+        "semantic_unknowns": 30692
+      },
+      "focused_module": {
+        "evidence_id": "ev_9dc183bd8799d0d3a47bd78dbeb6900e6d13ffecbe55f06c52e32ab0ac4f3e38",
+        "node_id": "jag_node_3abf8c49983b7852d8f639a41a0742336189ed47328832ca744282ccbf8c295e",
+        "path": "en.2e0c2c38edb09f9c9b0b32c33aa5e4d7.js",
+        "identity": {
+          "strategy": "artifact-local-key",
+          "stability": "artifact-version",
+          "artifact_sha256": "9c14a9b2d8db453da03e4f5540ac7935e778a7952367f22dc4e9c423219e6208",
+          "namespace": "source-module",
+          "key": "357c690724b7762091f467490f66625d833cd4784d7e64b2034f0f3e5f98e6af:en.2e0c2c38edb09f9c9b0b32c33aa5e4d7.js"
+        },
+        "source_ranges": [
+          {
+            "kind": "source-range",
+            "source": "en.2e0c2c38edb09f9c9b0b32c33aa5e4d7.js",
+            "start": {
+              "line": 1,
+              "column": 0
+            },
+            "end": {
+              "line": 1,
+              "column": 1399915
+            }
+          }
+        ]
+      },
+      "limitations": [
+        "Boundary extraction covers unshadowed JSON/global coercions plus parse and validation method candidates.",
+        "Child-process extraction covers asynchronous node:child_process creation, literal argv/env/stdio options, exit/error listeners, and kill signals.",
+        "CommonJS and ESM binding relationships were recovered from inert syntax and resolved only within the inventoried artifact container.",
+        "Configuration extraction covers process.env, process.argv, node:fs reads, and direct logical defaults.",
+        "Event extraction covers EventEmitter-style literal registrations, removals, and dispatch candidates; dynamic names remain unknown.",
+        "Function fingerprints are static candidates; equal digests can remain ambiguous and do not prove behavioral equivalence.",
+        "Graph coverage is incomplete; unavailable facts remain explicit and must not be read as absence.",
+        "JavaScript and HTML were parsed as inert text; bundle bootstrap code was never executed.",
+        "Local data flow does not claim control-flow-sensitive reaching definitions or arbitrary dynamic property resolution.",
+        "Promise ownership covers explicit unshadowed Promise construction, static factories, aggregation, chaining, and await syntax only.",
+        "Request extraction covers fetch, WebSocket, node:http/node:https construction, direct option fields, and exact local response consumers.",
+        "Resource extraction covers built-in filesystem/network acquisition and exact local close/destroy/end handles.",
+        "Static imports, entrypoints, workers, endpoints, and storage relationships do not prove runtime execution.",
+        "Static paths and relationships may remain unresolved when expressions are dynamic or obfuscated.",
+        "The semantic graph contains static syntax observations and conservative relationship candidates; it does not claim runtime execution.",
+        "Timer extraction covers global or node:timers scheduling and exact local-handle cancellation.",
+        "Webpack/Rspack factories were recovered from AST literals; REA did not invoke push handlers or bundle bootstrap code.",
+        "editor.78dcc000f3.js: Resource constraint during analyze_javascript_application: Owned JavaScript worker exhausted its heap while analyzing editor.78dcc000f3.js during semantic",
+        "src-editor-1.cfb2f344a7.js: Resource constraint during analyze_javascript_application: Semantic graph for src-editor-1.cfb2f344a7.js exceeds the parent's remaining result budget; static and module facts were retained",
+        "src-editor-2.f86e850dcf.js: Resource constraint during analyze_javascript_application: Semantic graph for src-editor-2.f86e850dcf.js exceeds the parent's remaining result budget; static and module facts were retained",
+        "src-editor-3.ad7baa845e.js: Resource constraint during analyze_javascript_application: Semantic graph for src-editor-3.ad7baa845e.js exceeds the parent's remaining result budget; static and module facts were retained",
+        "src-editor-4.5e3ecc7f72.js: Resource constraint during analyze_javascript_application: Semantic graph for src-editor-4.5e3ecc7f72.js exceeds the parent's remaining result budget; static and module facts were retained",
+        "src-editor-5.44a5547a45.js: Resource constraint during analyze_javascript_application: Semantic graph for src-editor-5.44a5547a45.js exceeds the parent's remaining result budget; static and module facts were retained"
+      ],
+      "unknowns": [
+        "editor.78dcc000f3.js: Resource constraint during analyze_javascript_application: Owned JavaScript worker exhausted its heap while analyzing editor.78dcc000f3.js during semantic",
+        "graph.coverage.status is partial",
+        "semantic_graph.coverage.status is partial",
+        "src-editor-1.cfb2f344a7.js: Resource constraint during analyze_javascript_application: Semantic graph for src-editor-1.cfb2f344a7.js exceeds the parent's remaining result budget; static and module facts were retained",
+        "src-editor-2.f86e850dcf.js: Resource constraint during analyze_javascript_application: Semantic graph for src-editor-2.f86e850dcf.js exceeds the parent's remaining result budget; static and module facts were retained",
+        "src-editor-3.ad7baa845e.js: Resource constraint during analyze_javascript_application: Semantic graph for src-editor-3.ad7baa845e.js exceeds the parent's remaining result budget; static and module facts were retained",
+        "src-editor-4.5e3ecc7f72.js: Resource constraint during analyze_javascript_application: Semantic graph for src-editor-4.5e3ecc7f72.js exceeds the parent's remaining result budget; static and module facts were retained",
+        "src-editor-5.44a5547a45.js: Resource constraint during analyze_javascript_application: Semantic graph for src-editor-5.44a5547a45.js exceeds the parent's remaining result budget; static and module facts were retained"
+      ],
+      "ui": {
+        "url": "https://www.capcut.com/editor?scenario=custom",
+        "method": "CUA AX observation",
+        "observed": [
+          "Separate panels for Text, Captions, Transcript, Transitions and Brand kit",
+          "Text templates and Text effects tabs; separate heading and body text actions",
+          "Caption panel exposes auto recognition, manual captions and subtitle-file import",
+          "Transition panel groups Classic, Overlay, Light, Camera and 3D resources",
+          "Onscreen transition instruction requires placement between two timeline clips"
+        ],
+        "not_observed": [
+          "Exported footage",
+          "Animation durations or easing curves",
+          "Subscription entitlement for individual effects"
+        ]
+      }
+    },
+    "invideo": {
+      "parent_evidence_id": "ev_51dd0235c32ad8bc66bc960d424b73c9cc9012a0a70b238f5548be518aeed981",
+      "summary_evidence_id": "ev_fcfd9fc35de6f9a6be6ebf0292431830c42baf754f36b3da5944d12b21214c79",
+      "artifact": {
+        "path": "/private/tmp/cutkind-rea-capcut-invideo-20261027/invideo",
+        "sha256": "77c176cc60fe40f1029bf14d2a165ea59c115cb1a68c86bf84f1bc320a7d101f"
+      },
+      "statistics": {
+        "relevant_files": 12,
+        "nested_asar_containers": 0,
+        "text_bytes_read": 611307,
+        "invalid_utf8_files": 0,
+        "parsed_javascript_files": 11,
+        "visited_ast_nodes": 182717,
+        "findings": 18,
+        "modules": 0,
+        "parse_failures": 0
+      },
+      "coverage": {
+        "application": {
+          "status": "partial",
+          "truncated": false,
+          "omitted_count": null,
+          "limits": [
+            {
+              "name": "javascript_analysis_parent_result_budget_bytes",
+              "value": 1850728128,
+              "unit": "bytes"
+            },
+            {
+              "name": "javascript_analysis_worker_heap_limit_bytes",
+              "value": 1098907648,
+              "unit": "bytes"
+            },
+            {
+              "name": "javascript_analysis_worker_timeout_ms",
+              "value": 30000,
+              "unit": "milliseconds"
+            }
+          ]
+        },
+        "semantic": {
+          "status": "partial",
+          "truncated": true,
+          "omitted_nodes": null,
+          "omitted_relations": null,
+          "limits": [
+            {
+              "name": "javascript_analysis_parent_result_budget_bytes",
+              "value": 1850728128,
+              "unit": "bytes"
+            },
+            {
+              "name": "javascript_analysis_worker_heap_limit_bytes",
+              "value": 1098907648,
+              "unit": "bytes"
+            },
+            {
+              "name": "javascript_analysis_worker_timeout_ms",
+              "value": 30000,
+              "unit": "milliseconds"
+            },
+            {
+              "name": "semantic_graph_node_ceiling",
+              "value": 100000,
+              "unit": "items"
+            }
+          ],
+          "families": [
+            {
+              "family": "boundary",
+              "status": "partial",
+              "retained_relations": 4,
+              "omitted_relations": null,
+              "unknown_count": 5
+            },
+            {
+              "family": "call-flow",
+              "status": "partial",
+              "retained_relations": 4026,
+              "omitted_relations": null,
+              "unknown_count": 2299
+            },
+            {
+              "family": "child-process",
+              "status": "partial",
+              "retained_relations": 0,
+              "omitted_relations": null,
+              "unknown_count": 5
+            },
+            {
+              "family": "closure",
+              "status": "partial",
+              "retained_relations": 3238,
+              "omitted_relations": null,
+              "unknown_count": 5
+            },
+            {
+              "family": "configuration",
+              "status": "partial",
+              "retained_relations": 0,
+              "omitted_relations": null,
+              "unknown_count": 5
+            },
+            {
+              "family": "data-flow",
+              "status": "partial",
+              "retained_relations": 21888,
+              "omitted_relations": null,
+              "unknown_count": 3725
+            },
+            {
+              "family": "event",
+              "status": "partial",
+              "retained_relations": 0,
+              "omitted_relations": null,
+              "unknown_count": 5
+            },
+            {
+              "family": "object-flow",
+              "status": "partial",
+              "retained_relations": 717,
+              "omitted_relations": null,
+              "unknown_count": 3840
+            },
+            {
+              "family": "promise-ownership",
+              "status": "partial",
+              "retained_relations": 26,
+              "omitted_relations": null,
+              "unknown_count": 13
+            },
+            {
+              "family": "request",
+              "status": "partial",
+              "retained_relations": 0,
+              "omitted_relations": null,
+              "unknown_count": 5
+            },
+            {
+              "family": "resource-lifecycle",
+              "status": "partial",
+              "retained_relations": 0,
+              "omitted_relations": null,
+              "unknown_count": 5
+            },
+            {
+              "family": "timer",
+              "status": "partial",
+              "retained_relations": 1,
+              "omitted_relations": null,
+              "unknown_count": 5
+            }
+          ]
+        },
+        "application_unknowns": 5,
+        "semantic_unknowns": 9917
+      },
+      "focused_module": {
+        "evidence_id": "ev_b7e66728cf44bfe53ea4c00cf7cdc9b15edddebb30a6e848da11db3eb62b466f",
+        "node_id": "jag_node_5e914cd474b2e77731fa7a8f29cfc279e8052edb733ee1128ecf158f35bb0217",
+        "path": "3rfi0_felya4w.js",
+        "identity": {
+          "strategy": "artifact-local-key",
+          "stability": "artifact-version",
+          "artifact_sha256": "ad56fe57efe5e58a282db200470060da5f8764a2ccee38312a942b3024bc01f7",
+          "namespace": "source-module",
+          "key": "77c176cc60fe40f1029bf14d2a165ea59c115cb1a68c86bf84f1bc320a7d101f:3rfi0_felya4w.js"
+        },
+        "source_ranges": [
+          {
+            "kind": "source-range",
+            "source": "3rfi0_felya4w.js",
+            "start": {
+              "line": 1,
+              "column": 0
+            },
+            "end": {
+              "line": 1,
+              "column": 8636
+            }
+          }
+        ]
+      },
+      "limitations": [
+        "0v9ejnbve5fs7.js: Resource constraint during analyze_javascript_application: Semantic graph for 0v9ejnbve5fs7.js exceeds the parent's remaining result budget; static and module facts were retained",
+        "1jl_a5aidl3e9.js: Resource constraint during analyze_javascript_application: Owned JavaScript worker exhausted its heap while analyzing 1jl_a5aidl3e9.js during semantic",
+        "3d2g9_vf3zx89.js: Resource constraint during analyze_javascript_application: Semantic graph for 3d2g9_vf3zx89.js exceeds the parent's remaining result budget; static and module facts were retained",
+        "3qfd1c666s4rw.js: Resource constraint during analyze_javascript_application: Owned JavaScript worker exhausted its heap while analyzing 3qfd1c666s4rw.js during semantic",
+        "3rfi0_felya4w.js: Resource constraint during analyze_javascript_application: Semantic graph for 3rfi0_felya4w.js exceeds the parent's remaining result budget; static and module facts were retained",
+        "Boundary extraction covers unshadowed JSON/global coercions plus parse and validation method candidates.",
+        "Child-process extraction covers asynchronous node:child_process creation, literal argv/env/stdio options, exit/error listeners, and kill signals.",
+        "CommonJS and ESM binding relationships were recovered from inert syntax and resolved only within the inventoried artifact container.",
+        "Configuration extraction covers process.env, process.argv, node:fs reads, and direct logical defaults.",
+        "Event extraction covers EventEmitter-style literal registrations, removals, and dispatch candidates; dynamic names remain unknown.",
+        "Function fingerprints are static candidates; equal digests can remain ambiguous and do not prove behavioral equivalence.",
+        "Graph coverage is incomplete; unavailable facts remain explicit and must not be read as absence.",
+        "JavaScript and HTML were parsed as inert text; bundle bootstrap code was never executed.",
+        "Local data flow does not claim control-flow-sensitive reaching definitions or arbitrary dynamic property resolution.",
+        "Promise ownership covers explicit unshadowed Promise construction, static factories, aggregation, chaining, and await syntax only.",
+        "Request extraction covers fetch, WebSocket, node:http/node:https construction, direct option fields, and exact local response consumers.",
+        "Resource extraction covers built-in filesystem/network acquisition and exact local close/destroy/end handles.",
+        "Static imports, entrypoints, workers, endpoints, and storage relationships do not prove runtime execution.",
+        "Static paths and relationships may remain unresolved when expressions are dynamic or obfuscated.",
+        "The semantic graph contains static syntax observations and conservative relationship candidates; it does not claim runtime execution.",
+        "Timer extraction covers global or node:timers scheduling and exact local-handle cancellation.",
+        "Webpack/Rspack factories were recovered from AST literals; REA did not invoke push handlers or bundle bootstrap code."
+      ],
+      "unknowns": [
+        "0v9ejnbve5fs7.js: Resource constraint during analyze_javascript_application: Semantic graph for 0v9ejnbve5fs7.js exceeds the parent's remaining result budget; static and module facts were retained",
+        "1jl_a5aidl3e9.js: Resource constraint during analyze_javascript_application: Owned JavaScript worker exhausted its heap while analyzing 1jl_a5aidl3e9.js during semantic",
+        "3d2g9_vf3zx89.js: Resource constraint during analyze_javascript_application: Semantic graph for 3d2g9_vf3zx89.js exceeds the parent's remaining result budget; static and module facts were retained",
+        "3qfd1c666s4rw.js: Resource constraint during analyze_javascript_application: Owned JavaScript worker exhausted its heap while analyzing 3qfd1c666s4rw.js during semantic",
+        "3rfi0_felya4w.js: Resource constraint during analyze_javascript_application: Semantic graph for 3rfi0_felya4w.js exceeds the parent's remaining result budget; static and module facts were retained",
+        "graph.coverage.status is partial",
+        "semantic_graph.coverage.status is partial"
+      ],
+      "ui": {
+        "url": "https://invideo.io/signup",
+        "method": "CUA DOM text observation",
+        "observed": [
+          "Account creation and login screen"
+        ],
+        "not_observed": [
+          "Authenticated editor",
+          "Applied caption presets",
+          "Exported footage"
+        ]
+      }
+    }
+  },
+  "capcut_literal_trace": {
+    "evidence_id": "ev_ccefcb3fd2840890625fd86fc146de47674495b57eeae9434ad9dcbcc0d07a54",
+    "seed": "You need to have at least 2 clips in the main track to preview or add transitions",
+    "coverage": {
+      "status": "no-match",
+      "source_graph_status": "partial",
+      "total_seed_matches": 0
+    },
+    "meaning": "No graph seed match in partial graph. The literal was separately read from the captured localization source; this is not absence of the feature."
+  }
+}

@@ -1,0 +1,1 @@
+review_id,run_id,blind_label,reviewer,graphics_score_1_5,rhythm_score_1_5,readability_score_1_5,brand_score_1_5,publishability_score_1_5,hard_errors,first_proposal_accepted,minor_correction_minutes,preferred_over_baseline,preferred_over_reference,reason

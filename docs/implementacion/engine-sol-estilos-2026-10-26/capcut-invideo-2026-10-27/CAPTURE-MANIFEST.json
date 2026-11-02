@@ -1,0 +1,140 @@
+{
+  "date": "2026-10-27",
+  "scope": "Public unauthenticated source snapshots; no browser credentials or storage exported.",
+  "applications": {
+    "capcut": {
+      "url": "https://www.capcut.com/editor?scenario=custom",
+      "final": "https://www.capcut.com/editor?scenario=custom",
+      "sources": [
+        {
+          "url": "https://sf16-web-login-neutral.capcutstatic.com/obj/capcut-web-login-static/ies/lvweb/video_online/static/js/src-editor-0.73850ada42.js",
+          "file": "src-editor-0.73850ada42.js",
+          "bytes": 266462,
+          "sha256": "a0354f5f0bc15caceca9bcbb03afa5175d3737e3ee706731cc2102fe1177fdf0"
+        },
+        {
+          "url": "https://sf16-web-login-neutral.capcutstatic.com/obj/capcut-web-login-static/ies/lvweb/video_online/static/js/src-editor-1.cfb2f344a7.js",
+          "file": "src-editor-1.cfb2f344a7.js",
+          "bytes": 200416,
+          "sha256": "c7a89ba1ca5eb8f0d5ab3024b626598800707bbd99ba134622a246ef52739321"
+        },
+        {
+          "url": "https://sf16-web-login-neutral.capcutstatic.com/obj/capcut-web-login-static/ies/lvweb/video_online/static/js/src-editor-2.f86e850dcf.js",
+          "file": "src-editor-2.f86e850dcf.js",
+          "bytes": 228800,
+          "sha256": "e1ab674deb6a5e88189f1babebc6c2d8697c3abada02f30e2811bf1b14348d3a"
+        },
+        {
+          "url": "https://sf16-web-login-neutral.capcutstatic.com/obj/capcut-web-login-static/ies/lvweb/video_online/static/js/src-editor-3.ad7baa845e.js",
+          "file": "src-editor-3.ad7baa845e.js",
+          "bytes": 242091,
+          "sha256": "79219c5d3d3cd18f9b17145abe3a82bff0f71adc0be9cfd58b135442bd87c174"
+        },
+        {
+          "url": "https://sf16-web-login-neutral.capcutstatic.com/obj/capcut-web-login-static/ies/lvweb/video_online/static/js/src-editor-4.5e3ecc7f72.js",
+          "file": "src-editor-4.5e3ecc7f72.js",
+          "bytes": 225545,
+          "sha256": "ca5ade9dad0110463e7b0c8f72cae8f5cbacd13cc26b5a1f5aab39229ddebc61"
+        },
+        {
+          "url": "https://sf16-web-login-neutral.capcutstatic.com/obj/capcut-web-login-static/ies/lvweb/video_online/static/js/src-editor-5.44a5547a45.js",
+          "file": "src-editor-5.44a5547a45.js",
+          "bytes": 374673,
+          "sha256": "4590712b534f31fe515078035873d65aa679ccac9ba574d2934225941a978a64"
+        },
+        {
+          "url": "https://sf16-web-login-neutral.capcutstatic.com/obj/capcut-web-login-static/ies/lvweb/video_online/static/js/src-editor-6.487025e608.js",
+          "file": "src-editor-6.487025e608.js",
+          "bytes": 225864,
+          "sha256": "61e66d4e5835516da8a3ee0fba268a01cca082ef757f33475c40520a3f4dc375"
+        },
+        {
+          "url": "https://sf16-web-login-neutral.capcutstatic.com/obj/capcut-web-login-static/ies/lvweb/video_online/static/js/editor.78dcc000f3.js",
+          "file": "editor.78dcc000f3.js",
+          "bytes": 3216522,
+          "sha256": "d85b7f3a851eafeb31c4f8f8406faaeb51e3788ad7f4fa2b3e0ca327e7c35a63"
+        },
+        {
+          "url": "https://sf16-web-login-neutral.capcutstatic.com/obj/capcut-web-login-static/ies/lvweb/video_online/upload/locales/en.2e0c2c38edb09f9c9b0b32c33aa5e4d7.js",
+          "file": "en.2e0c2c38edb09f9c9b0b32c33aa5e4d7.js",
+          "bytes": 1399915,
+          "sha256": "9c14a9b2d8db453da03e4f5540ac7935e778a7952367f22dc4e9c423219e6208"
+        }
+      ],
+      "scope": "public unauthenticated static response"
+    },
+    "invideo": {
+      "url": "https://invideo.io/signup",
+      "final": "https://invideo.io/signup",
+      "sources": [
+        {
+          "url": "https://invideo.io/pro-frontend-assets/eb4f3a8662ca4a7dc7372ffc1163dacd62894a3f/_next/static/chunks/3d2g9_vf3zx89.js?dpl=eb4f3a8662ca4a7dc7372ffc1163dacd62894a3f",
+          "file": "3d2g9_vf3zx89.js",
+          "bytes": 32229,
+          "sha256": "975e3e7e80c805ce7e75234aa2bda08583c1246bbc772b584ed84aaf899606ee"
+        },
+        {
+          "url": "https://invideo.io/pro-frontend-assets/eb4f3a8662ca4a7dc7372ffc1163dacd62894a3f/_next/static/chunks/3qfd1c666s4rw.js?dpl=eb4f3a8662ca4a7dc7372ffc1163dacd62894a3f",
+          "file": "3qfd1c666s4rw.js",
+          "bytes": 155979,
+          "sha256": "1ad8bf0802a5e97e85e7695a25e9dfe24413334cbddb55fe2e1cbb614fd7c110"
+        },
+        {
+          "url": "https://invideo.io/pro-frontend-assets/eb4f3a8662ca4a7dc7372ffc1163dacd62894a3f/_next/static/chunks/1jl_a5aidl3e9.js?dpl=eb4f3a8662ca4a7dc7372ffc1163dacd62894a3f",
+          "file": "1jl_a5aidl3e9.js",
+          "bytes": 204604,
+          "sha256": "0ac54abf1424f91db2b889427d3ceb7c32810a05c1f57e75e5a7b6e36dd43bda"
+        },
+        {
+          "url": "https://invideo.io/pro-frontend-assets/eb4f3a8662ca4a7dc7372ffc1163dacd62894a3f/_next/static/chunks/0v9ejnbve5fs7.js?dpl=eb4f3a8662ca4a7dc7372ffc1163dacd62894a3f",
+          "file": "0v9ejnbve5fs7.js",
+          "bytes": 28852,
+          "sha256": "557a6fa2c4c6f1ec2c911c2ab57322d823790e7047ba0a0283b5e79dbb8d9ea6"
+        },
+        {
+          "url": "https://invideo.io/pro-frontend-assets/eb4f3a8662ca4a7dc7372ffc1163dacd62894a3f/_next/static/chunks/turbopack-1uznitchedius.js?dpl=eb4f3a8662ca4a7dc7372ffc1163dacd62894a3f",
+          "file": "turbopack-1uznitchedius.js",
+          "bytes": 9816,
+          "sha256": "ef56bcfafc8c2230299b3732a25763a8b5ea477b4ed70dce48e3fc23246b262c"
+        },
+        {
+          "url": "https://invideo.io/pro-frontend-assets/eb4f3a8662ca4a7dc7372ffc1163dacd62894a3f/_next/static/chunks/2o20gpuwlzya1.js?dpl=eb4f3a8662ca4a7dc7372ffc1163dacd62894a3f",
+          "file": "2o20gpuwlzya1.js",
+          "bytes": 14445,
+          "sha256": "588e66a67c9b983ec3552a68e004fe01151afc520dd0c72d6854d17c188cc338"
+        },
+        {
+          "url": "https://invideo.io/pro-frontend-assets/eb4f3a8662ca4a7dc7372ffc1163dacd62894a3f/_next/static/chunks/1d_7v28cp80ob.js?dpl=eb4f3a8662ca4a7dc7372ffc1163dacd62894a3f",
+          "file": "1d_7v28cp80ob.js",
+          "bytes": 1594,
+          "sha256": "892796882ddd8e4ecc8cde9bb4be14685e68f66294b82992b5d73e56c891c68c"
+        },
+        {
+          "url": "https://invideo.io/pro-frontend-assets/eb4f3a8662ca4a7dc7372ffc1163dacd62894a3f/_next/static/chunks/0ualztsvi0yor.js?dpl=eb4f3a8662ca4a7dc7372ffc1163dacd62894a3f",
+          "file": "0ualztsvi0yor.js",
+          "bytes": 1299,
+          "sha256": "502fbbbf6179fcfd0287a2a5912914650e8db45797eac45c46b23258fa2a7d59"
+        },
+        {
+          "url": "https://invideo.io/pro-frontend-assets/eb4f3a8662ca4a7dc7372ffc1163dacd62894a3f/_next/static/chunks/2cvuhtchm839e.js?dpl=eb4f3a8662ca4a7dc7372ffc1163dacd62894a3f",
+          "file": "2cvuhtchm839e.js",
+          "bytes": 9206,
+          "sha256": "4449c02a3498fe8ab58437649af915c50c08112d4983f12aa2681f1fc9a6b465"
+        },
+        {
+          "url": "https://invideo.io/pro-frontend-assets/eb4f3a8662ca4a7dc7372ffc1163dacd62894a3f/_next/static/chunks/0cz1d0mv5g_q7.js?dpl=eb4f3a8662ca4a7dc7372ffc1163dacd62894a3f",
+          "file": "0cz1d0mv5g_q7.js",
+          "bytes": 112594,
+          "sha256": "0973c1d64c88adc8e3c950410cb58b288f72118d5965b78049438deb8f2f9683"
+        },
+        {
+          "url": "https://invideo.io/pro-frontend-assets/eb4f3a8662ca4a7dc7372ffc1163dacd62894a3f/_next/static/chunks/3rfi0_felya4w.js?dpl=eb4f3a8662ca4a7dc7372ffc1163dacd62894a3f",
+          "file": "3rfi0_felya4w.js",
+          "bytes": 8636,
+          "sha256": "ad56fe57efe5e58a282db200470060da5f8764a2ccee38312a942b3024bc01f7"
+        }
+      ],
+      "scope": "public unauthenticated static response"
+    }
+  }
+}
