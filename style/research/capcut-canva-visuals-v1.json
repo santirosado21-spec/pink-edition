@@ -1,0 +1,85 @@
+{
+  "schema_version": 1,
+  "id": "capcut-canva-visuals-20261027",
+  "date": "2026-10-27",
+  "status": "partially-implemented-with-static-validation",
+  "research_report": "docs/implementacion/engine-sol-estilos-2026-10-26/capcut-canva-visuals-2026-10-27/INVESTIGACION.md",
+  "apps": [
+    "CapCut",
+    "Canva"
+  ],
+  "asset_policy": "Original Cutkind reconstruction only. No competitor source, media, fonts, or templates imported into engine. Research screenshots remain local evidence.",
+  "preview_policy": "Static original images, Cutkind palette only.",
+  "patterns": [
+    {
+      "id": "graphics-comparison",
+      "title": "Gráficos con jerarquía equivalente",
+      "status": "implemented-questionnaire-existing-renderer",
+      "evidence": "Canva comparison thumbnails",
+      "proposed_controls": "none, figures, comparisons, steps",
+      "acceptance": "Datos literales; unidades repetidas; igual escala para comparación válida; sin inventar números.",
+      "implemented_controls": [
+        "compare",
+        "steps",
+        "none"
+      ]
+    },
+    {
+      "id": "support-media-type",
+      "title": "Fotografía o video de apoyo",
+      "status": "partially-implemented",
+      "evidence": "Canva typography thumbnails; CapCut/Canva static labels",
+      "proposed_controls": "none, video, photo, mixed",
+      "acceptance": "Respetar tipos permitidos, procedencia y anclaje al discurso; cero material cuando no haya recurso relevante.",
+      "implemented_controls": [
+        "auto",
+        "video",
+        "still-from-reviewed-clip",
+        "none"
+      ],
+      "pending": [
+        "independent-stock-photos",
+        "own-uploads"
+      ]
+    },
+    {
+      "id": "support-media-layout",
+      "title": "Apoyo enmarcado o de cobertura",
+      "status": "specified-not-integrated",
+      "evidence": "Canva product thumbnail over typography",
+      "proposed_controls": "inset, split, full",
+      "acceptance": "Rostro/captions despejados cuando están visibles; voz original continua; no estirar relación de aspecto."
+    },
+    {
+      "id": "person-background",
+      "title": "Fondo real de la persona",
+      "status": "concept-images-only",
+      "evidence": "CapCut and Canva static localization only",
+      "proposed_controls": "original; actual replacement pending segmentation",
+      "acceptance": "No equiparar lienzo de marca ni filtro completo con recorte de sujeto; validar máscaras temporales, pelo y manos.",
+      "limitation": "Original background preserved; replacement cannot be selected."
+    },
+    {
+      "id": "full-screen-words",
+      "title": "Intertítulo de palabras protagonistas",
+      "status": "implemented-still-validated",
+      "evidence": "Canva kinetic typography thumbnails",
+      "proposed_controls": "off, overlay, fullscreen",
+      "acceptance": "Frase literal corta, fuente elegida, voz continua y frecuencia limitada; requiere renderer e integración de preferencias.",
+      "implemented_controls": [
+        "none",
+        "overlay",
+        "fullscreen"
+      ],
+      "validation": "Real Remotion stills portrait and landscape; preference roundtrip and exclusions tested. New raw temporal/audio validation remains pending."
+    }
+  ],
+  "unknowns": [
+    "Competitor segmentation runtime and models",
+    "Animation timing and curves",
+    "Feature availability per account/plan",
+    "Licenses to reuse competitor assets",
+    "Our implementation not inspected or changed by this research task"
+  ],
+  "implementation_scope": "Local questionnaire and renderer; human approval and new raw end-to-end render pending."
+}

@@ -1,7 +1,6 @@
 import { Video } from "@remotion/media";
 import type { Caption } from "@remotion/captions";
 import {
-  OffthreadVideo,
   Easing,
   Series,
   interpolate,
@@ -13,7 +12,7 @@ import { ColorCuts } from "./ColorCuts";
 import { EditorialGraphics } from "./EditorialGraphics";
 import { SoundDesign } from "./SoundDesign";
 import { EditContext, asset, buildEdit, useEdit, type CaptionPage, type EditProps } from "./edit";
-import { frameTransform } from "./zooms";
+import { pictureTransform } from "./zooms";
 
 // Estilos «keyword» y «karaoke»: mismo tamaño, fuente y paginación que «pink»; sólo
 // cambian el color, la escala de la palabra resaltada y cuándo aparece cada palabra.
@@ -156,7 +155,7 @@ const FullCaptions: React.FC<{ pages: CaptionPage[] }> = ({ pages }) => {
   );
 };
 
-// Tres capas por toma comparten trim: fondo, persona recortada y captions.
+// Imagen y captions comparten el mismo recorte temporal por toma.
 const ClipSeries: React.FC<{ label: string; render: (index: number) => React.ReactNode }> = ({ label, render }) => {
   const { fps } = useVideoConfig();
   const { plan, clips } = useEdit();
@@ -186,6 +185,7 @@ export const PinkEdit: React.FC<EditProps> = (props) => {
   const { fps } = useVideoConfig();
   const edit = buildEdit(props);
   const { style, plan, clips, isSample, media } = edit;
+  const transition = plan.take_transition ?? plan.preferences?.transition ?? "none";
   const intro = plan.intro_blur ?? style.intro_blur;
   const blur = interpolate(frame, [intro.hold_frames, intro.hold_frames + intro.release_frames], [intro.pixels, 0], {
     extrapolateLeft: "clamp",
@@ -194,18 +194,20 @@ export const PinkEdit: React.FC<EditProps> = (props) => {
   });
   // Ritmo: zoom activo (sube en 3 frames y vuelve de golpe) y pulso de la transición de toma.
   const take = clips.findIndex((clip) => frame >= clip.timeline_in_frame && frame < clip.timeline_in_frame + clip.duration_frames);
-  const zoom = (plan.zooms ?? []).reduce((current, event) => {
+  const active = (plan.zooms ?? []).find((event) => {
     const start = edit.resolveFrame(event, event.id);
-    if (frame < start || frame >= start + event.duration_frames) return current;
-    return interpolate(frame, [start, start + 3], [1, event.scale], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-  }, 1);
+    return frame >= start && frame < start + event.duration_frames;
+  });
+  const zoomTarget = active ? active.scale : 1;
+  const zoom = active ? interpolate(frame, [edit.resolveFrame(active, active.id), edit.resolveFrame(active, active.id) + 3], [1, active.scale], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }) : 1;
   const takeStart = take > 0 ? clips[take].timeline_in_frame : -1;
-  const punch = plan.take_transition === "punch" && take > 0 && frame < takeStart + 8
+  const punch = transition === "punch" && take > 0 && frame < takeStart + 8
     ? interpolate(frame, [takeStart, takeStart + 8], [1.06, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.bezier(0.22, 1, 0.36, 1) })
     : 1;
   // Sin efecto, la imagen conserva exactamente la transformación de siempre.
-  const framed = frameTransform(take >= 0 ? clips[take].head : null, 1 + blur / 400, zoom, punch, style);
-  const flash = plan.take_transition === "flash" && take > 0 && frame < takeStart + 5 ? interpolate(frame, [takeStart, takeStart + 5], [0.55, 0]) : 0;
+  const punchPeak = punch === 1 ? 1 : 1.06;
+  const framed = zoomTarget * punchPeak === 1 ? null : pictureTransform(take >= 0 ? clips[take].head : null, 1 + blur / 400, { zoom, punch }, { zoom: zoomTarget, punch: punchPeak }, style);
+  const flash = transition === "flash" && take > 0 && frame < takeStart + 5 ? interpolate(frame, [takeStart, takeStart + 5], [0.55, 0]) : 0;
   return (
     <EditContext.Provider value={edit}>
       {/* El filtro sólo existe mientras desenfoca: después apagaría el vidrio de las tarjetas. */}
@@ -220,16 +222,12 @@ export const PinkEdit: React.FC<EditProps> = (props) => {
             )
           }
         />
-        <BackgroundEffects />
-        <EditorialGraphics />
-        {/* La persona recortada vuelve a ir encima: los gráficos quedan detrás de ella. */}
-        {isSample || !media.person ? null : (
-          <ClipSeries
-            label="Persona"
-            render={() => <OffthreadVideo transparent muted src={asset(media.person as string)} style={{ ...video, objectFit: "cover" }} />}
-          />
-        )}
+        {/* Una sola imagen en movimiento. El matte se usa para medir posiciones,
+            nunca como segundo decoder superpuesto (Safari podía desincronizarlo). */}
       </div>
+      {/* Los gráficos no heredan el zoom del video; su posición protege cara y captions. */}
+      <BackgroundEffects />
+      <EditorialGraphics />
       {flash > 0 ? <div style={{ ...fill, background: "#ffffff", opacity: flash }} /> : null}
       <ClipSeries
         label="Captions"

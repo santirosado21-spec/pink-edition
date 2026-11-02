@@ -8,6 +8,7 @@ tal cual cuando la toma no cambió: volver a correr el pipeline no las altera.
 
 import argparse
 import json
+import os
 from pathlib import Path
 
 import numpy as np
@@ -62,8 +63,10 @@ def main():
     args = parser.parse_args()
     style = json.loads(args.style.read_text(encoding="utf-8"))
     timeline = json.loads(args.timeline.read_text(encoding="utf-8"))
-    previous = (json.loads(args.previous.read_text(encoding="utf-8"))
-                if args.previous and args.previous.exists() else {})
+    # Las cabezas que ya tiene el timeline también cuentan: nunca se pisan.
+    previous = {head_key(clip): clip["head"] for clip in timeline["clips"] if "head" in clip}
+    if args.previous and args.previous.exists():
+        previous.update(json.loads(args.previous.read_text(encoding="utf-8")))
     missing = [clip for clip in timeline["clips"] if head_key(clip) not in previous]
     if missing:
         source_width, source_height = probe_size(args.person)
@@ -77,7 +80,10 @@ def main():
     for clip in timeline["clips"]:
         key = head_key(clip)
         clip["head"] = previous[key] if key in previous else measure(clip, alpha, geometry)
-    args.timeline.write_text(json.dumps(timeline, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    # Reemplazo atómico: quien lea el timeline nunca ve un archivo a medio escribir.
+    temporary = args.timeline.with_name(args.timeline.name + ".tmp")
+    temporary.write_text(json.dumps(timeline, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    os.replace(temporary, args.timeline)
     reused = len(timeline["clips"]) - len(missing)
     print(f"Cabezas: {len(missing)} medidas, {reused} reutilizadas.", flush=True)
 

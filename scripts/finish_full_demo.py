@@ -2,6 +2,7 @@
 
 import argparse
 import json
+import math
 import subprocess
 from pathlib import Path
 
@@ -47,6 +48,8 @@ def main():
     REPORT_DIR = args.report_dir.resolve()
     style = json.loads(STYLE.read_text(encoding="utf-8"))
     edit_plan = json.loads(PLAN.read_text(encoding="utf-8"))
+    from layout_captions import font_style
+    style = font_style(style, edit_plan.get("preferences", {}))
     timeline = json.loads(TIMELINE.read_text(encoding="utf-8"))
     audio = style["audio"]
     measured = loudness(RENDER, audio)
@@ -66,12 +69,32 @@ def main():
              "-b:a", "192k", "-movflags", "+faststart",
              "-metadata", "comment=Pink.ai",
              str(FINAL)])
+    # En clips cortos loudnorm puede quedar lejos del objetivo. Corregir el
+    # archivo real, limitando picos, y medir de nuevo sin relajar el QC.
+    checked_audio = loudness(FINAL, audio)
+    for attempt in range(3):
+        level = float(checked_audio["input_i"])
+        peak = float(checked_audio["input_tp"])
+        gain = audio["integrated_lufs"] - level
+        if not math.isfinite(level) or (abs(gain) <= 0.5 and peak <= -1.0):
+            break
+        corrected = FINAL.with_name(FINAL.stem + ".audio-correction.mp4")
+        # AAC puede reconstruir picos superiores al límite PCM. Dejar margen,
+        # volver a medir el archivo codificado y corregir también picos aislados.
+        ceiling = 10 ** ((audio["true_peak_dbtp"] - 0.5 - 0.25 * attempt) / 20)
+        run(["ffmpeg", "-v", "error", "-y", "-i", str(FINAL),
+             "-map", "0:v:0", "-map", "0:a:0", "-c:v", "copy",
+             "-af", f"aresample=192000,volume={gain}dB,"
+             f"alimiter=limit={ceiling}:level=false:latency=true,aresample=48000",
+             "-c:a", "aac", "-b:a", "192k", "-movflags", "+faststart",
+             str(corrected)])
+        corrected.replace(FINAL)
+        checked_audio = loudness(FINAL, audio)
     metadata = json.loads(run([
         "ffprobe", "-v", "error", "-show_streams", "-show_format",
         "-of", "json", str(FINAL),
     ]).stdout)
     run(["ffmpeg", "-v", "error", "-i", str(FINAL), "-f", "null", "-"])
-    checked_audio = loudness(FINAL, audio)
     video = next(s for s in metadata["streams"] if s["codec_type"] == "video")
     sound = next(s for s in metadata["streams"] if s["codec_type"] == "audio")
     words = [word for clip in timeline["clips"] for word in clip["words"]]
@@ -125,8 +148,8 @@ def main():
              f"Duración: {report['duration_seconds']:.3f}s",
              f"Contenido: {len(words)}/{source_word_count} palabras, "
              f"{len(timeline['clips'])} tomas, orden original",
-             "Cortes: pausas entre intervenciones; márgenes 0.22s / 0.28s",
-             "Tipografía: Inter Display Bold, tamaño uniforme 100px",
+             ("Audio completo preservado; transcripción mixta pendiente de revisión humana" if timeline.get("audio_preserved") else "Cortes: pausas entre intervenciones; márgenes 0.22s / 0.28s"),
+             f"Tipografía: {style['captions']['font_family']}, tamaño uniforme {style['captions']['font_size']}px",
              f"Captions: máximo {word_limit} palabras por página",
              f"Voz: {checked_audio['input_i']} LUFS, "
              f"{checked_audio['input_tp']} dBTP",

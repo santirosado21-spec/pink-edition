@@ -1,5 +1,6 @@
 import { Easing, interpolate, useCurrentFrame } from "remotion";
 import { useEdit, useTheme } from "../edit";
+import { contrastWithWhite } from "../preferences";
 
 // Medidas y tintas de la tarjeta, del estilo de la edición en curso.
 const useCard = () => {
@@ -168,6 +169,7 @@ const Healing: React.FC<CardProps> = ({ duration }) => {
 
 const Bill: React.FC<CardProps> = ({ beat }) => {
   const { W, ink } = useCard();
+  const receiptInk = contrastWithWhite(ink) >= 3 ? "#ffffff" : "#3a3432";
   const frame = useCurrentFrame();
   const unroll = interpolate(frame, [2, 18], [0, 1], clamp);
   const total = interpolate(frame, [beat, beat + 10], [0, 1], clamp);
@@ -180,8 +182,8 @@ const Bill: React.FC<CardProps> = ({ beat }) => {
       <path d={`M${x} ${top} H${x + 300} V${top + height} ${teeth} Z`} fill={ink} opacity="0.94" />
       {[0, 1, 2].map((row) => (
         <g key={row} opacity={interpolate(frame, [8 + row * 3, 16 + row * 3], [0, 1], clamp)}>
-          <rect x={x + 30} y={top + 28 + row * 34} width={130 - row * 18} height="14" rx="7" fill="#3a3432" opacity="0.5" />
-          <rect x={x + 214} y={top + 28 + row * 34} width="56" height="14" rx="7" fill="#3a3432" opacity="0.5" />
+          <rect x={x + 30} y={top + 28 + row * 34} width={130 - row * 18} height="14" rx="7" fill={receiptInk} opacity="0.5" />
+          <rect x={x + 214} y={top + 28 + row * 34} width="56" height="14" rx="7" fill={receiptInk} opacity="0.5" />
         </g>
       ))}
       <rect x={x + 30} y={top + 136} width={240 * total} height="22" rx="11" fill="url(#card-accent)" opacity={total} />

@@ -15,7 +15,7 @@ import urllib.request
 import uuid
 from pathlib import Path
 
-from plan_io import check_plan, check_preferences
+from plan_io import check_plan, read_preferences_file, require_preferences
 
 PROJECT = Path(__file__).resolve().parents[1]
 PINK_EDIT = PROJECT / "scripts/pink_edit.py"
@@ -73,7 +73,7 @@ class Cloud:
 
     def get_preferences(self, owner_id):
         rows = self.rows("GET", f"profiles?user_id=eq.{owner_id}&select=preferences")
-        return rows[0]["preferences"] if rows else None
+        return require_preferences(rows[0]["preferences"]) if rows else None
 
     def insert_plan(self, row):
         return self.rows("POST", "edit_plans", row)[0]
@@ -131,7 +131,7 @@ class Local(Cloud):
 
     def get_preferences(self, owner_id):
         file = self.root / "profiles" / f"{owner_id}.json"
-        return json.loads(file.read_text()) if file.exists() else None
+        return read_preferences_file(file, optional=True)
 
     def insert_plan(self, row):
         row = {**row, "id": str(uuid.uuid4())}
@@ -202,9 +202,10 @@ def shrink(webm):
 def analyze(store, job, video, source):
     name = video["id"]
     arguments = [source, "--id", name, "--prepare-only", "--allow-model-download"]
-    # El estilo del creador se copia al plan inicial; uno inválido no detiene el video.
+    # Un perfil presente pero inválido detiene el trabajo antes del motor.
     preferences = store.get_preferences(video["owner_id"])
-    if preferences and not check_preferences(preferences):
+    if preferences is not None:
+        require_preferences(preferences)
         file = source.with_name(f"{name}-preferences.json")
         file.write_text(json.dumps(preferences))
         arguments += ["--preferences", file]
@@ -231,14 +232,14 @@ def render(store, job, video, source):
     errors = check_plan(plan_row["config"], plan_row["timeline"])
     if errors:
         raise RuntimeError("El plan no es válido: " + " ".join(errors[:3]))
-    # El timeline guardado con esta versión del plan trae las cabezas con que se vio la
-    # vista previa: el motor las reutiliza en vez de medirlas otra vez en esta máquina.
-    (PROJECT / "work" / name).mkdir(parents=True, exist_ok=True)
-    (PROJECT / "work" / name / "timeline.json").write_text(json.dumps(plan_row["timeline"]))
     plan_file = PROJECT / "work" / "_cloud" / f"{plan_row['id']}.json"
     plan_file.parent.mkdir(parents=True, exist_ok=True)
     plan_file.write_text(json.dumps(plan_row["config"]))
-    run_engine(name, [source, "--id", name, "--plan", plan_file])
+    # Se renderiza el montaje guardado con esta versión del plan (el de la vista previa),
+    # sin transcribir ni cortar otra vez en esta máquina: mismas tomas, palabras y cabezas.
+    timeline_file = PROJECT / "work" / "_cloud" / f"{plan_row['id']}-timeline.json"
+    timeline_file.write_text(json.dumps(plan_row["timeline"]))
+    run_engine(name, [source, "--id", name, "--plan", plan_file, "--timeline-from", timeline_file])
     out = PROJECT / "work" / name / "out"
     output = f"{video['owner_id']}/{name}/{plan_row['id']}.mp4"
     store.upload("renders", output, fit(out / f"{name}.mp4"), "video/mp4")

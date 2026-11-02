@@ -2,13 +2,13 @@ import type { Metadata } from "next";
 import { Chat } from "./_landing/Chat";
 import { Brand, Heading, PrimaryAction } from "./_landing/Elements";
 import Faq from "./_landing/Faq";
-import { Video } from "./_landing/Video";
 import Plans from "./_landing/Plans";
 import { getPrimaryAction, landingConfig } from "./_landing/config";
+import { ThemePicker } from "./_components/ThemePicker";
 import "./landing.css";
 
 export const metadata: Metadata = {
-  title: "Pink.ai — Tu próximo Reel empieza con tu video",
+  title: "Cutkind — Tu voz. Tu historia. Tu mejor corte.",
   description: "Sube tu grabación y conviértela en un video con ritmo, subtítulos, gráficos y sonido. Después, pide los cambios que quieras con tus propias palabras.",
 };
 
@@ -25,35 +25,39 @@ export default function Landing() {
     <div className="landing">
       <a className="skip" href="#contenido">Ir al contenido</a>
       {!landingConfig.flowConnected && (
-        <div className="announce"><span>Pink.ai abre por invitación.</span> <a href={action.href}>Solicita acceso →</a></div>
+        <div className="announce"><span>Cutkind abre por invitación.</span> <a href={action.href}>Solicita acceso →</a></div>
       )}
       <nav className="nav" aria-label="Principal">
         <div className="wrap nav-in">
           <Brand />
-          <div className="nav-links"><a href="#demo">Demo</a><a href="#como">Cómo funciona</a><a href="#planes">Planes</a><a href="#preguntas">Preguntas</a></div>
-          <a className="nav-enter" href="/app">Entrar</a>
+          <div className="nav-links"><a href="#como">Cómo funciona</a><a href="#incluye">Qué incluye</a><a href="#planes">Planes</a><a href="#preguntas">Preguntas</a></div>
+          <ThemePicker /><a className="nav-enter" href="/app">Entrar</a>
         </div>
       </nav>
 
       <main id="contenido">
         <header className="hero wrap">
           <div className="hero-copy">
-            <p className="pill">Para Reels, TikTok y Shorts</p>
-            <h1>Tu próximo Reel empieza con <em>tu video.</em></h1>
-            <p className="lead">Sube tu grabación y conviértela en un video con ritmo, subtítulos, gráficos y sonido. Después, pide los cambios que quieras con tus propias palabras.</p>
-            <div className="actions"><PrimaryAction /><a className="ghost" href="#demo">Ver una demo</a></div>
+            <p className="pill"><span aria-hidden="true">✦</span> MENOS EDICIÓN. MÁS TÚ.</p>
+            <h1>Tu voz.<br />Tu historia.<br /><em>Tu mejor corte.</em></h1>
+            <p className="lead">Convierte lo que grabaste en algo que quieras compartir. Cortes, subtítulos y gráficos que acompañan tu historia.</p>
+            <div className="actions"><PrimaryAction /><a className="ghost" href="#como">Cómo funciona</a></div>
             <p className="support">Hecho para Reels, TikTok y Shorts. Editamos tu material real: tu voz y tu cara siguen siendo tuyas.</p>
           </div>
-          <div className="hero-video"><div className="phone"><Video src={landingConfig.hero.video} poster={landingConfig.hero.poster} label="Edición real" autoPlay /></div></div>
-        </header>
-
-        <section className="section wrap" id="demo">
-          <Heading eyebrow="El resultado" sub="A la izquierda, la grabación sin editar. A la derecha, la misma historia ya editada.">Lo que grabaste. Lo que publicas.</Heading>
-          <div className="pair">
-            <Video src={landingConfig.demo.original} poster={landingConfig.demo.posterOriginal} label="Original" />
-            <Video src={landingConfig.demo.edited} poster={landingConfig.demo.posterEdited} label="Editado" />
+          <div className="hero-video">
+            <span className="hero-caption">YOUR VOICE. A KINDER CUT.</span>
+            <div className="phone">
+              <div className="demo-placeholder">
+                <span className="demo-placeholder-tag">PRÓXIMAMENTE</span>
+                <img src="/brand/cutkind-symbol.svg" width={124} height={124} alt="" />
+                <span className="demo-placeholder-wordmark">cutkind</span>
+                <p>Nuestra historia.<br />Nuestro primer corte.</p>
+                <span className="demo-placeholder-detail">Estamos preparando nuestra demo.</span>
+              </div>
+            </div>
+            <div className="hero-note"><span aria-hidden="true">✦</span><div><b>Tu esencia, intacta.</b><span>Nos encargamos de los cortes.</span></div><span className="hero-check" aria-hidden="true">✓</span></div>
           </div>
-        </section>
+        </header>
 
         <section className="section tint" id="como">
           <div className="wrap">
@@ -68,12 +72,8 @@ export default function Landing() {
 
         <section className="section wrap" id="incluye">
           <Heading eyebrow="Qué incluye la edición" sub="Todo lo que normalmente toma horas en una línea de tiempo.">Una edición completa, pensada para contenido corto.</Heading>
-          <div className="clips">
-            {landingConfig.clips.map((clip) => (
-              <figure key={clip.src}><Video src={clip.src} /><figcaption><h3>{clip.title}</h3><p>{clip.text}</p></figcaption></figure>
-            ))}
-          </div>
           <div className="facts">
+            {landingConfig.features.map((feature) => <div key={feature.title}><h3>{feature.title}</h3><p>{feature.text}</p></div>)}
             <div><h3>Cortes sin habla</h3><p>Quitamos los momentos sin voz y conservamos cada palabra, en el mismo orden.</p></div>
             <div><h3>Sonido que acompaña</h3><p>Efectos en los cortes y en cada gráfico, sin tapar tu voz.</p></div>
             <div><h3>Pensado en vertical</h3><p>Contenido corto en 9:16, listo para Reels, TikTok y Shorts.</p></div>
@@ -111,7 +111,7 @@ export default function Landing() {
 
         <section className="close" id="acceso">
           <div className="wrap">
-            <h2>Tú tienes algo que contar.<br />Pink.ai te ayuda a publicarlo.</h2>
+            <h2>Tú tienes algo que contar.<br />Cutkind te ayuda a publicarlo.</h2>
             <PrimaryAction light />
             {!landingConfig.flowConnected && (
               <p className="access-note">Acceso por invitación, por ahora.{landingConfig.accessEmail ? <> Escríbenos a <a href={`mailto:${landingConfig.accessEmail}`}>{landingConfig.accessEmail}</a>.</> : " Pronto abriremos la lista de espera."}</p>

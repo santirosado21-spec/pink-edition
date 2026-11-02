@@ -1,0 +1,271 @@
+[
+  {
+    "name": "legacy",
+    "value": {
+      "topic": "",
+      "notes": "",
+      "vibe": "balanced",
+      "graphics": "none",
+      "brand_color": "#1f5fc4",
+      "context_colors": false,
+      "sfx": "none"
+    },
+    "valid": true
+  },
+  {
+    "name": "catalog_float_one",
+    "value": {
+      "topic": "",
+      "notes": "",
+      "vibe": "balanced",
+      "graphics": "none",
+      "brand_color": "#1f5fc4",
+      "context_colors": false,
+      "sfx": "none",
+      "catalog_version": 1.0
+    },
+    "valid": true
+  },
+  {
+    "name": "null",
+    "value": null,
+    "valid": false
+  },
+  {
+    "name": "empty",
+    "value": {},
+    "valid": false
+  },
+  {
+    "name": "false",
+    "value": false,
+    "valid": false
+  },
+  {
+    "name": "array",
+    "value": [],
+    "valid": false
+  },
+  {
+    "name": "future",
+    "value": {
+      "topic": "",
+      "notes": "",
+      "vibe": "balanced",
+      "graphics": "none",
+      "brand_color": "#1f5fc4",
+      "context_colors": false,
+      "sfx": "none",
+      "profile_version": 2
+    },
+    "valid": false
+  },
+  {
+    "name": "catalog_bool",
+    "value": {
+      "topic": "",
+      "notes": "",
+      "vibe": "balanced",
+      "graphics": "none",
+      "brand_color": "#1f5fc4",
+      "context_colors": false,
+      "sfx": "none",
+      "catalog_version": true
+    },
+    "valid": false
+  },
+  {
+    "name": "catalog_string",
+    "value": {
+      "topic": "",
+      "notes": "",
+      "vibe": "balanced",
+      "graphics": "none",
+      "brand_color": "#1f5fc4",
+      "context_colors": false,
+      "sfx": "none",
+      "catalog_version": "1"
+    },
+    "valid": false
+  },
+  {
+    "name": "bad_vibe",
+    "value": {
+      "topic": "",
+      "notes": "",
+      "vibe": "wow",
+      "graphics": "none",
+      "brand_color": "#1f5fc4",
+      "context_colors": false,
+      "sfx": "none"
+    },
+    "valid": false
+  },
+  {
+    "name": "duplicates",
+    "value": {
+      "topic": "",
+      "notes": "",
+      "vibe": "balanced",
+      "graphics": "none",
+      "brand_color": "#1f5fc4",
+      "context_colors": false,
+      "sfx": "none",
+      "graphic_kinds": [
+        "bill",
+        "bill"
+      ]
+    },
+    "valid": false
+  },
+  {
+    "name": "constructor",
+    "value": {
+      "topic": "",
+      "notes": "",
+      "vibe": "balanced",
+      "graphics": "none",
+      "brand_color": "#1f5fc4",
+      "context_colors": false,
+      "sfx": "none",
+      "constructor": 1
+    },
+    "valid": false
+  },
+  {
+    "name": "toString",
+    "value": {
+      "topic": "",
+      "notes": "",
+      "vibe": "balanced",
+      "graphics": "none",
+      "brand_color": "#1f5fc4",
+      "context_colors": false,
+      "sfx": "none",
+      "toString": "x"
+    },
+    "valid": false
+  },
+  {
+    "name": "__proto__",
+    "value": {
+      "topic": "",
+      "notes": "",
+      "vibe": "balanced",
+      "graphics": "none",
+      "brand_color": "#1f5fc4",
+      "context_colors": false,
+      "sfx": "none",
+      "__proto__": {}
+    },
+    "valid": false
+  },
+  {
+    "name": "topic_utf16_0",
+    "value": {
+      "topic": "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀",
+      "notes": "",
+      "vibe": "balanced",
+      "graphics": "none",
+      "brand_color": "#1f5fc4",
+      "context_colors": false,
+      "sfx": "none"
+    },
+    "valid": true
+  },
+  {
+    "name": "topic_utf16_1",
+    "value": {
+      "topic": "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀",
+      "notes": "",
+      "vibe": "balanced",
+      "graphics": "none",
+      "brand_color": "#1f5fc4",
+      "context_colors": false,
+      "sfx": "none"
+    },
+    "valid": false
+  },
+  {
+    "name": "notes_utf16_0",
+    "value": {
+      "topic": "",
+      "notes": "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀",
+      "vibe": "balanced",
+      "graphics": "none",
+      "brand_color": "#1f5fc4",
+      "context_colors": false,
+      "sfx": "none"
+    },
+    "valid": true
+  },
+  {
+    "name": "notes_utf16_1",
+    "value": {
+      "topic": "",
+      "notes": "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀",
+      "vibe": "balanced",
+      "graphics": "none",
+      "brand_color": "#1f5fc4",
+      "context_colors": false,
+      "sfx": "none"
+    },
+    "valid": false
+  },
+  {
+    "name": "brand_name_utf16_0",
+    "value": {
+      "topic": "",
+      "notes": "",
+      "vibe": "balanced",
+      "graphics": "none",
+      "brand_color": "#1f5fc4",
+      "context_colors": false,
+      "sfx": "none",
+      "brand_name": "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀"
+    },
+    "valid": true
+  },
+  {
+    "name": "brand_name_utf16_1",
+    "value": {
+      "topic": "",
+      "notes": "",
+      "vibe": "balanced",
+      "graphics": "none",
+      "brand_color": "#1f5fc4",
+      "context_colors": false,
+      "sfx": "none",
+      "brand_name": "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀"
+    },
+    "valid": false
+  },
+  {
+    "name": "vocabulary_utf16_0",
+    "value": {
+      "topic": "",
+      "notes": "",
+      "vibe": "balanced",
+      "graphics": "none",
+      "brand_color": "#1f5fc4",
+      "context_colors": false,
+      "sfx": "none",
+      "vocabulary": "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀"
+    },
+    "valid": true
+  },
+  {
+    "name": "vocabulary_utf16_1",
+    "value": {
+      "topic": "",
+      "notes": "",
+      "vibe": "balanced",
+      "graphics": "none",
+      "brand_color": "#1f5fc4",
+      "context_colors": false,
+      "sfx": "none",
+      "vocabulary": "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀"
+    },
+    "valid": false
+  }
+]

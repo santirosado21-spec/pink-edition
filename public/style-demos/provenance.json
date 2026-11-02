@@ -1,0 +1,7 @@
+{
+  "author": "Project-authored vector demonstration",
+  "source": "scripts/setup-style-demos.mjs",
+  "scope": "Synthetic demonstration; no Fran footage, private transcripts or third-party media. MP4/JPG derived locally.",
+  "durationSeconds": 8,
+  "audio": false
+}

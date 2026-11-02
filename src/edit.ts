@@ -25,8 +25,10 @@ export type SpeechClip = {
   pages: CaptionPage[];
   // Caja de la cabeza en la toma (scripts/heads.py); encuadra zooms y transiciones.
   head?: Head | null;
+  // Detección real de rostros; distinta de la heurística de silueta para zoom.
+  face?: Head | null;
 };
-export type Timeline = { is_sample?: boolean; duration_frames: number; clips: SpeechClip[] };
+export type Timeline = { is_sample?: boolean; duration_frames: number; clips: SpeechClip[]; transcription_review_required?: boolean; audio_preserved?: boolean };
 // El estilo es fijo por look; el plan son las decisiones de un video
 // (`schema/edit-plan.schema.json`).
 export type Style = typeof styleJson;
@@ -34,7 +36,8 @@ export type Style = typeof styleJson;
 export type Anchor = { anchor_word_id: string; offset_frames: number; sample_frame?: number };
 export type PlanEvent = Anchor & { id: string; label: string; theme: string; duration_frames: number };
 export type CutEvent = PlanEvent & { style: string; last_word_id: string };
-export type CardEvent = PlanEvent & { kind: string; top?: number; beat: Anchor; meaning?: string; text?: string };
+export type StockPhoto = { provider: "Pexels" | "Openverse" | "Pixabay" | "Wikimedia"; id: number | string; asset: string; photographer: string; url: string; license: string; alt: string };
+export type CardEvent = PlanEvent & { kind: string; top?: number; beat: Anchor; meaning?: string; text?: string; photo?: StockPhoto };
 export type BackgroundEvent = PlanEvent & { motif: string };
 export type Plan = {
   style: string;

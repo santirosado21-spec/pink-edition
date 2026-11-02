@@ -22,7 +22,9 @@ export const LiquidGlass: React.FC<{
   duration: number;
   children: React.ReactNode;
 }> = ({ id, top, duration, children }) => {
-  const style = useEdit().style.graphics;
+  const edit = useEdit();
+  const style = edit.style.graphics;
+  const material = edit.plan.preferences?.graphic_material ?? "glass";
   const glass = style.glass;
   const frame = useCurrentFrame();
   const ease = Easing.bezier(0.16, 1, 0.3, 1);
@@ -33,6 +35,11 @@ export const LiquidGlass: React.FC<{
   const opacity = interpolate(frame, [0, 6], [0, 1], clamp) * (1 - leave);
   const sheen = interpolate(frame, [3, 3 + glass.sheen_frames], [-0.5, 1.5], clamp);
   const layer = { position: "absolute", inset: 0, borderRadius: style.radius } as const;
+
+  if (material !== "glass") return <div style={{ position: "absolute", left: style.left, top, width: style.width, height: style.height,
+    borderRadius: style.radius, overflow: "hidden", opacity, translate: `0px ${(1 - enter) * style.enter_offset}px`,
+    background: material === "paper" ? "#f5f1eb" : edit.themeOf("base").accent,
+    boxShadow: "0 12px 28px rgba(0,0,0,.2)" }}>{children}</div>;
 
   return (
     <div

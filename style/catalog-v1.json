@@ -1,0 +1,257 @@
+{
+  "version": 1,
+  "fonts": [
+    {
+      "id": "inter",
+      "title": "Inter · directo",
+      "family": "InterDisplay",
+      "file": "InterDisplay-Bold.ttf",
+      "tracking": -0.075,
+      "description": "Actual, compacto y legible.",
+      "size": 100,
+      "weight": 700
+    },
+    {
+      "id": "serif",
+      "title": "Plex Serif · editorial",
+      "family": "PlexSerif",
+      "file": "fonts/IBMPlexSerif-Bold.ttf",
+      "tracking": -0.025,
+      "description": "Más editorial, para historias y explicaciones.",
+      "size": 86,
+      "weight": 700
+    },
+    {
+      "id": "mono",
+      "title": "Plex Mono · técnico",
+      "family": "PlexMono",
+      "file": "fonts/IBMPlexMono-Bold.ttf",
+      "tracking": -0.04,
+      "description": "Ritmo uniforme para tecnología y procesos.",
+      "size": 82,
+      "weight": 700
+    },
+    {
+      "id": "anton",
+      "title": "Anton · impacto",
+      "family": "CutkindAnton",
+      "file": "fonts/Anton-Regular.ttf",
+      "description": "Trazo grueso y compacto para frases contundentes.",
+      "size": 94,
+      "weight": 400,
+      "tracking": 0
+    },
+    {
+      "id": "montserrat",
+      "title": "Montserrat · geométrica",
+      "family": "CutkindMontserrat",
+      "file": "fonts/Montserrat-Variable.ttf",
+      "description": "Geometría marcada, cercana a los subtítulos de reels.",
+      "size": 88,
+      "weight": 800,
+      "tracking": 0
+    },
+    {
+      "id": "bebas",
+      "title": "Bebas Neue · póster",
+      "family": "CutkindBebas",
+      "file": "fonts/BebasNeue-Regular.ttf",
+      "description": "Alta y estrecha, con carácter de cartel en mayúsculas.",
+      "size": 100,
+      "weight": 400,
+      "tracking": 0
+    },
+    {
+      "id": "editorial",
+      "title": "Editorial cálido",
+      "family": "DM Serif Display",
+      "file": "fonts/DMSerifDisplay-Regular.ttf",
+      "weight": 400,
+      "fontStyle": "normal",
+      "tracking": 0,
+      "size": 90,
+      "description": "DM Serif Display en títulos · DM Sans en subtítulos.",
+      "recommended": true,
+      "captionFamily": "DM Sans",
+      "captionFile": "fonts/DMSans[opsz,wght].ttf",
+      "captionWeight": 500
+    },
+    {
+      "id": "cinema",
+      "title": "Cine íntimo",
+      "family": "Cormorant Garamond",
+      "file": "fonts/CormorantGaramond-Italic[wght].ttf",
+      "weight": 600,
+      "fontStyle": "italic",
+      "tracking": 0,
+      "size": 90,
+      "description": "Cormorant Garamond en títulos · Manrope en subtítulos.",
+      "recommended": true,
+      "captionFamily": "Manrope",
+      "captionFile": "fonts/Manrope[wght].ttf",
+      "captionWeight": 600
+    },
+    {
+      "id": "magazine",
+      "title": "Revista",
+      "family": "Bodoni Moda",
+      "file": "fonts/BodoniModa[opsz,wght].ttf",
+      "weight": 500,
+      "fontStyle": "normal",
+      "tracking": 0,
+      "size": 90,
+      "description": "Bodoni Moda en títulos · Manrope en subtítulos.",
+      "recommended": true,
+      "captionFamily": "Manrope",
+      "captionFile": "fonts/Manrope[wght].ttf",
+      "captionWeight": 600
+    },
+    {
+      "id": "documentary",
+      "title": "Documental moderno",
+      "family": "Space Grotesk",
+      "file": "fonts/SpaceGrotesk[wght].ttf",
+      "weight": 500,
+      "fontStyle": "normal",
+      "tracking": 0,
+      "size": 90,
+      "description": "Space Grotesk en títulos · DM Sans en subtítulos.",
+      "recommended": true,
+      "captionFamily": "DM Sans",
+      "captionFile": "fonts/DMSans[opsz,wght].ttf",
+      "captionWeight": 500
+    }
+  ],
+  "materials": [
+    {
+      "id": "glass",
+      "title": "Vidrio",
+      "description": "Panel translúcido con reflejos."
+    },
+    {
+      "id": "paper",
+      "title": "Papel",
+      "description": "Panel claro con tinta oscura."
+    },
+    {
+      "id": "solid",
+      "title": "Color de marca",
+      "description": "Panel sólido y contraste alto."
+    }
+  ],
+  "transitions": [
+    {
+      "id": "none",
+      "title": "Corte limpio",
+      "description": "Cambio directo, sin efecto."
+    },
+    {
+      "id": "punch",
+      "title": "Acercamiento breve",
+      "description": "Un pequeño pulso de zoom al cambiar de toma."
+    },
+    {
+      "id": "flash",
+      "title": "Destello",
+      "description": "Flash blanco breve. Evítalo si prefieres menos estímulos."
+    }
+  ],
+  "sounds": [
+    {
+      "id": "air",
+      "title": "Aire",
+      "description": "Barridos para un ritmo fluido.",
+      "sample": "audio/mixkit/sweep-166.wav",
+      "enter": "audio/kenney/glass_001.wav",
+      "beat": "audio/kenney/glass_005.wav"
+    },
+    {
+      "id": "digital",
+      "title": "Digital",
+      "description": "Toques cortos y precisos.",
+      "sample": "audio/kenney/glass_001.wav",
+      "enter": "audio/kenney/glass_001.wav",
+      "beat": "audio/kenney/tick_001.wav"
+    },
+    {
+      "id": "soft",
+      "title": "Discreto",
+      "description": "Clics pequeños, sin barridos largos.",
+      "sample": "audio/kenney/switch_001.wav",
+      "enter": "audio/kenney/switch_001.wav",
+      "beat": "audio/kenney/tick_001.wav"
+    }
+  ],
+  "graphics": [
+    {
+      "id": "patients",
+      "title": "Proporción",
+      "description": "Una de cuatro personas; sólo si esa proporción se dice en el video."
+    },
+    {
+      "id": "emergency",
+      "title": "Alerta creciente",
+      "description": "Una alerta con una barra que sube."
+    },
+    {
+      "id": "risk",
+      "title": "Doble riesgo",
+      "description": "Sólo cuando la frase dice dos veces."
+    },
+    {
+      "id": "illness",
+      "title": "Causa y efecto",
+      "description": "Une dos ideas de la frase."
+    },
+    {
+      "id": "body",
+      "title": "Cabeza y cuerpo",
+      "description": "Representa la conexión entre ambos."
+    },
+    {
+      "id": "healing",
+      "title": "Recuperación",
+      "description": "Un progreso gradual."
+    },
+    {
+      "id": "bill",
+      "title": "Recibo",
+      "description": "Precio, gasto o factura."
+    },
+    {
+      "id": "compare",
+      "title": "Comparación",
+      "description": "Dos magnitudes distintas."
+    },
+    {
+      "id": "steps",
+      "title": "Tres pasos",
+      "description": "Sólo si la frase enumera tres pasos."
+    },
+    {
+      "id": "beforeafter",
+      "title": "Antes y después",
+      "description": "Dos estados en contraste."
+    },
+    {
+      "id": "alert",
+      "title": "Advertencia",
+      "description": "Destaca una precaución."
+    },
+    {
+      "id": "counter",
+      "title": "Cifra",
+      "description": "Usa exclusivamente la cifra pronunciada."
+    },
+    {
+      "id": "question",
+      "title": "Pregunta",
+      "description": "Introduce una duda o reflexión."
+    },
+    {
+      "id": "photo",
+      "title": "Foto de archivo",
+      "description": "Imagen elegida y licenciada; nunca evidencia del hecho."
+    }
+  ]
+}

@@ -1,10 +1,12 @@
 import { existsSync } from "node:fs";
 import { CLOUD, cloudRender } from "../../../../_lib/cloud";
 import { sourceFile, startPipeline, validId } from "../../../../_lib/jobs";
+import { sameOrigin } from "../../../../_lib/request-security";
 
 type Context = { params: Promise<{ id: string }> };
 
-export async function POST(_request: Request, { params }: Context) {
+export async function POST(request: Request, { params }: Context) {
+  if (!sameOrigin(request)) return Response.json({ error: "Solicitud no permitida." }, { status: 403 });
   const { id } = await params;
   if (CLOUD) {
     const error = await cloudRender(id);

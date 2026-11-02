@@ -1,5 +1,6 @@
 import { Sequence, interpolate, random, useCurrentFrame, useVideoConfig } from "remotion";
 import { useEdit } from "./edit";
+import { protectedHead } from "./visualSafety";
 
 // Fondo detrás de la persona según el tema de la frase; sin azar por frame.
 const Motif: React.FC<{ id: string; motif: string; duration: number; color: string }> = ({ id, motif, duration, color }) => {
@@ -55,14 +56,21 @@ const Motif: React.FC<{ id: string; motif: string; duration: number; color: stri
 
 export const BackgroundEffects: React.FC = () => {
   const { fps } = useVideoConfig();
-  const { plan, resolveFrame, themeOf } = useEdit();
+  const { plan, style, clips, isSample, resolveFrame, themeOf } = useEdit();
   return (
     <>
-      {plan.backgrounds.map((event) => (
-        <Sequence key={event.id} name={`Fondo: ${event.label}`} from={resolveFrame(event, event.id)} durationInFrames={event.duration_frames} premountFor={fps}>
+      {plan.backgrounds.map((event) => {
+        const from = resolveFrame(event, event.id);
+        const face = protectedHead({ clips }, plan, style, from, event.duration_frames);
+        if (!face && !isSample) return null;
+        const c = style.captions;
+        const mask = face ? `url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='${style.width}' height='${style.height}'><rect width='100%' height='100%' fill='white'/><rect x='${face.left}' y='${face.top}' width='${face.right - face.left}' height='${face.bottom - face.top}' fill='black'/><rect x='0' y='${c.top - 40}' width='100%' height='${c.line_height * c.max_lines + 80}' fill='black'/></svg>`)}")` : undefined;
+        return <Sequence key={event.id} name={`Fondo: ${event.label}`} from={from} durationInFrames={event.duration_frames} premountFor={fps}>
+          <div style={{ position: "absolute", inset: 0, maskImage: mask, maskMode: "luminance" }}>
           <Motif id={event.id} motif={event.motif} duration={event.duration_frames} color={themeOf(event.theme).light} />
-        </Sequence>
-      ))}
+          </div>
+        </Sequence>;
+      })}
     </>
   );
 };

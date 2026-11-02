@@ -153,7 +153,8 @@
               "beforeafter",
               "alert",
               "counter",
-              "question"
+              "question",
+              "photo"
             ]
           },
           "top": {
@@ -195,6 +196,64 @@
             "type": "string",
             "maxLength": 12,
             "description": "Cifra o palabra corta dicha literalmente en el video; sólo la usa `counter`. Sin ella no se muestra ninguna cifra."
+          },
+          "photo": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "provider",
+              "id",
+              "asset",
+              "photographer",
+              "url",
+              "license",
+              "alt"
+            ],
+            "properties": {
+              "provider": {
+                "enum": [
+                  "Wikimedia",
+                  "Pixabay",
+                  "Pexels",
+                  "Openverse"
+                ]
+              },
+              "id": {
+                "oneOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  {
+                    "type": "string",
+                    "pattern": "^[a-f0-9-]{36}$"
+                  }
+                ]
+              },
+              "asset": {
+                "type": "string",
+                "pattern": "^work/[a-z0-9-]+/photos/(?:(?:pexels|pixabay|wikimedia)-[0-9]+|openverse-[a-f0-9-]{36})\\.jpg$"
+              },
+              "photographer": {
+                "type": "string"
+              },
+              "url": {
+                "type": "string"
+              },
+              "license": {
+                "enum": [
+                  "https://pixabay.com/service/license-summary/",
+                  "https://www.pexels.com/legal-pages/license/",
+                  "https://creativecommons.org/publicdomain/zero/1.0/"
+                ]
+              },
+              "alt": {
+                "type": "string"
+              },
+              "downloadedAt": {
+                "type": "string"
+              }
+            }
           }
         },
         "required": [
@@ -371,6 +430,90 @@
             "karaoke"
           ],
           "description": "Estilo de subtítulos. Opcional: sin él, «pink» (el de la casa)."
+        },
+        "catalog_version": {
+          "const": 1
+        },
+        "brand_name": {
+          "type": "string",
+          "maxLength": 80
+        },
+        "language": {
+          "enum": [
+            "es",
+            "en",
+            "mixed"
+          ]
+        },
+        "graphic_kinds": {
+          "type": "array",
+          "uniqueItems": true,
+          "maxItems": 14,
+          "items": {
+            "enum": [
+              "patients",
+              "emergency",
+              "risk",
+              "illness",
+              "body",
+              "healing",
+              "bill",
+              "compare",
+              "steps",
+              "beforeafter",
+              "alert",
+              "counter",
+              "question",
+              "photo"
+            ]
+          }
+        },
+        "font": {
+          "enum": [
+            "inter",
+            "serif",
+            "mono"
+          ]
+        },
+        "graphic_material": {
+          "enum": [
+            "glass",
+            "paper",
+            "solid"
+          ]
+        },
+        "transition": {
+          "enum": [
+            "none",
+            "punch",
+            "flash"
+          ]
+        },
+        "sound_pack": {
+          "enum": [
+            "air",
+            "digital",
+            "soft"
+          ]
+        },
+        "vocabulary": {
+          "type": "string",
+          "maxLength": 300
+        },
+        "support_media": {
+          "enum": [
+            "auto",
+            "video",
+            "still",
+            "none"
+          ]
+        },
+        "emphasis_mode": {
+          "enum": [
+            "overlay",
+            "fullscreen",
+            "none"
+          ]
         }
       }
     },

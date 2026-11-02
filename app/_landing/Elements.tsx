@@ -5,14 +5,7 @@ export function PrimaryAction({ light = false }: { light?: boolean }) {
   return <a className={`cta${light ? " light" : ""}`} href={action.href}>{action.label}<span aria-hidden="true">→</span></a>;
 }
 
-export function Brand() {
-  return (
-    <a className="brand-link" href="/" aria-label="Pink.ai, inicio">
-      <img src="/logo.png" width="40" height="40" alt="" />
-      <span>Pink<i>.ai</i></span>
-    </a>
-  );
-}
+export { Brand } from "../_components/Brand";
 
 export function Heading({ eyebrow, children, sub, center = true }: { eyebrow?: string; children: React.ReactNode; sub?: React.ReactNode; center?: boolean }) {
   return (

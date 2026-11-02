@@ -1,5 +1,5 @@
 import style from "../../style/pink-demo-v1.json";
-import { CLOUD, CLOUD_MAX_MB } from "../_lib/supabase/config";
+import { AUTH_EMAIL_READY, DEMO_ENABLED, CLOUD, CLOUD_MAX_MB } from "../_lib/supabase/config";
 
 export type Plan = {
   name: string;
@@ -14,10 +14,7 @@ type LandingConfig = {
   flowConnected: boolean;
   accessHref: string;
   accessEmail: string;
-  // Video real de la demo: rutas dentro de public/. Sólo material autorizado para publicar.
-  hero: { video: string; poster: string };
-  demo: { original: string; edited: string; posterOriginal: string; posterEdited: string };
-  clips: { title: string; text: string; src: string }[];
+  features: { title: string; text: string }[];
   plans: Plan[];
   faqConditions: {
     uploadFormats: string | null;
@@ -31,20 +28,13 @@ type LandingConfig = {
 
 // Configuración pública: no incluir secretos ni rutas de material privado.
 export const landingConfig: LandingConfig = {
-  flowConnected: false,
+  flowConnected: AUTH_EMAIL_READY,
   accessHref: "#acceso",
   accessEmail: "",
-  hero: { video: "/landing/edited-full.mp4", poster: "/landing/poster-edited.jpg" },
-  demo: {
-    original: "/landing/original-20s.mp4",
-    edited: "/landing/edited-10s.mp4",
-    posterOriginal: "/landing/poster-original.jpg",
-    posterEdited: "/landing/poster-edited.jpg",
-  },
-  clips: [
-    { title: "Subtítulos y cortes de color", text: "Tus palabras en pantalla, y tu frase clave a pantalla completa.", src: "/landing/clip-color.mp4" },
-    { title: "Gráficos detrás de ti", text: "Las tarjetas se colocan detrás de tu silueta, nunca encima.", src: "/landing/clip-card.mp4" },
-    { title: "Fondos con sentido", text: "El fondo cambia con lo que estás diciendo.", src: "/landing/clip-background.mp4" },
+  features: [
+    { title: "Subtítulos y cortes de color", text: "Tus palabras en pantalla, y tu frase clave a pantalla completa." },
+    { title: "Gráficos detrás de ti", text: "Las tarjetas se colocan detrás de tu silueta, nunca encima." },
+    { title: "Fondos con sentido", text: "El fondo cambia con lo que estás diciendo." },
   ],
   plans: [
     {
@@ -88,7 +78,8 @@ export const definedOrPending = (value: string | null) =>
 export function getPrimaryAction(
   config: Pick<LandingConfig, "flowConnected" | "accessHref">,
 ) {
+  if (DEMO_ENABLED) return { label: "Entrar a la demo", href: "/demo" };
   return config.flowConnected
-    ? { label: "Editar mi primer video", href: "/app" }
+    ? { label: "Crear mi cuenta", href: "/login" }
     : { label: "Solicitar acceso", href: config.accessHref };
 }

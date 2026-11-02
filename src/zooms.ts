@@ -40,6 +40,26 @@ export const frameTransform = (
   return { scale: total, originX: cx, originY: cy };
 };
 
+/**
+ * Transformación de la imagen en un cuadro concreto. El destino seguro se calcula con el
+ * zoom pedido y el pico del punch; la rampa (zoom que sube, punch que baja) recorre ese
+ * destino de forma proporcional, así que nunca lo excede ni salta de golpe.
+ */
+export const pictureTransform = (
+  head: Head | null | undefined,
+  base: number,
+  now: { zoom: number; punch: number },
+  peak: { zoom: number; punch: number },
+  canvas: { width: number; height: number },
+): { scale: number; originX: number; originY: number } | null => {
+  const safe = frameTransform(head, base, peak.zoom, peak.punch, canvas);
+  if (!safe) return null;
+  const requested = now.zoom * now.punch;
+  const top = peak.zoom * peak.punch;
+  const effect = 1 + (safe.scale / base - 1) * ((requested - 1) / (top - 1));
+  return { scale: base * effect, originX: safe.originX, originY: safe.originY };
+};
+
 type Phrase = { frame: number; wordId: string; clip: number };
 
 // Inicios de frase: primera palabra de cada toma, o la que sigue a una pausa o a un signo.

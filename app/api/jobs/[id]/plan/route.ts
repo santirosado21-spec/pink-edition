@@ -1,10 +1,13 @@
 import { CLOUD, cloudSavePlan } from "../../../../_lib/cloud";
-import { checkPlan, savePlan, validId } from "../../../../_lib/jobs";
+import { checkPlan, readJob, savePlan, validId } from "../../../../_lib/jobs";
 import type { Plan } from "../../../../../src/edit";
+import { PlanConflict } from "../../../../_lib/planStore";
+import { sameOrigin } from "../../../../_lib/request-security";
 
 type Context = { params: Promise<{ id: string }> };
 
 export async function PUT(request: Request, { params }: Context) {
+  if (!sameOrigin(request)) return Response.json({ error: "Solicitud no permitida." }, { status: 403 });
   const { id } = await params;
   let plan: Plan;
   try {
@@ -20,8 +23,9 @@ export async function PUT(request: Request, { params }: Context) {
   const errors = await checkPlan(id, plan);
   if (errors.length > 0) return Response.json({ error: "El plan tiene errores.", errors }, { status: 400 });
   try {
-    return Response.json({ plan: await savePlan(id, plan) });
+    const saved = await savePlan(id, plan);
+    return Response.json({ plan: saved, timeline: (await readJob(id))?.timeline });
   } catch (error) {
-    return Response.json({ error: `No se pudo guardar: ${(error as Error).message}` }, { status: 500 });
+    return Response.json({ error: `No se pudo guardar: ${(error as Error).message}` }, { status: error instanceof PlanConflict ? 409 : 500 });
   }
 }

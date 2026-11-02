@@ -1,0 +1,15 @@
+.git
+.next
+.venv
+.venv-asr
+node_modules
+out
+work
+local
+analysis
+*.log
+.env
+.env.*
+!.env.example
+!pink.env.example
+

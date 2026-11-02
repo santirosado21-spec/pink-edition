@@ -1,0 +1,1264 @@
+{
+  "version": 1,
+  "updated_on": "2026-10-27",
+  "purpose": "Biblioteca editorial de referencias y recetas; separada del catalogo de recursos ya operativos.",
+  "default_family_id": null,
+  "policy": {
+    "selection": "explicit_per_brand_or_video",
+    "reference_is_approval": false,
+    "existing_profiles_unchanged": true,
+    "montage_requires_explicit_mode": true,
+    "private_reference_media_in_public_bundle": false,
+    "audio_sync_reviewed": false,
+    "parameters_are_measured": false
+  },
+  "references": [
+    {
+      "id": "mogul-demo",
+      "filename": "Mogul demo.mp4",
+      "sha256": "b2647cc3287f2769a0a954e08e04f00ba8e413e093e1218b3875500346e5e607",
+      "duration_seconds": 58.2,
+      "width": 1920,
+      "height": 1080,
+      "review_path": "work/references/mogul-demo/ANALISIS.md",
+      "evidence_scope": "Muestras visuales cada 2 s y detalles; audio pendiente",
+      "audio_reviewed": false,
+      "usage": "analysis_only_not_render_asset"
+    },
+    {
+      "id": "travel-day",
+      "filename": "snaptik_7696717174165064981_v3.mp4",
+      "sha256": "844134714ce38050c29f2a88cba63657c83d6d9d6b7e05ce458ad71912bb4bee",
+      "duration_seconds": 83.433333,
+      "width": 720,
+      "height": 1280,
+      "review_path": "work/references/fran-snaptik-7696717174165064981/manifest.json",
+      "evidence_scope": "Muestras visuales cada 4 s; audio pendiente",
+      "audio_reviewed": false,
+      "usage": "analysis_only_not_render_asset"
+    },
+    {
+      "id": "city-diary",
+      "filename": "snaptik_7541469524764167446_v3.mp4",
+      "sha256": "b53b95078fd1909bede22ef7a39dff3b94556642024f46c1f3cdb7e23a86cc50",
+      "duration_seconds": 26.383333,
+      "width": 1080,
+      "height": 1920,
+      "review_path": "work/references/fran-snaptik-7541469524764167446/manifest.json",
+      "evidence_scope": "Muestras visuales cada 1 s; audio pendiente",
+      "audio_reviewed": false,
+      "usage": "analysis_only_not_render_asset"
+    },
+    {
+      "id": "training-type",
+      "filename": "snaptik_7603732873115421985_v3.mp4",
+      "sha256": "bf08ff50e18f979e19489a913b6afed3b721a385e8a41d1bc43757f6378a2282",
+      "duration_seconds": 7.08,
+      "width": 576,
+      "height": 1024,
+      "review_path": "work/references/snaptik-7603732873115421985/manifest.json",
+      "evidence_scope": "Muestras visuales cada 0.25 s; audio pendiente",
+      "audio_reviewed": false,
+      "usage": "analysis_only_not_render_asset"
+    },
+    {
+      "id": "text-editing-tips",
+      "filename": "snaptik_7559598746233883960_v3.mp4",
+      "sha256": "f20bb664128e8cc92d2fd069b394ab3df1af52d066030c5e223dfb8cc3c73c08",
+      "duration_seconds": 37.312993,
+      "width": 576,
+      "height": 1024,
+      "review_path": "work/references/snaptik-7559598746233883960/analysis.json",
+      "evidence_scope": "Muestreo visual cada 1 s, overview cada 3 s y ASR local Whisper-small sobre el audio completo. No escucha humana ni validación de cada frame.",
+      "audio_reviewed": false,
+      "audio_transcribed": true,
+      "usage": "analysis_only_not_render_asset"
+    },
+    {
+      "id": "motion-continuity",
+      "filename": "snaptik_7635521642168438030_v3.mp4",
+      "sha256": "ed7b99067bd4c7e717aaf2917ea8ef372829113483a45ea27fee5d8dd969a7bc",
+      "duration_seconds": 75.462993,
+      "width": 720,
+      "height": 1280,
+      "review_path": "work/references/snaptik-7635521642168438030/analysis.json",
+      "evidence_scope": "Muestras visuales cada 3 s, detalles del ejemplo y transcripción local en inglés de todo el audio; sin escucha humana ni auditoría de cada frame.",
+      "audio_reviewed": false,
+      "audio_transcribed": true,
+      "usage": "analysis_only_not_render_asset"
+    },
+    {
+      "id": "capture-basics",
+      "filename": "snaptik_7593043805004172551_v3.mp4",
+      "sha256": "c5f8e0f3ceb72da31cc46957862f486b9de7e43be207df1562fa194bbc90f76d",
+      "duration_seconds": 78.997007,
+      "width": 720,
+      "height": 1280,
+      "review_path": "work/references/snaptik-7593043805004172551/analysis.json",
+      "evidence_scope": "Muestras visuales cada 3 s, detalles del ejemplo y transcripción local en inglés de todo el audio; sin escucha humana ni auditoría de cada frame.",
+      "audio_reviewed": false,
+      "audio_transcribed": true,
+      "usage": "analysis_only_not_render_asset"
+    },
+    {
+      "id": "editing-workflow-seven-steps",
+      "filename": "snaptik_7599720559177403660_v3.mp4",
+      "sha256": "9316b326e88e6ffeaa738f8b184c501af22a6ad5eb827438dd7f563bab368df9",
+      "duration_seconds": 80.703991,
+      "width": 576,
+      "height": 1024,
+      "review_path": "work/references/snaptik-7599720559177403660/analysis.json",
+      "evidence_scope": "Muestras visuales cada 3 s y detalles cada 1 s de recursos; ASR local del audio completo con detección automática de inglés. No escucha humana ni auditoría de cada frame.",
+      "audio_reviewed": false,
+      "audio_transcribed": true,
+      "usage": "analysis_only_not_render_asset"
+    }
+  ],
+  "families": [
+    {
+      "id": "umbral",
+      "name": "Umbral",
+      "reference_ids": [
+        "mogul-demo"
+      ],
+      "approval": "visual_sample_approved",
+      "purpose": "Historia explicativa con contraste, diagramas y mosaicos.",
+      "preview_composition_ids": [
+        "CinematicStyleLab",
+        "CinematicStyleLabVertical"
+      ]
+    },
+    {
+      "id": "bitacora",
+      "name": "Bitácora",
+      "reference_ids": [
+        "travel-day"
+      ],
+      "approval": "reference_only",
+      "purpose": "Relato cotidiano organizado por momentos y lugares.",
+      "preview_composition_ids": []
+    },
+    {
+      "id": "estampa",
+      "name": "Estampa",
+      "reference_ids": [
+        "city-diary"
+      ],
+      "approval": "reference_only",
+      "purpose": "Diario visual con detalles, títulos editoriales y etiquetas discretas.",
+      "preview_composition_ids": []
+    },
+    {
+      "id": "pulso",
+      "name": "Pulso",
+      "reference_ids": [
+        "training-type",
+        "text-editing-tips"
+      ],
+      "approval": "reference_only",
+      "purpose": "Montaje breve de acción con énfasis tipográfico por palabras.",
+      "preview_composition_ids": []
+    },
+    {
+      "id": "enlace",
+      "name": "Enlace",
+      "reference_ids": [
+        "motion-continuity",
+        "capture-basics",
+        "editing-workflow-seven-steps"
+      ],
+      "approval": "reference_only",
+      "purpose": "Explicación visual por capítulos, demostraciones y continuidad entre ángulos. Nombre de trabajo propio; no es perfil predeterminado.",
+      "preview_composition_ids": []
+    }
+  ],
+  "patterns": [
+    {
+      "id": "umbral-dual-title",
+      "family_id": "umbral",
+      "name": "Título de dos voces",
+      "kind": "typography",
+      "evidence": {
+        "reference_id": "mogul-demo",
+        "approx_start_seconds": 0,
+        "approx_end_seconds": 10,
+        "observed": "Contraste de escala y tratamiento tipográfico."
+      },
+      "use_when": "Abrir una idea central con pocas palabras.",
+      "avoid_when": "Habla densa que requiere subtítulos completos.",
+      "parameters": {
+        "primary_font": "InterDisplay",
+        "secondary_font": "LabScript",
+        "max_words": 8,
+        "duration_seconds": 3
+      },
+      "parameter_origin": "proposed_defaults_not_measured_from_reference",
+      "implementation": {
+        "status": "preview_only",
+        "component": "src/style-lab/TypographyScene.tsx#OpeningScene",
+        "automatic_editor_support": false
+      }
+    },
+    {
+      "id": "umbral-linked-ideas",
+      "family_id": "umbral",
+      "name": "Ideas conectadas",
+      "kind": "graphic",
+      "evidence": {
+        "reference_id": "mogul-demo",
+        "approx_start_seconds": 26,
+        "approx_end_seconds": 31,
+        "observed": "Iconos y flechas construyen una relación progresiva."
+      },
+      "use_when": "La frase expresa una secuencia o relación explícita.",
+      "avoid_when": "No hay relación causal o secuencia en el contenido.",
+      "parameters": {
+        "max_nodes": 3,
+        "reveal": "sequential",
+        "duration_seconds": 4
+      },
+      "parameter_origin": "proposed_defaults_not_measured_from_reference",
+      "implementation": {
+        "status": "preview_only",
+        "component": "src/style-lab/DiagramScene.tsx#DiagramScene",
+        "automatic_editor_support": false
+      }
+    },
+    {
+      "id": "umbral-detail-callout",
+      "family_id": "umbral",
+      "name": "Detalle señalado",
+      "kind": "graphic",
+      "evidence": {
+        "reference_id": "mogul-demo",
+        "approx_start_seconds": 38,
+        "approx_end_seconds": 43,
+        "observed": "Acento rojo y señalamiento de un detalle."
+      },
+      "use_when": "Se conoce el objeto o región a destacar.",
+      "avoid_when": "La región no está localizada o tapa rostro/texto.",
+      "parameters": {
+        "max_callouts": 1,
+        "accent": "brand",
+        "duration_seconds": 3
+      },
+      "parameter_origin": "proposed_defaults_not_measured_from_reference",
+      "implementation": {
+        "status": "preview_only",
+        "component": "src/style-lab/FootageScenes.tsx#CalloutScene",
+        "automatic_editor_support": false
+      }
+    },
+    {
+      "id": "umbral-mosaic",
+      "family_id": "umbral",
+      "name": "Mosaico de miradas",
+      "kind": "layout",
+      "evidence": {
+        "reference_id": "mogul-demo",
+        "approx_start_seconds": 52,
+        "approx_end_seconds": 57,
+        "observed": "Composición de varias imágenes en cuadrícula."
+      },
+      "use_when": "Hay material complementario con procedencia y variedad.",
+      "avoid_when": "Se exige seguir una acción o leer detalle en cada toma.",
+      "parameters": {
+        "rows": 3,
+        "columns": 3,
+        "duration_seconds": 4
+      },
+      "parameter_origin": "proposed_defaults_not_measured_from_reference",
+      "implementation": {
+        "status": "preview_only",
+        "component": "src/style-lab/FootageScenes.tsx#MosaicScene",
+        "automatic_editor_support": false
+      }
+    },
+    {
+      "id": "umbral-light-close",
+      "family_id": "umbral",
+      "name": "Cierre en claro",
+      "kind": "typography",
+      "evidence": {
+        "reference_id": "mogul-demo",
+        "approx_start_seconds": 54,
+        "approx_end_seconds": 58.2,
+        "observed": "Cierre con contraste tipográfico y tratamiento manuscrito."
+      },
+      "use_when": "Existe una frase de cierre autorizada.",
+      "avoid_when": "Requeriría inventar un CTA.",
+      "parameters": {
+        "max_words": 10,
+        "duration_seconds": 3,
+        "background": "off_white"
+      },
+      "parameter_origin": "proposed_defaults_not_measured_from_reference",
+      "implementation": {
+        "status": "preview_only",
+        "component": "src/style-lab/TypographyScene.tsx#ClosingScene",
+        "automatic_editor_support": false
+      }
+    },
+    {
+      "id": "bitacora-time-marker",
+      "family_id": "bitacora",
+      "name": "Hora del momento",
+      "kind": "typography",
+      "evidence": {
+        "reference_id": "travel-day",
+        "approx_start_seconds": 4,
+        "approx_end_seconds": 8,
+        "observed": "Marcador grande 6:30 am sobre toma del día."
+      },
+      "use_when": "La hora está confirmada en el brief o metadatos fiables.",
+      "avoid_when": "La hora se tendría que inferir o inventar.",
+      "parameters": {
+        "font": "InterDisplay",
+        "x_normalized": 0.5,
+        "y_normalized": 0.3,
+        "duration_seconds": 1.5,
+        "clock_format": "h:mm a"
+      },
+      "parameter_origin": "proposed_defaults_not_measured_from_reference",
+      "implementation": {
+        "status": "specified",
+        "component": null,
+        "automatic_editor_support": false
+      }
+    },
+    {
+      "id": "bitacora-quiet-captions",
+      "family_id": "bitacora",
+      "name": "Narración discreta",
+      "kind": "captions",
+      "evidence": {
+        "reference_id": "travel-day",
+        "approx_start_seconds": 0,
+        "approx_end_seconds": 80,
+        "observed": "Texto blanco pequeño acompaña distintos momentos."
+      },
+      "use_when": "La imagen lleva la historia y la voz necesita apoyo.",
+      "avoid_when": "La lectura en móvil pierde legibilidad.",
+      "parameters": {
+        "font": "InterDisplay",
+        "max_lines": 2,
+        "font_height_ratio": 0.028,
+        "min_contrast_ratio": 4.5,
+        "position": "lower_safe",
+        "font_size_constant": true
+      },
+      "parameter_origin": "proposed_defaults_not_measured_from_reference",
+      "implementation": {
+        "status": "specified",
+        "component": null,
+        "automatic_editor_support": false
+      }
+    },
+    {
+      "id": "bitacora-day-sequence",
+      "family_id": "bitacora",
+      "name": "Momentos del día",
+      "kind": "montage",
+      "evidence": {
+        "reference_id": "travel-day",
+        "approx_start_seconds": 8,
+        "approx_end_seconds": 76,
+        "observed": "Traslados, playa, piscina y salida nocturna."
+      },
+      "use_when": "El usuario solicita resumir material de un diario con cronología conocida.",
+      "avoid_when": "Modo de preservación de voz/orden o cronología incierta.",
+      "parameters": {
+        "required_mode": "explicit_montage_opt_in",
+        "shot_roles": [
+          "context",
+          "action",
+          "detail",
+          "reaction"
+        ],
+        "transition": "hard_cut",
+        "reorder_existing_speech": false
+      },
+      "parameter_origin": "proposed_defaults_not_measured_from_reference",
+      "implementation": {
+        "status": "specified",
+        "component": null,
+        "automatic_editor_support": false
+      }
+    },
+    {
+      "id": "estampa-editorial-title",
+      "family_id": "estampa",
+      "name": "Título editorial breve",
+      "kind": "typography",
+      "evidence": {
+        "reference_id": "city-diary",
+        "approx_start_seconds": 0,
+        "approx_end_seconds": 2,
+        "observed": "Título central con serif y letra cursiva/manuscrita."
+      },
+      "use_when": "Introducción breve de tema o episodio.",
+      "avoid_when": "Superpone texto ya incrustado o información crítica.",
+      "parameters": {
+        "primary_font": "PlexSerif",
+        "secondary_font": "LabScript",
+        "max_words": 5,
+        "duration_seconds": 1.8,
+        "position": "center_safe"
+      },
+      "parameter_origin": "proposed_defaults_not_measured_from_reference",
+      "implementation": {
+        "status": "specified",
+        "component": null,
+        "automatic_editor_support": false
+      }
+    },
+    {
+      "id": "estampa-activity-label",
+      "family_id": "estampa",
+      "name": "Etiqueta de actividad",
+      "kind": "typography",
+      "evidence": {
+        "reference_id": "city-diary",
+        "approx_start_seconds": 2,
+        "approx_end_seconds": 25,
+        "observed": "Pequeñas etiquetas blancas de dos líneas."
+      },
+      "use_when": "Se conoce la actividad, hora o lugar por fuente confirmada.",
+      "avoid_when": "La etiqueta duplicaría captions o sería ilegible.",
+      "parameters": {
+        "font": "InterDisplay",
+        "max_lines": 2,
+        "max_words": 5,
+        "font_height_ratio": 0.025,
+        "duration_seconds": 1.2,
+        "position": "center_safe"
+      },
+      "parameter_origin": "proposed_defaults_not_measured_from_reference",
+      "implementation": {
+        "status": "specified",
+        "component": null,
+        "automatic_editor_support": false
+      }
+    },
+    {
+      "id": "estampa-detail-chain",
+      "family_id": "estampa",
+      "name": "Cadena de detalles",
+      "kind": "montage",
+      "evidence": {
+        "reference_id": "city-diary",
+        "approx_start_seconds": 3,
+        "approx_end_seconds": 25,
+        "observed": "Comida, vestuario, objetos, retratos y calles alternan escalas."
+      },
+      "use_when": "Hay originales complementarios y permiso de montaje.",
+      "avoid_when": "Video continuo de voz que debe conservarse en orden.",
+      "parameters": {
+        "required_mode": "explicit_montage_opt_in",
+        "shot_roles": [
+          "wide",
+          "portrait",
+          "detail"
+        ],
+        "transition": "hard_cut",
+        "reorder_existing_speech": false
+      },
+      "parameter_origin": "proposed_defaults_not_measured_from_reference",
+      "implementation": {
+        "status": "specified",
+        "component": null,
+        "automatic_editor_support": false
+      }
+    },
+    {
+      "id": "pulso-word-build",
+      "family_id": "pulso",
+      "name": "Frase que se construye",
+      "kind": "captions",
+      "evidence": {
+        "reference_id": "training-type",
+        "approx_start_seconds": 1,
+        "approx_end_seconds": 2.25,
+        "observed": "Palabras aparecen formando grupos sucesivos."
+      },
+      "use_when": "Hay transcripción alineada y se quiere enfatizar una frase corta.",
+      "avoid_when": "Lectura rápida o larga impide comprensión.",
+      "parameters": {
+        "font": "PlexSerif",
+        "max_words": 6,
+        "max_lines": 3,
+        "reveal": "word_aligned",
+        "anchor_stable_per_phrase": true
+      },
+      "parameter_origin": "proposed_defaults_not_measured_from_reference",
+      "implementation": {
+        "status": "specified",
+        "component": null,
+        "automatic_editor_support": false
+      }
+    },
+    {
+      "id": "pulso-color-stress",
+      "family_id": "pulso",
+      "name": "Acento de palabra",
+      "kind": "captions",
+      "evidence": {
+        "reference_id": "training-type",
+        "approx_start_seconds": 2.25,
+        "approx_end_seconds": 3.75,
+        "observed": "Texto sans blanco con acentos de color visibles."
+      },
+      "use_when": "Una palabra de la frase concentra la idea.",
+      "avoid_when": "El color cambia el significado o falla el contraste.",
+      "parameters": {
+        "font": "InterDisplay",
+        "accent": "brand",
+        "max_accented_words_per_phrase": 1,
+        "font_size_constant": true,
+        "reveal": "word_aligned"
+      },
+      "parameter_origin": "proposed_defaults_not_measured_from_reference",
+      "implementation": {
+        "status": "specified",
+        "component": null,
+        "automatic_editor_support": false
+      },
+      "additional_evidence": [
+        {
+          "reference_id": "editing-workflow-seven-steps",
+          "approx_start_seconds": 45.14,
+          "approx_end_seconds": 50.98,
+          "note": "Evidencia adicional de una receta existente; no se cuenta como patrón nuevo."
+        }
+      ]
+    },
+    {
+      "id": "pulso-spatial-phrase",
+      "family_id": "pulso",
+      "name": "Frase distribuida",
+      "kind": "typography",
+      "evidence": {
+        "reference_id": "training-type",
+        "approx_start_seconds": 5.25,
+        "approx_end_seconds": 6.25,
+        "observed": "Palabras distribuidas alrededor del sujeto."
+      },
+      "use_when": "Frase muy breve con regiones libres verificadas.",
+      "avoid_when": "Regiones ocupadas, lectura confusa o dos capas de captions.",
+      "parameters": {
+        "max_words": 5,
+        "max_regions": 3,
+        "face_exclusion": true,
+        "caption_exclusion": true,
+        "fallback": "single_safe_block",
+        "requires_region_detection": true
+      },
+      "parameter_origin": "proposed_defaults_not_measured_from_reference",
+      "implementation": {
+        "status": "specified",
+        "component": null,
+        "automatic_editor_support": false
+      }
+    },
+    {
+      "id": "pulso-action-cuts",
+      "family_id": "pulso",
+      "name": "Cambio de acción",
+      "kind": "montage",
+      "evidence": {
+        "reference_id": "training-type",
+        "approx_start_seconds": 0,
+        "approx_end_seconds": 7.08,
+        "observed": "Varias tomas y ejercicios en un montaje breve."
+      },
+      "use_when": "Secuencia de acción con material y audio disponibles para revisar.",
+      "avoid_when": "Pretende seguir un beat no analizado o altera voz protegida.",
+      "parameters": {
+        "required_mode": "explicit_montage_opt_in",
+        "transition": "hard_cut",
+        "shot_duration_seconds_range": [
+          0.5,
+          1.5
+        ],
+        "beat_sync_verified": false,
+        "reorder_existing_speech": false
+      },
+      "parameter_origin": "proposed_defaults_not_measured_from_reference",
+      "implementation": {
+        "status": "specified",
+        "component": null,
+        "automatic_editor_support": false
+      }
+    },
+    {
+      "id": "pulso-opening-hierarchy",
+      "family_id": "pulso",
+      "name": "Gancho de dos niveles",
+      "kind": "typography",
+      "evidence": {
+        "reference_id": "text-editing-tips",
+        "approx_start_seconds": 0,
+        "approx_end_seconds": 2.8,
+        "observed": "Frase introductoria pequeña sobre una palabra grande de textura irregular."
+      },
+      "use_when": "La apertura contiene una idea principal breve.",
+      "avoid_when": "Cubre el rostro o exige inventar un gancho. ",
+      "parameters": {
+        "small_font": "InterDisplay",
+        "headline_font": "brand_approved_display",
+        "max_words": 7,
+        "duration_seconds": 2.5,
+        "face_exclusion": true,
+        "exact_reference_font_identified": false
+      },
+      "parameter_origin": "proposed_defaults_not_measured_from_reference",
+      "implementation": {
+        "status": "specified",
+        "component": null,
+        "automatic_editor_support": false
+      }
+    },
+    {
+      "id": "pulso-two-entry-levels",
+      "family_id": "pulso",
+      "name": "Entrada suave o marcada",
+      "kind": "typography",
+      "evidence": {
+        "reference_id": "text-editing-tips",
+        "approx_start_seconds": 4.44,
+        "approx_end_seconds": 11.14,
+        "observed": "Se muestran ejemplos de animaciones de texto en dos grupos."
+      },
+      "use_when": "La marca permite movimiento tipográfico y existe tiempo de lectura.",
+      "avoid_when": "El efecto interfiere con comprensión o con movimiento ya presente.",
+      "parameters": {
+        "intensity_options": [
+          "soft",
+          "accented"
+        ],
+        "soft": {
+          "opacity_from": 0,
+          "translate_y_height_ratio": 0.01,
+          "entry_seconds": 0.2
+        },
+        "accented": {
+          "opacity_from": 0,
+          "scale_from": 0.92,
+          "entry_seconds": 0.25
+        },
+        "frame_driven": true
+      },
+      "parameter_origin": "proposed_defaults_not_measured_from_reference",
+      "implementation": {
+        "status": "specified",
+        "component": null,
+        "automatic_editor_support": false
+      },
+      "additional_evidence": [
+        {
+          "reference_id": "editing-workflow-seven-steps",
+          "approx_start_seconds": 58.96,
+          "approx_end_seconds": 65.64,
+          "note": "Evidencia adicional de una receta existente; no se cuenta como patrón nuevo."
+        }
+      ]
+    },
+    {
+      "id": "pulso-text-path",
+      "family_id": "pulso",
+      "name": "Texto alrededor de una región",
+      "kind": "typography",
+      "evidence": {
+        "reference_id": "text-editing-tips",
+        "approx_start_seconds": 12,
+        "approx_end_seconds": 16,
+        "observed": "Las palabras se colocan con distintas orientaciones alrededor de la zona central."
+      },
+      "use_when": "Frase breve y una región libre verificada.",
+      "avoid_when": "Sin región fiable o si requiere captions completos simultáneos.",
+      "parameters": {
+        "max_words": 6,
+        "max_rotation_degrees": 90,
+        "region_exclusion": [
+          "face",
+          "captions",
+          "important_object"
+        ],
+        "fallback": "horizontal_safe_block",
+        "requires_region_detection": true
+      },
+      "parameter_origin": "proposed_defaults_not_measured_from_reference",
+      "implementation": {
+        "status": "specified",
+        "component": null,
+        "automatic_editor_support": false
+      }
+    },
+    {
+      "id": "enlace-match-action",
+      "family_id": "enlace",
+      "name": "Continuidad de gesto",
+      "kind": "montage",
+      "evidence": {
+        "reference_id": "motion-continuity",
+        "approx_start_seconds": 37.98,
+        "approx_end_seconds": 55.4,
+        "observed": "Se repite caminar/parar/girar desde otro ángulo y se presenta el montaje."
+      },
+      "use_when": "Hay dos tomas de una acción compatible y permiso para montaje multicámara.",
+      "avoid_when": "Sólo hay una toma, el gesto no coincide, o se perdería voz protegida.",
+      "parameters": {
+        "required_mode": "explicit_multitake_montage_opt_in",
+        "motion_features": [
+          "subject",
+          "gesture_phase",
+          "direction",
+          "screen_position"
+        ],
+        "cut_during_motion": true,
+        "fallback": "hard_cut_at_allowed_boundary",
+        "synthesize_missing_angle": false
+      },
+      "parameter_origin": "proposed_defaults_not_measured_from_reference",
+      "implementation": {
+        "status": "specified",
+        "component": null,
+        "automatic_editor_support": false
+      }
+    },
+    {
+      "id": "enlace-gesture-guide",
+      "family_id": "enlace",
+      "name": "Guía de movimiento",
+      "kind": "graphic",
+      "evidence": {
+        "reference_id": "motion-continuity",
+        "approx_start_seconds": 39,
+        "approx_end_seconds": 47.7,
+        "observed": "Flechas dibujadas muestran hacia dónde mirar y mover la cámara."
+      },
+      "use_when": "Una explicación de acción dispone de trayectoria y región confirmadas.",
+      "avoid_when": "No se conoce la trayectoria o la flecha tapa al sujeto.",
+      "parameters": {
+        "path_source": "verified_keyframes",
+        "stroke": "brand",
+        "max_arrows": 2,
+        "face_exclusion": true,
+        "requires_region_detection": true
+      },
+      "parameter_origin": "proposed_defaults_not_measured_from_reference",
+      "implementation": {
+        "status": "specified",
+        "component": null,
+        "automatic_editor_support": false
+      }
+    },
+    {
+      "id": "enlace-device-demo",
+      "family_id": "enlace",
+      "name": "Demostración dentro del dispositivo",
+      "kind": "layout",
+      "evidence": {
+        "reference_id": "motion-continuity",
+        "approx_start_seconds": 39,
+        "approx_end_seconds": 41.6,
+        "observed": "El teléfono muestra la grabación dentro de un encuadre mayor."
+      },
+      "use_when": "Existe captura autorizada o toma del dispositivo que demuestra el proceso.",
+      "avoid_when": "No hay captura real o se requeriría fabricar una interfaz como evidencia.",
+      "parameters": {
+        "media_required": true,
+        "inset_area_ratio_max": 0.4,
+        "background_treatment": "dim_or_blur",
+        "source_usage": "licensed_or_user_owned"
+      },
+      "parameter_origin": "proposed_defaults_not_measured_from_reference",
+      "implementation": {
+        "status": "specified",
+        "component": null,
+        "automatic_editor_support": false
+      }
+    },
+    {
+      "id": "enlace-chapter-card",
+      "family_id": "enlace",
+      "name": "Capítulo de alto contraste",
+      "kind": "typography",
+      "evidence": {
+        "reference_id": "capture-basics",
+        "approx_start_seconds": 19.36,
+        "approx_end_seconds": 23,
+        "observed": "Separación por pasos con grandes títulos, fondos claros/oscuros y espacio libre."
+      },
+      "use_when": "El discurso contiene una estructura de pasos o secciones.",
+      "avoid_when": "La numeración no está respaldada o rompe una frase.",
+      "parameters": {
+        "number_source": "explicit_script_or_transcript",
+        "title_max_words": 5,
+        "font": "InterDisplay",
+        "duration_seconds": 1.2,
+        "background_options": [
+          "light",
+          "dark"
+        ]
+      },
+      "parameter_origin": "proposed_defaults_not_measured_from_reference",
+      "implementation": {
+        "status": "specified",
+        "component": null,
+        "automatic_editor_support": false
+      },
+      "additional_evidence": [
+        {
+          "reference_id": "editing-workflow-seven-steps",
+          "approx_start_seconds": 18.68,
+          "approx_end_seconds": 21.68,
+          "note": "Evidencia adicional de una receta existente; no se cuenta como patrón nuevo."
+        }
+      ]
+    },
+    {
+      "id": "enlace-concept-demo",
+      "family_id": "enlace",
+      "name": "Concepto con ejemplo",
+      "kind": "layout",
+      "evidence": {
+        "reference_id": "capture-basics",
+        "approx_start_seconds": 24.24,
+        "approx_end_seconds": 33.98,
+        "observed": "Rótulos de las luces acompañan pequeños ejemplos visuales aislados."
+      },
+      "use_when": "Se puede mostrar el concepto con un ejemplo autorizado y correctamente rotulado.",
+      "avoid_when": "La imagen no demuestra el concepto o exigiría inventar datos.",
+      "parameters": {
+        "layout": "label_above_example",
+        "max_examples_simultaneous": 2,
+        "media_required": true,
+        "caption_region": "separate",
+        "background": "neutral"
+      },
+      "parameter_origin": "proposed_defaults_not_measured_from_reference",
+      "implementation": {
+        "status": "specified",
+        "component": null,
+        "automatic_editor_support": false
+      },
+      "additional_evidence": [
+        {
+          "reference_id": "editing-workflow-seven-steps",
+          "approx_start_seconds": 50.98,
+          "approx_end_seconds": 53.46,
+          "note": "Evidencia adicional de una receta existente; no se cuenta como patrón nuevo."
+        }
+      ]
+    },
+    {
+      "id": "enlace-framing-overlay",
+      "family_id": "enlace",
+      "name": "Guía de encuadre",
+      "kind": "graphic",
+      "evidence": {
+        "reference_id": "capture-basics",
+        "approx_start_seconds": 44.76,
+        "approx_end_seconds": 62.1,
+        "observed": "Cuadrícula de tercios y guía central sobre retrato vertical."
+      },
+      "use_when": "Se explica o revisa composición; no se impone a todas las entregas.",
+      "avoid_when": "La guía oculta texto o el encuadre depende de acción fuera de centro.",
+      "parameters": {
+        "overlay_options": [
+          "thirds_grid",
+          "vertical_centerline",
+          "eye_line"
+        ],
+        "default_overlay": "thirds_grid",
+        "final_export_default": false,
+        "face_exclusion_for_labels": true
+      },
+      "parameter_origin": "proposed_defaults_not_measured_from_reference",
+      "implementation": {
+        "status": "specified",
+        "component": null,
+        "automatic_editor_support": false
+      }
+    },
+    {
+      "id": "enlace-progress-route",
+      "family_id": "enlace",
+      "name": "Ruta de pasos",
+      "kind": "graphic",
+      "evidence": {
+        "reference_id": "editing-workflow-seven-steps",
+        "approx_start_seconds": 5.5,
+        "approx_end_seconds": 9,
+        "observed": "Números conectados introducen una secuencia de siete pasos."
+      },
+      "use_when": "El contenido enumera pasos reales y conviene anticipar su estructura.",
+      "avoid_when": "El número se inventa o la ruta tapa el rostro.",
+      "parameters": {
+        "count_source": "explicit_transcript_or_brief",
+        "max_visible_steps": 7,
+        "active_step_emphasis": true,
+        "face_exclusion": true,
+        "brand_accent": true
+      },
+      "parameter_origin": "proposed_defaults_not_measured_from_reference",
+      "implementation": {
+        "status": "specified",
+        "component": null,
+        "automatic_editor_support": false
+      }
+    },
+    {
+      "id": "enlace-literal-object",
+      "family_id": "enlace",
+      "name": "Objeto mencionado",
+      "kind": "graphic",
+      "evidence": {
+        "reference_id": "editing-workflow-seven-steps",
+        "approx_start_seconds": 48,
+        "approx_end_seconds": 51.5,
+        "observed": "Recortes de donuts aparecen al mencionar ese objeto."
+      },
+      "use_when": "La frase menciona un objeto concreto y existe un recurso autorizado pertinente.",
+      "avoid_when": "Podría presentarse una ilustración como evidencia real de un hecho.",
+      "parameters": {
+        "asset_required": true,
+        "source_usage": "licensed_or_user_owned",
+        "max_objects": 2,
+        "anchor": "spoken_entity",
+        "semantic_match_required": true,
+        "face_exclusion": true
+      },
+      "parameter_origin": "proposed_defaults_not_measured_from_reference",
+      "implementation": {
+        "status": "specified",
+        "component": null,
+        "automatic_editor_support": false
+      }
+    },
+    {
+      "id": "enlace-resource-stack",
+      "family_id": "enlace",
+      "name": "Lista visual de recursos",
+      "kind": "layout",
+      "evidence": {
+        "reference_id": "editing-workflow-seven-steps",
+        "approx_start_seconds": 53,
+        "approx_end_seconds": 57,
+        "observed": "Varias tarjetas de recursos aparecen apiladas sobre la toma."
+      },
+      "use_when": "La lista está confirmada y los nombres/logos son pertinentes.",
+      "avoid_when": "La lista implica una recomendación no validada o cubre información.",
+      "parameters": {
+        "max_items": 3,
+        "item_reveal": "sequential",
+        "names_source": "verified_brief_or_transcript",
+        "layout": "stack",
+        "asset_provenance_required": true
+      },
+      "parameter_origin": "proposed_defaults_not_measured_from_reference",
+      "implementation": {
+        "status": "specified",
+        "component": null,
+        "automatic_editor_support": false
+      }
+    }
+  ],
+  "editorial_rules": [
+    {
+      "id": "focus-editing-budget",
+      "reference_id": "text-editing-tips",
+      "approx_start_seconds": 24.16,
+      "approx_end_seconds": 29.7,
+      "source_advice_paraphrase": "Para ahorrar tiempo, concentrar el trabajo de texto en los primeros cinco segundos y hacia la mitad; mantener subtítulos normales en el resto.",
+      "proposed_application": "Probar una apertura expresiva y un segundo énfasis en una idea central cercana a la mitad. El segundo énfasis necesita justificación semántica; no dispararlo sólo por reloj.",
+      "exceptions": [
+        "Vídeos de menos de 10 s: evitar dos ráfagas automáticas.",
+        "Perfil sobrio o instrucciones por video prevalecen.",
+        "No asumir que la regla de cinco segundos es universal."
+      ],
+      "validation": "A/B del mismo contenido con y sin esta distribución: aprobación, comprensión, minutos de corrección y, si se publican versiones comparables, retención real.",
+      "status": "candidate_not_automatically_applied",
+      "approval_required_per_brand": true
+    },
+    {
+      "id": "purposeful-text-animation",
+      "reference_id": "text-editing-tips",
+      "approx_start_seconds": 4.44,
+      "approx_end_seconds": 11.14,
+      "source_advice_paraphrase": "Usar animaciones de texto sencillas para edición rápida y opciones más elaboradas cuando haya tiempo.",
+      "proposed_application": "Definir entradas suaves y enfatizadas; seleccionar una intensidad por frase y por marca. Los nombres exactos de los presets mostrados no se identificaron.",
+      "exceptions": [
+        "Evitar animar cada palabra sólo por tener el recurso.",
+        "Animación de Remotion guiada por frames."
+      ],
+      "validation": "Comprobar que el texto permanezca legible y no se recorte al entrar/salir.",
+      "status": "candidate_not_automatically_applied",
+      "approval_required_per_brand": true
+    },
+    {
+      "id": "semantic-size-and-position",
+      "reference_id": "text-editing-tips",
+      "approx_start_seconds": 11.32,
+      "approx_end_seconds": 15.68,
+      "source_advice_paraphrase": "Jugar con tamaño y posición del texto.",
+      "proposed_application": "Permitir variación en títulos cortos cuando el estilo elegido la admita; mantener un bloque estable para captions largos.",
+      "exceptions": [
+        "La demo de voz existente conserva Inter Display Bold de tamaño uniforme.",
+        "Evitar rostro, manos relevantes, captions y controles de plataforma."
+      ],
+      "validation": "Revisión antes/durante/después de animaciones, detector de regiones y lectura en móvil.",
+      "status": "candidate_not_automatically_applied",
+      "approval_required_per_brand": true
+    },
+    {
+      "id": "brand-led-color-hierarchy",
+      "reference_id": "text-editing-tips",
+      "approx_start_seconds": 15.84,
+      "approx_end_seconds": 22.46,
+      "source_advice_paraphrase": "Experimentar con color; menciona rosa y amarillo como combinación frecuente.",
+      "proposed_application": "Probar base neutra y un acento de la marca en una palabra central. Rosa/amarillo son un ejemplo de la creadora, no una paleta predeterminada.",
+      "exceptions": [
+        "Mantener colores semánticos y restricciones de marca.",
+        "No asumir que popular equivale a legible o eficaz."
+      ],
+      "validation": "Contraste sobre frames claros/oscuros, legibilidad y aprobación de marca.",
+      "status": "candidate_not_automatically_applied",
+      "approval_required_per_brand": true
+    },
+    {
+      "id": "show-the-technique",
+      "reference_id": "text-editing-tips",
+      "approx_start_seconds": 29.7,
+      "approx_end_seconds": 35.5,
+      "source_advice_paraphrase": "Volver a ver el video prestando atención a los textos: la pieza ejemplifica lo explicado.",
+      "proposed_application": "Acompañar cada receta con un ejemplo visible y sus parámetros para que el usuario apruebe decisiones concretas.",
+      "exceptions": [
+        "No contar una ficha escrita como componente implementado."
+      ],
+      "validation": "Exigir vista previa del recurso antes de habilitarlo al editor automático.",
+      "status": "candidate_not_automatically_applied",
+      "approval_required_per_brand": true
+    },
+    {
+      "id": "cut-on-compatible-motion",
+      "reference_id": "motion-continuity",
+      "approx_start_seconds": 15.42,
+      "approx_end_seconds": 23.32,
+      "source_advice_paraphrase": "Cortar durante giros de cabeza o movimientos de mano para disimular cambios de toma.",
+      "proposed_application": "Buscar pares de tomas con mismo sujeto, fase del gesto, dirección y posición compatibles. Es un criterio de selección pendiente de implementar.",
+      "exceptions": [
+        "El beat musical sigue siendo una opción estética.",
+        "No prometer que todo corte deba ser invisible.",
+        "No cortar, duplicar ni reordenar voz bajo el modo actual."
+      ],
+      "validation": "Revisar continuidad antes/durante/después del corte y la señal de voz; comparar con corte directo.",
+      "status": "candidate_not_automatically_applied",
+      "approval_required_per_brand": true
+    },
+    {
+      "id": "plan-repeatable-coverage",
+      "reference_id": "motion-continuity",
+      "approx_start_seconds": 24.36,
+      "approx_end_seconds": 47.64,
+      "source_advice_paraphrase": "Planificar las acciones en la lista de tomas y repetirlas desde un segundo ángulo.",
+      "proposed_application": "Añadir al brief de grabación acción, ángulo A/B, posición de inicio/fin y repetición con margen. El editor sólo propone si existen ambos originales.",
+      "exceptions": [
+        "No fabricar ángulos inexistentes.",
+        "Material de una sola toma conserva sus posibilidades reales."
+      ],
+      "validation": "Verificar cobertura antes de encolar el montaje; explicar qué toma falta.",
+      "status": "candidate_not_automatically_applied",
+      "approval_required_per_brand": true
+    },
+    {
+      "id": "capture-lighting-separation",
+      "reference_id": "capture-basics",
+      "approx_start_seconds": 19.36,
+      "approx_end_seconds": 33.98,
+      "source_advice_paraphrase": "Explica luz principal, relleno de sombras y separación del sujeto respecto al fondo.",
+      "proposed_application": "Añadir revisión de cara visible, sombras, altas luces y separación al diagnóstico de entrada y al brief para agencia.",
+      "exceptions": [
+        "No exigir tres luminarias como condición universal.",
+        "El grading no recupera detalle perdido por completo."
+      ],
+      "validation": "Revisar frames representativos, exposición de rostro y coherencia entre tomas; correcciones con aprobación estética.",
+      "status": "candidate_not_automatically_applied",
+      "approval_required_per_brand": true
+    },
+    {
+      "id": "eye-level-as-option",
+      "reference_id": "capture-basics",
+      "approx_start_seconds": 34.2,
+      "approx_end_seconds": 43.44,
+      "source_advice_paraphrase": "Propone cámara a la altura de los ojos para hablar al espectador.",
+      "proposed_application": "Incluir altura de cámara como opción en el brief de talking-head y revisar recortes según contenido.",
+      "exceptions": [
+        "Ángulos altos/bajos pueden ser decisiones expresivas.",
+        "No cambiar el estilo de referencias previas por esta sugerencia."
+      ],
+      "validation": "Comparar encuadre y comodidad visual; preservar cabeza/manos relevantes al recortar.",
+      "status": "candidate_not_automatically_applied",
+      "approval_required_per_brand": true
+    },
+    {
+      "id": "framing-guides-not-rules",
+      "reference_id": "capture-basics",
+      "approx_start_seconds": 43.74,
+      "approx_end_seconds": 62.1,
+      "source_advice_paraphrase": "Presenta tercios y encuadre simétrico para vertical.",
+      "proposed_application": "Ofrecer guías de tercios, centro vertical y altura de ojos; elegir según mirada, acción y espacio para gráficos.",
+      "exceptions": [
+        "Dice horizontal mientras dibuja una línea vertical: registrar discrepancia.",
+        "La regla de tercios no obliga a centrar al sujeto.",
+        "La simetría no es universalmente superior para vertical."
+      ],
+      "validation": "Contrastar guía con imagen y zonas ocupadas; aprobar por video, no imponer automáticamente.",
+      "status": "candidate_not_automatically_applied",
+      "approval_required_per_brand": true
+    },
+    {
+      "id": "exposure-before-post",
+      "reference_id": "capture-basics",
+      "approx_start_seconds": 62.32,
+      "approx_end_seconds": 76.56,
+      "source_advice_paraphrase": "Menciona obturación, apertura e ISO y una app con controles manuales.",
+      "proposed_application": "Registrar exposición, fps y desenfoque/movimiento cuando estén disponibles y dar recomendaciones de captura según dispositivo.",
+      "exceptions": [
+        "No fijar apertura en un teléfono que no permita variarla.",
+        "No asumir que la app citada sea obligatoria o esté verificada por esta revisión.",
+        "No añadir una compra ni instalar software por esta referencia."
+      ],
+      "validation": "Separar fallos de captura de decisiones de edición; no tratar una imagen irrecuperable como fallo de prompt.",
+      "status": "candidate_not_automatically_applied",
+      "approval_required_per_brand": true
+    },
+    {
+      "id": "silence-with-intent",
+      "reference_id": "editing-workflow-seven-steps",
+      "approx_start_seconds": 18.68,
+      "approx_end_seconds": 25.76,
+      "source_advice_paraphrase": "Recortar silencios y usar automatización para agilizarlo.",
+      "proposed_application": "Detectar tramos sin voz; preservar respiraciones, pausas expresivas y contexto según el perfil.",
+      "exceptions": [
+        "No eliminar toda pausa por defecto.",
+        "No cortar palabras ni reordenar voz bajo el modo actual."
+      ],
+      "validation": "Comparar audio y alineación, escuchar el resultado y registrar pausas retenidas/eliminadas.",
+      "status": "candidate_not_automatically_applied",
+      "approval_required_per_brand": true
+    },
+    {
+      "id": "meaning-before-decoration",
+      "reference_id": "editing-workflow-seven-steps",
+      "approx_start_seconds": 25.96,
+      "approx_end_seconds": 35,
+      "source_advice_paraphrase": "Priorizar storytelling y el criterio del creador sobre la herramienta.",
+      "proposed_application": "Identificar tema, intención, idea central y función de cada énfasis antes de seleccionar un recurso.",
+      "exceptions": [
+        "No reescribir ni reordenar la narrativa sin un modo explícito.",
+        "Cada gráfico debe tener una justificación vinculada a una frase."
+      ],
+      "validation": "Rechazar recursos sin aporte explicativo; medir pertinencia y cambios manuales.",
+      "status": "candidate_not_automatically_applied",
+      "approval_required_per_brand": true
+    },
+    {
+      "id": "music-by-intent-and-source",
+      "reference_id": "editing-workflow-seven-steps",
+      "approx_start_seconds": 35,
+      "approx_end_seconds": 45.14,
+      "source_advice_paraphrase": "Buscar música para el contenido; propone pedir canciones y descargarlas.",
+      "proposed_application": "Elegir una pista por intención, energía y espacio para la voz entre recursos con permisos documentados.",
+      "exceptions": [
+        "Un archivo descargado no demuestra permisos de uso.",
+        "No reutilizar música de estas referencias.",
+        "La sugerencia de una canción por un modelo no verifica licencia ni popularidad."
+      ],
+      "validation": "Guardar procedencia, condiciones y mezcla; revisar inteligibilidad de voz y nivel de audio.",
+      "status": "candidate_not_automatically_applied",
+      "approval_required_per_brand": true
+    },
+    {
+      "id": "semantic-broll",
+      "reference_id": "editing-workflow-seven-steps",
+      "approx_start_seconds": 45.14,
+      "approx_end_seconds": 55.5,
+      "source_advice_paraphrase": "Mostrar imágenes relacionadas con el objeto o tema del que se está hablando.",
+      "proposed_application": "Buscar B-roll por entidad, acción, contexto y tono; conservar la voz debajo y exigir correspondencia con la frase.",
+      "exceptions": [
+        "No representar hechos específicos con stock genérico como si fuera prueba.",
+        "No cubrir cada sustantivo si la imagen no aporta.",
+        "Si no hay recurso adecuado, conservar A-roll o marcar revisión."
+      ],
+      "validation": "Evaluar frase-recurso, utilidad, continuidad y procedencia antes de renderizar.",
+      "status": "candidate_not_automatically_applied",
+      "approval_required_per_brand": true
+    },
+    {
+      "id": "font-and-template-provenance",
+      "reference_id": "editing-workflow-seven-steps",
+      "approx_start_seconds": 55.5,
+      "approx_end_seconds": 65.64,
+      "source_advice_paraphrase": "Usar fuentes y animaciones existentes o construirlas con keyframes.",
+      "proposed_application": "Seleccionar fuentes/plantillas del catálogo de marca y verificar licencia, compatibilidad con Remotion y caracteres españoles.",
+      "exceptions": [
+        "No asumir que todo lo que un sitio permite descargar es comercialmente reutilizable.",
+        "Un preset de otro editor no implica un componente Remotion listo."
+      ],
+      "validation": "Previsualizar fuente y animación, verificar acentos y registrar archivo/licencia/versiones.",
+      "status": "candidate_not_automatically_applied",
+      "approval_required_per_brand": true
+    },
+    {
+      "id": "balance-before-look",
+      "reference_id": "editing-workflow-seven-steps",
+      "approx_start_seconds": 65.64,
+      "approx_end_seconds": 72.06,
+      "source_advice_paraphrase": "Ajustar color al aspecto deseado; lo simplifica como mover controles.",
+      "proposed_application": "Separar balance de imagen y coherencia entre tomas del look creativo de marca.",
+      "exceptions": [
+        "No aplicar un único filtro a todas las condiciones de luz.",
+        "No prometer recuperar detalle recortado.",
+        "El gusto se revisa con la marca."
+      ],
+      "validation": "Comparar exposición, dominantes, piel y continuidad; aprobar después el look.",
+      "status": "candidate_not_automatically_applied",
+      "approval_required_per_brand": true
+    }
+  ],
+  "tutorial_synthesis_path": "work/references/tutorials-synthesis-2026-10-19.json",
+  "research_catalogs": [
+    {
+      "id": "capcut-invideo-20261027",
+      "path": "style/research/capcut-invideo-patterns-v1.json",
+      "report": "docs/implementacion/engine-sol-estilos-2026-10-26/capcut-invideo-2026-10-27/INVESTIGACION.md",
+      "status": "specified-not-integrated",
+      "apps": [
+        "CapCut",
+        "InVideo"
+      ]
+    },
+    {
+      "id": "capcut-canva-20261027",
+      "path": "style/research/capcut-canva-patterns-v1.json",
+      "report": "docs/implementacion/engine-sol-estilos-2026-10-26/capcut-canva-2026-10-27/INVESTIGACION.md",
+      "status": "partially-implemented-static-previews",
+      "apps": [
+        "CapCut",
+        "Canva"
+      ]
+    },
+    {
+      "id": "capcut-canva-visuals-20261027",
+      "path": "style/research/capcut-canva-visuals-v1.json",
+      "report": "docs/implementacion/engine-sol-estilos-2026-10-26/capcut-canva-visuals-2026-10-27/INVESTIGACION.md",
+      "apps": [
+        "CapCut",
+        "Canva"
+      ],
+      "status": "partially-implemented-with-static-validation"
+    }
+  ]
+}

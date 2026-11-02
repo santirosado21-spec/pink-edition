@@ -1,4 +1,6 @@
 import type { Style, Theme } from "./edit";
+import catalog from "../style/catalog-v1.json";
+export { catalog };
 
 // Lo que el creador contesta una vez en el cuestionario de estilo. Viaja copiado en
 // el plan de cada video (`plan.preferences`).
@@ -9,6 +11,7 @@ export const SFX = ["full", "soft", "none"] as const;
 export const CAPTION_PRESETS = ["pink", "keyword", "karaoke"] as const;
 export type CaptionPreset = (typeof CAPTION_PRESETS)[number];
 export type Preferences = {
+  editorialFamilyId?: "umbral" | "bitacora" | "estampa" | "pulso" | "enlace";
   topic: string;
   vibe: (typeof VIBES)[number];
   graphics: (typeof GRAPHICS)[number];
@@ -18,17 +21,40 @@ export type Preferences = {
   notes: string;
   // Opcional: los perfiles anteriores no lo tienen y siguen siendo válidos.
   captions?: CaptionPreset;
+  catalog_version?: 1;
+  brand_name?: string;
+  vocabulary?: string;
+  font?: "inter" | "serif" | "mono" | "anton" | "montserrat" | "bebas" | "editorial" | "cinema" | "magazine" | "documentary";
+  graphic_material?: "glass" | "paper" | "solid";
+  graphic_kinds?: string[];
+  support_media?: "auto" | "video" | "still" | "none";
+  emphasis_mode?: "overlay" | "fullscreen" | "none";
+  transition?: "none" | "punch" | "flash";
+  sound_pack?: "air" | "digital" | "soft";
+  language?: "es" | "en" | "mixed";
 };
 
-// Los valores por defecto reproducen el look de la casa: sin preferencias nada cambia.
+// Nuevo perfil: paneles de papel y sonido discreto. Los perfiles previos son válidos.
 export const DEFAULT_PREFERENCES: Preferences = {
+  editorialFamilyId: undefined,
   topic: "",
-  vibe: "dynamic",
-  graphics: "many",
+  vibe: "balanced",
+  graphics: "few",
   brand_color: "#1f5fc4",
   context_colors: true,
-  sfx: "full",
+  sfx: "soft",
   notes: "",
+  catalog_version: 1,
+  brand_name: "",
+  vocabulary: "",
+  font: "inter",
+  graphic_material: "paper",
+  support_media: undefined,
+  emphasis_mode: undefined,
+  graphic_kinds: ["bill", "compare", "steps", "beforeafter", "alert", "counter", "question", "photo"],
+  transition: "none",
+  sound_pack: "soft",
+  language: "mixed",
 };
 export const MAX_TOPIC = 80;
 export const MAX_NOTES = 300;
@@ -40,7 +66,8 @@ export const checkPreferences = (value: unknown): string[] => {
   if (typeof value !== "object" || value === null || Array.isArray(value)) return ["Las preferencias no son válidas."];
   const prefs = value as Record<string, unknown>;
   const errors: string[] = [];
-  const unknown = Object.keys(prefs).filter((key) => !(key in DEFAULT_PREFERENCES) && key !== "captions");
+  if (prefs.editorialFamilyId !== undefined && !["umbral", "bitacora", "estampa", "pulso", "enlace"].includes(prefs.editorialFamilyId as string)) errors.push("Familia editorial desconocida.");
+  const unknown = Object.keys(prefs).filter((key) => !Object.prototype.hasOwnProperty.call(DEFAULT_PREFERENCES, key) && key !== "captions");
   if (unknown.length > 0) errors.push(`Preferencias desconocidas: ${unknown.join(", ")}.`);
   if (typeof prefs.topic !== "string" || prefs.topic.length > MAX_TOPIC) errors.push(`El tema admite hasta ${MAX_TOPIC} caracteres.`);
   if (typeof prefs.notes !== "string" || prefs.notes.length > MAX_NOTES) errors.push(`La nota admite hasta ${MAX_NOTES} caracteres.`);
@@ -50,6 +77,17 @@ export const checkPreferences = (value: unknown): string[] => {
   if (typeof prefs.brand_color !== "string" || !HEX.test(prefs.brand_color)) errors.push("El color de marca debe ser un hexadecimal como #1f5fc4.");
   if (typeof prefs.context_colors !== "boolean") errors.push("Falta indicar si el color cambia con el tema.");
   if (prefs.captions !== undefined && !CAPTION_PRESETS.includes(prefs.captions as CaptionPreset)) errors.push("Estilo de subtítulos desconocido.");
+  if (prefs.catalog_version !== undefined && prefs.catalog_version !== 1) errors.push("Versión del catálogo desconocida.");
+  if (prefs.brand_name !== undefined && (typeof prefs.brand_name !== "string" || prefs.brand_name.length > 80)) errors.push("La marca admite hasta 80 caracteres.");
+  if (prefs.vocabulary !== undefined && (typeof prefs.vocabulary !== "string" || prefs.vocabulary.length > 300)) errors.push("El vocabulario admite hasta 300 caracteres.");
+  for (const [key, choices] of Object.entries({ font: catalog.fonts, graphic_material: catalog.materials, transition: catalog.transitions, sound_pack: catalog.sounds })) {
+    if (prefs[key] !== undefined && !choices.some((item) => item.id === prefs[key])) errors.push(`Opción de ${key} desconocida.`);
+  }
+  for (const [key, choices] of Object.entries({support_media: ["auto", "video", "still", "none"], emphasis_mode: ["overlay", "fullscreen", "none"]})) {
+    if (prefs[key] !== undefined && !choices.includes(prefs[key] as string)) errors.push(`Opción de ${key} desconocida.`);
+  }
+  if (prefs.language !== undefined && !["es", "en", "mixed"].includes(prefs.language as string)) errors.push("Idioma desconocido.");
+  if (prefs.graphic_kinds !== undefined && (!Array.isArray(prefs.graphic_kinds) || prefs.graphic_kinds.length > catalog.graphics.length || new Set(prefs.graphic_kinds).size !== prefs.graphic_kinds.length || prefs.graphic_kinds.some((id) => !catalog.graphics.some((item) => item.id === id)))) errors.push("Catálogo de gráficos inválido.");
   return errors;
 };
 
@@ -111,14 +149,24 @@ export const applyPreferences = (style: Style, prefs?: Preferences): Style => {
   const [hue, saturation] = toHsl(toRgb(prefs.brand_color));
   const softer = (sound: { gain_db: number }) => ({ ...sound, gain_db: sound.gain_db + SOFT_SFX_DB });
   const audio = style.audio;
+  const font = catalog.fonts.find((item) => item.id === (prefs.font ?? "inter"))!;
+  const pack = catalog.sounds.find((item) => item.id === prefs.sound_pack);
+  const packed = !pack ? audio : { ...audio,
+    intro_sfx: { ...audio.intro_sfx, file: pack.sample, trim_before_frames: 0 },
+    cut_sfx: { ...audio.cut_sfx, sounds: audio.cut_sfx.sounds.map((sound) => ({ ...sound, file: pack.sample, peak_frames: pack.id === "air" ? sound.peak_frames : 0 })) },
+    card_enter_sfx: { ...audio.card_enter_sfx, file: pack.enter }, card_beat_sfx: { ...audio.card_beat_sfx, file: pack.beat },
+    color_cut_sfx: { ...audio.color_cut_sfx, file: pack.sample },
+  };
   return {
     ...style,
+    captions: { ...style.captions, font_family: font.family, font_file: font.file, letter_spacing_em: font.tracking, font_size: font.size, line_height: Math.ceil(font.size * 1.12) },
+    graphics: { ...style.graphics, ...(prefs.graphic_material === "paper" ? { ink: DARK_INK, muted: "rgba(23,19,28,.35)" } : prefs.graphic_material === "solid" ? { ink: base.on ?? "#ffffff", muted: base.on_muted ?? "rgba(255,255,255,.3)" } : {}) },
     themes: prefs.context_colors ? { ...themes, base } : Object.fromEntries(Object.keys(themes).map((name) => [name, base])),
     cuts: sameBrand ? style.cuts : { ...style.cuts, paper: { ...style.cuts.paper, muted: fromHsl(hue, saturation * 0.35, 0.71) } },
     background: sameBrand ? style.background : { ...style.background, dim: `${fromHsl(hue, Math.min(saturation, 0.75), 0.13)}75` },
     audio:
       prefs.sfx === "soft"
-        ? { ...audio, intro_sfx: softer(audio.intro_sfx), cut_sfx: softer(audio.cut_sfx), card_enter_sfx: softer(audio.card_enter_sfx), card_beat_sfx: softer(audio.card_beat_sfx), color_cut_sfx: softer(audio.color_cut_sfx) }
-        : audio,
+        ? { ...packed, intro_sfx: softer(packed.intro_sfx), cut_sfx: softer(packed.cut_sfx), card_enter_sfx: softer(packed.card_enter_sfx), card_beat_sfx: softer(packed.card_beat_sfx), color_cut_sfx: softer(packed.color_cut_sfx) }
+        : packed,
   } as Style;
 };

@@ -1,0 +1,105 @@
+{
+  "version": 1,
+  "families": [
+    {
+      "id": "umbral",
+      "title": "Umbral",
+      "description": "Cine íntimo: títulos serif, espacio y cambios de toma con enfoque suave.",
+      "font": "cinema",
+      "cards": [
+        "mask",
+        "line-reveal"
+      ],
+      "graphics": [
+        "comparison",
+        "idea-map"
+      ],
+      "broll": [
+        "framed",
+        "split"
+      ],
+      "transition": "soft-focus",
+      "texture": "grain"
+    },
+    {
+      "id": "bitacora",
+      "title": "Bitácora",
+      "description": "Diario cercano: texto alineado a la izquierda e imágenes de bordes discretos.",
+      "font": "documentary",
+      "cards": [
+        "chapter",
+        "underline"
+      ],
+      "graphics": [
+        "comparison",
+        "idea-map"
+      ],
+      "broll": [
+        "framed",
+        "split"
+      ],
+      "transition": "soft-focus",
+      "texture": "none"
+    },
+    {
+      "id": "estampa",
+      "title": "Estampa",
+      "description": "Revista: contraste serif/sans, imágenes enmarcadas en papel y barridos de color.",
+      "font": "editorial",
+      "cards": [
+        "quote",
+        "underline"
+      ],
+      "graphics": [
+        "comparison",
+        "idea-map"
+      ],
+      "broll": [
+        "framed",
+        "split"
+      ],
+      "transition": "mask-wipe",
+      "texture": "paper"
+    },
+    {
+      "id": "pulso",
+      "title": "Pulso",
+      "description": "Impacto: letra condensada, composición centrada y acercamientos breves.",
+      "font": "anton",
+      "cards": [
+        "word-accent",
+        "line-reveal"
+      ],
+      "graphics": [
+        "comparison",
+        "idea-map"
+      ],
+      "broll": [
+        "split",
+        "framed"
+      ],
+      "transition": "zoom-blur",
+      "texture": "none"
+    },
+    {
+      "id": "enlace",
+      "title": "Enlace",
+      "description": "Explicación clara: comparaciones, listas y barridos de color.",
+      "font": "documentary",
+      "cards": [
+        "underline",
+        "chapter"
+      ],
+      "graphics": [
+        "comparison",
+        "idea-map"
+      ],
+      "broll": [
+        "split",
+        "framed"
+      ],
+      "transition": "mask-wipe",
+      "texture": "none"
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import os from 'node:os';
+import { createHash, randomUUID } from 'node:crypto';
+import { loader } from './test_support/load_ts.mjs';
+const load=loader();const {DEFAULT_PREFERENCES}=load('src/preferences.ts');
+const origin='http://localhost:3001';
+const brief={version:1,objective:'Prueba de sesión',audience:'Prueba',preferences:{...DEFAULT_PREFERENCES,topic:'Prueba',graphics:'many',transition:'punch'},musicMood:'calm',musicSource:'licensed-library',brollSource:'licensed-library',resourceNotes:'',confirmed:true};
+const created=await fetch(origin+'/api/local-intake',{method:'POST',headers:{origin,'Content-Type':'application/json'},body:JSON.stringify(brief)});assert.equal(created.status,200);
+const {sessionId}=await created.json();const headers={origin,'x-cutkind-session':sessionId,'Content-Type':'application/json'};
+const dir=path.join(os.tmpdir(),'cutkind-upload-sessions',createHash('sha256').update(process.cwd()).digest('hex').slice(0,16),sessionId);
+try {
+  assert.equal((await fetch(origin+'/api/local-intake/run',{method:'POST',headers:{...headers,origin:'http://other'},body:JSON.stringify({action:'edit',order:[]})})).status,403);
+  assert.equal((await fetch(origin+'/api/local-intake/run',{method:'POST',headers,body:JSON.stringify({action:'edit',order:[]})})).status,422);
+  const bytes=Buffer.from('fixture-only-not-video');await fs.writeFile(path.join(dir,'proxy-test.mp4'),bytes);
+  await fs.writeFile(path.join(dir,'edit.json'),JSON.stringify({scenes:[{asset:'proxy-test.mp4'}],assets:[],issues:['Missing resources'],checks:{broll:false}}));
+  let response=await fetch(origin+`/api/local-intake/media?session=${sessionId}&asset=proxy-test.mp4`,{headers:{Range:'bytes=2-7'}});
+  assert.equal(response.status,206);assert.equal(response.headers.get('content-range'),`bytes 2-7/${bytes.length}`);assert.deepEqual(Buffer.from(await response.arrayBuffer()),bytes.subarray(2,8));
+  assert.equal((await fetch(origin+`/api/local-intake/media?session=${sessionId}&asset=../session.json`)).status,404);
+  assert.equal((await fetch(origin+`/api/local-intake/media?session=${sessionId}&asset=proxy-test.mp4`,{headers:{Range:'bytes=500-600'}})).status,416);
+  const session=JSON.parse(await fs.readFile(path.join(dir,'session.json'),'utf8'));session.sources=[{id:randomUUID(),name:'fixture.mp4'}];await fs.writeFile(path.join(dir,'session.json'),JSON.stringify(session));
+  assert.equal((await fetch(origin+'/api/local-intake/run',{method:'POST',headers,body:JSON.stringify({action:'export',order:[]})})).status,422,'Incomplete edit cannot export');
+  await fs.writeFile(path.join(dir,'run.json'),JSON.stringify({state:'running',pid:process.pid,stage:'Fixture active'}));
+  session.expiresAt=Date.now()-1000;await fs.writeFile(path.join(dir,'session.json'),JSON.stringify(session));
+  assert.equal((await fetch(origin+'/api/local-intake/run',{headers})).status,200,'Active execution protects expired upload lease');
+  assert.equal((await fetch(origin+'/api/local-intake',{method:'DELETE',headers})).status,409,'Cannot discard active worker');
+  await fs.writeFile(path.join(dir,'run.json'),JSON.stringify({state:'ready'}));
+  console.log('PASS: local execution origin, missing-input/export gates, range streaming, traversal rejection, and active retention.');
+} finally { await fs.rm(dir,{recursive:true,force:true}); }
