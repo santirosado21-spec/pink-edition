@@ -95,9 +95,20 @@ No se encadenan revisiones entre modelos de forma automática. Una llamada falli
 
 Nube y VPS, pagos, app con Capacitor, generación de video por IA y música. Nada de esto mejora la nota del dueño hoy.
 
+## Avance
+
+| Orden | Estado (2 nov 2026) |
+|---|---|
+| W1 | Hecha. Codex construyó, Claude inspeccionó y pidió una ronda de correcciones: la review a ciegas se filtraba vía `status` y había un mensaje engañoso en `next`. Hay 7 pruebas y un gate «loop de evaluación». |
+| W2 | Hecha. Codex construyó y Claude inspeccionó. 6 pruebas, más una prueba real con Gemma que etiquetó bien el tema. |
+| W3 | En curso con Codex: `run --split/--preset/--dry-run`, brief leído de `src/intakePresets.ts` y holdout protegido. |
+| Push | Hay commits locales en `claude/plataforma-v2`. Están retenidos porque el repo de GitHub es **público** y el dueño debe decidir la visibilidad. |
+
+Pregunta abierta para el dueño: los presets del 28 de octubre llevan `musicMood`, y eso choca con la decisión del 10 de octubre de no poner música en el producto.
+
 ## Próximo paso
 
-1. El dueño decide qué hacer con los 278 cambios sin commit.
+1. ~~El dueño decide qué hacer con los 278 cambios sin commit.~~ Hecho: hay commits locales.
 2. Dueño: F0, con `python3 scripts/pink_loop.py review`.
 3. Codex: W1.
 4. Dueño: empieza a juntar los 12 clips; las grabaciones propias son la mejor fuente.
