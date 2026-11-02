@@ -2058,9 +2058,9 @@
     "semantic_hash": ""
   },
   "scripts/pink_loop.py": {
-    "mtime": 1793653190.3259256,
-    "seen": 1793653203.954633,
-    "ast_hash": "32c5896e7fa6fc7064903c7cfae9687b",
+    "mtime": 1793653689.6996744,
+    "seen": 1793653696.3439722,
+    "ast_hash": "f3d95034a3b703f286950c45fac70737",
     "semantic_hash": ""
   },
   "scripts/test_director_controls.py": {
@@ -2184,15 +2184,21 @@
     "semantic_hash": ""
   },
   "scripts/test_pink_loop.py": {
-    "mtime": 1793653190.3260725,
-    "seen": 1793653203.955171,
-    "ast_hash": "1a4d5a7f3bd71756a97aa2c1aaa7c05a",
+    "mtime": 1793653689.7000072,
+    "seen": 1793653696.3445098,
+    "ast_hash": "c2f185fdf844846d5a3bf1790a7b1027",
     "semantic_hash": ""
   },
   "docs/estrategia/mapa-2026-11-02/MAPA.md": {
-    "mtime": 1793652613.527394,
-    "seen": 1793653203.956584,
-    "ast_hash": "327996533f0de0c258170a9fefca4e89",
+    "mtime": 1793653249.2311428,
+    "seen": 1793653696.345901,
+    "ast_hash": "87a174bfdca6904204d07b5a4f15eec5",
+    "semantic_hash": ""
+  },
+  "scripts/preset_brief.mjs": {
+    "mtime": 1793653689.6997836,
+    "seen": 1793653696.3440242,
+    "ast_hash": "b2d5756761125df3d644204c2fb32394",
     "semantic_hash": ""
   }
 }
