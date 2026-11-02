@@ -7,7 +7,9 @@ import subprocess
 import sys
 import tempfile
 import time
+import threading
 import unittest
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 
 SCRIPT = pathlib.Path(__file__).with_name('pink_loop.py')
@@ -19,6 +21,7 @@ class PinkLoopTests(unittest.TestCase):
         self.root = pathlib.Path(self.temp.name)
         self.rounds = self.root / 'rounds'
         self.state = self.root / 'state'
+        self.corpus = self.root / 'corpus'
 
     def tearDown(self):
         self.temp.cleanup()
@@ -39,12 +42,30 @@ class PinkLoopTests(unittest.TestCase):
                 self.write_json(target / 'feedback.json', video['feedback'])
         return folder
 
-    def execute(self, *args, input_text='', state=None):
+    def execute(self, *args, input_text='', state=None, extra_env=None):
         env = os.environ.copy()
         env['PINK_LOOP_ROUNDS'] = str(self.rounds)
         env['PINK_LOOP_STATE'] = str(state or self.state)
+        env['PINK_CORPUS_DIR'] = str(self.corpus)
+        if extra_env:
+            env.update(extra_env)
         return subprocess.run([sys.executable, str(SCRIPT), *args], input=input_text,
                               text=True, capture_output=True, env=env, check=False)
+
+    def write_manifest(self, rows):
+        self.corpus.mkdir(parents=True, exist_ok=True)
+        (self.corpus / 'manifest.jsonl').write_text(
+            ''.join(json.dumps(row) + '\n' for row in rows), encoding='utf-8')
+
+    def corpus_rows(self):
+        return [
+            {'sha256': 'a' * 64, 'file': 'raw/a.mp4', 'split': 'dev', 'topic': 'Tema A', 'addedAt': '2026-11-01T00:00:00Z'},
+            {'sha256': 'b' * 64, 'file': 'raw/b.mp4', 'split': 'dev', 'topic': 'Tema B', 'addedAt': '2026-11-01T00:01:00Z'},
+            {'sha256': 'c' * 64, 'file': 'raw/c.mp4', 'split': 'holdout', 'topic': 'Reservado', 'addedAt': '2026-11-01T00:02:00Z'},
+        ]
+
+    def planned(self):
+        return json.loads((self.state / 'planned-config.json').read_text(encoding='utf-8'))
 
     def test_review_records_new_dimensions_and_approval(self):
         folder = self.make_round('review-ok', [{}])
@@ -157,6 +178,93 @@ class PinkLoopTests(unittest.TestCase):
         done = self.execute('run', '--config', str(config))
         self.assertEqual(done.returncode, 2)
         self.assertIn('Repite con --yes', done.stdout)
+
+    def test_corpus_dry_run_reads_explain_preset_and_only_dev(self):
+        self.write_manifest(self.corpus_rows())
+        done = self.execute('run', '--split', 'dev', '--preset', 'explain', '--dry-run')
+        self.assertEqual(done.returncode, 0, done.stdout + done.stderr)
+        config = self.planned()
+        self.assertEqual(config['targetRawProjects'], 2)
+        self.assertEqual([video['split'] for video in config['videos']], ['dev', 'dev'])
+        self.assertEqual(config['videos'][0]['brief']['preferences']['editorialFamilyId'], 'enlace')
+        self.assertEqual(config['videos'][0]['brief']['preferences']['topic'], 'Tema A')
+        self.assertTrue(all('explain' not in video['title'] for video in config['videos']))
+        self.assertFalse((self.state / 'runs.jsonl').exists())
+
+    def test_corpus_impact_preset_comes_from_typescript(self):
+        self.write_manifest(self.corpus_rows())
+        done = self.execute('run', '--split', 'dev', '--preset', 'impact', '--dry-run')
+        self.assertEqual(done.returncode, 0, done.stdout + done.stderr)
+        self.assertEqual(self.planned()['videos'][0]['brief']['preferences']['editorialFamilyId'], 'pulso')
+
+    def test_holdout_requires_cycle_and_never_copies_feedback(self):
+        self.write_manifest(self.corpus_rows())
+        self.write_json(self.state / 'next-config.json', {'feedback': 'No debe llegar al reservado'})
+        denied = self.execute('run', '--split', 'holdout', '--dry-run')
+        self.assertEqual(denied.returncode, 2)
+        self.assertIn('--holdout-cycle', denied.stdout + denied.stderr)
+        self.assertFalse((self.state / 'planned-config.json').exists())
+        done = self.execute('run', '--split', 'holdout', '--holdout-cycle', '--dry-run')
+        self.assertEqual(done.returncode, 0, done.stdout + done.stderr)
+        self.assertEqual(self.planned()['feedback'], '')
+
+    def test_same_preset_launched_clips_are_excluded_but_other_preset_can_use_them(self):
+        self.write_manifest(self.corpus_rows())
+        self.state.mkdir(parents=True, exist_ok=True)
+        (self.state / 'runs.jsonl').write_text(json.dumps({
+            'sha256': 'a' * 64, 'preset': 'explain', 'split': 'dev', 'state': 'launched', 'at': '2026-11-01T00:00:00'
+        }) + '\n', encoding='utf-8')
+        done = self.execute('run', '--split', 'dev', '--preset', 'explain', '--dry-run')
+        self.assertEqual(done.returncode, 0, done.stdout + done.stderr)
+        self.assertEqual([video['corpusSha256'] for video in self.planned()['videos']], ['b' * 64])
+        done = self.execute('run', '--split', 'dev', '--preset', 'clean', '--dry-run')
+        self.assertEqual(done.returncode, 0, done.stdout + done.stderr)
+        self.assertEqual(self.planned()['videos'][0]['corpusSha256'], 'a' * 64)
+
+    def test_real_corpus_run_records_states_only_after_yes(self):
+        self.write_manifest(self.corpus_rows())
+        fake = self.root / 'fake_fran.py'
+        fake.write_text(
+            'import os, pathlib, shutil, sys\n'
+            'shutil.copyfile(sys.argv[sys.argv.index("--config") + 1], os.environ["PINK_FAKE_CONFIG"])\n',
+            encoding='utf-8')
+        fake_config = self.root / 'received.json'
+        env = {'PINK_LOOP_FRAN': str(fake), 'PINK_FAKE_CONFIG': str(fake_config)}
+        denied = self.execute('run', '--split', 'dev', '--batch', '1', extra_env=env)
+        self.assertEqual(denied.returncode, 2)
+        self.assertFalse((self.state / 'runs.jsonl').exists())
+
+        class JobsHandler(BaseHTTPRequestHandler):
+            def do_GET(self):
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json')
+                self.end_headers()
+                self.wfile.write(b'{}')
+
+            def log_message(self, _format, *_args):
+                pass
+
+        try:
+            server = ThreadingHTTPServer(('127.0.0.1', 0), JobsHandler)
+        except PermissionError:
+            self.skipTest('El entorno aislado no permite abrir un puerto HTTP local.')
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        try:
+            env['PINK_LOOP_ORIGIN'] = f'http://127.0.0.1:{server.server_port}'
+            done = self.execute('run', '--split', 'dev', '--batch', '1', '--yes', extra_env=env)
+            self.assertEqual(done.returncode, 0, done.stdout + done.stderr)
+        finally:
+            server.shutdown()
+            server.server_close()
+        received = json.loads(fake_config.read_text(encoding='utf-8'))
+        self.assertEqual(received['videos'][0]['corpusSha256'], 'a' * 64)
+        self.assertNotIn('explain', received['videos'][0]['title'])
+        entries = [json.loads(line) for line in (self.state / 'runs.jsonl').read_text(encoding='utf-8').splitlines()]
+        self.assertEqual([(entry['state'], entry['sha256']) for entry in entries], [
+            ('launched', 'a' * 64), ('finished', 'a' * 64),
+        ])
+        self.assertEqual(entries[-1]['exitCode'], 0)
 
 
 if __name__ == '__main__':
