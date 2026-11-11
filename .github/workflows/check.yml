@@ -26,12 +26,20 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
       - run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      # test_pink_loop invoca utilidades node que importan de node_modules.
+      - run: npm ci
       # Lista explícita: discover recogería utilidades que no son pruebas.
+      # test_media_intake queda fuera: necesita los originales del piloto local,
+      # ausentes en un checkout limpio; se reincorpora cuando estén en el repo.
       - run: |
           for test in test_source_coverage test_speech_cuts test_editorial_recipes \
             test_editorial_controls test_personalization_contract test_pink_loop \
             test_round_notes test_worker_queue test_director_controls \
-            test_media_intake test_sound_events test_stock_queries test_stock_relevance; do
+            test_sound_events test_stock_queries test_stock_relevance; do
             python "scripts/$test.py" || exit 1
           done
