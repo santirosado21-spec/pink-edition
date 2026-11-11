@@ -11,3 +11,27 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run typecheck
+      # Pruebas de lógica pura (sin medios, audio ni render; el catálogo de marca y
+      # la tinta del resaltado se verifican en local con `pink_loop.py gates`).
+      - run: node scripts/test_editor_ai.mjs
+      - run: node scripts/test_personalization_contract.mjs
+      - run: node scripts/test_editorial_step.mjs
+      - run: node scripts/test_resource_policy.mjs
+      - run: node scripts/test_revise.mjs
+      - run: npm run web:build
+  python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      # Lista explícita: discover recogería utilidades que no son pruebas.
+      - run: |
+          for test in test_source_coverage test_speech_cuts test_editorial_recipes \
+            test_editorial_controls test_personalization_contract test_pink_loop \
+            test_round_notes test_worker_queue test_director_controls \
+            test_media_intake test_sound_events test_stock_queries test_stock_relevance; do
+            python "scripts/$test.py" || exit 1
+          done

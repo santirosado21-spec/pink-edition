@@ -117,4 +117,25 @@ export const useEdit = (): Edit => {
 };
 
 export const ThemeContext = createContext<Theme>({ accent: "#1f5fc4", light: "#6aa6ff", dark: "#174a9c" });
+
+// Luminancia relativa (WCAG) para elegir tintas legibles sin depender del fondo.
+export const relativeLuminance = (hex: string): number => {
+  const channel = (index: number) => {
+    const value = parseInt(hex.slice(index, index + 2), 16) / 255;
+    return value <= 0.03928 ? value / 12.92 : Math.pow((value + 0.055) / 1.055, 2.4);
+  };
+  return 0.2126 * channel(1) + 0.7152 * channel(3) + 0.0722 * channel(5);
+};
+
+// Palabra resaltada: la tinta conserva el color de marca y va sobre una placa
+// sólida que contrasta con ella (precedente: la placa del karaoke en OneShotVideo).
+// La placa garantiza la lectura sobre cielos claros, fondos oscuros o texturas
+// sin conocer el fondo; su relleno además separa las palabras entre sí.
+export const highlightInk = (theme: Theme): { color: string; backplate: string } => {
+  const dark = relativeLuminance(theme.accent) < 0.5;
+  return {
+    color: theme.accent,
+    backplate: dark ? "rgba(255,255,255,.94)" : "rgba(16,16,20,.78)",
+  };
+};
 export const useTheme = () => useContext(ThemeContext);

@@ -39,6 +39,8 @@
     "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.next.json",
     "render:demo": "remotion render PinkEdit out/piscina-demo-render.mp4 --codec=h264 --audio-codec=aac --crf=18",
     "web": "next dev",
-    "web:build": "next build"
+    "web:build": "next build",
+    "qa:editor": "node scripts/qa_editor_revise.mjs",
+    "setup:asr": "node scripts/setup-asr.mjs"
   }
 }

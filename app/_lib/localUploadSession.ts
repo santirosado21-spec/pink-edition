@@ -4,6 +4,7 @@ import os from "node:os";
 import path from "node:path";
 import { createHash, randomUUID } from "node:crypto";
 import { checkOneShotBrief, type OneShotBrief } from "../../src/oneShotBrief";
+import type { BrandSnapshot } from '../../src/brandKit';
 
 const TTL = 60 * 60 * 1000;
 
@@ -13,7 +14,7 @@ export class SessionError extends Error {
 }
 export type UploadSource = { id: string; name: string; bytes: number; sha256: string; seconds: number; width: number; height: number };
 export type UploadSession = { id: string; expiresAt: number; brief: OneShotBrief; state: "awaiting_upload" | "received";
-  sources?: UploadSource[] };
+  sources?: UploadSource[]; brand?: BrandSnapshot; referenceScope?: 'brand-only' };
 export const sessionRoot = () => path.join(os.tmpdir(), "cutkind-upload-sessions", createHash("sha256").update(process.cwd()).digest("hex").slice(0, 16));
 export function sessionDir(id: string) {
   if (!uuid.test(id)) throw new SessionError("Confirma el cuestionario antes de subir.", 428);

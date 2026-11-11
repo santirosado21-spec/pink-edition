@@ -19,6 +19,8 @@
   --base: #6aa6ff;
   --health: #5fd79a;
   --stress: #ff8a80;
+  --money: #ffc857;
+  --tech: #b49bff;
 }
 
 * { box-sizing: border-box; }

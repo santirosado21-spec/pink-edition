@@ -4,10 +4,12 @@ export class ProposalRequestError extends Error {
   constructor(message: string, readonly status = 400) { super(message); }
 }
 
-export async function readProposalDraft(request: Request, stored: Plan): Promise<Plan> {
+export const MAX_INSTRUCTION = 500;
+
+async function readBody(request: Request): Promise<unknown | undefined> {
   const maximum = 512 * 1024;
   if (Number(request.headers.get("content-length")) > maximum) throw new ProposalRequestError("El borrador supera 512 KiB.", 413);
-  if (!request.body) return stored;
+  if (!request.body) return undefined;
   const reader = request.body.getReader();
   const chunks: Uint8Array[] = [];
   let size = 0;
@@ -20,12 +22,27 @@ export async function readProposalDraft(request: Request, stored: Plan): Promise
       chunks.push(value);
     }
   } finally { reader.releaseLock(); }
-  if (size === 0) return stored;
-  let body: unknown;
-  try { body = JSON.parse(Buffer.concat(chunks).toString("utf8")); }
+  if (size === 0) return undefined;
+  try { return JSON.parse(Buffer.concat(chunks).toString("utf8")); }
   catch { throw new ProposalRequestError("El borrador no llegó como JSON válido."); }
+}
+
+export async function readProposalDraft(request: Request, stored: Plan): Promise<Plan> {
+  const body = await readBody(request);
+  if (body === undefined) return stored;
   if (!body || typeof body !== "object" || !Object.hasOwn(body, "plan")) throw new ProposalRequestError("Falta el borrador del video.");
   return (body as { plan: Plan }).plan;
+}
+
+// Pedir un cambio: el borrador visible más la instrucción escrita del creador.
+export async function readRevisionDraft(request: Request): Promise<{ plan: Plan; instruction: string }> {
+  const body = await readBody(request);
+  if (body === undefined || typeof body !== "object" || body === null || !Object.hasOwn(body, "plan")) throw new ProposalRequestError("Falta el borrador del video.");
+  const raw = (body as { instruction?: unknown }).instruction;
+  const instruction = typeof raw === "string" ? raw.trim() : "";
+  if (!instruction) throw new ProposalRequestError("Escribe qué quieres cambiar.");
+  if (instruction.length > MAX_INSTRUCTION) throw new ProposalRequestError(`El cambio admite hasta ${MAX_INSTRUCTION} caracteres.`);
+  return { plan: (body as { plan: Plan }).plan, instruction };
 }
 
 export function draftShapeErrors(plan: Plan): string[] {

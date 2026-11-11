@@ -174,6 +174,20 @@ class CorpusAddTests(unittest.TestCase):
         self.assertIn("Faltan 5 para dev / 6 para holdout", result.stdout)
         self.assertIn("menos de 5 temas", result.stdout)
 
+    def test_verify_checks_provenance_split_and_copied_hash(self) -> None:
+        self.assertEqual(self.add(self.video, "--split", "dev").returncode, 0)
+        verified = self.run_cli("verify")
+        self.assertEqual(verified.returncode, 0, verified.stderr)
+        self.assertIn("dev=1 · holdout=0", verified.stdout)
+
+        row = self.rows()[0]
+        copied = self.corpus / row["file"]
+        with copied.open("ab") as handle:
+            handle.write(b"alterado")
+        tampered = self.run_cli("verify")
+        self.assertNotEqual(tampered.returncode, 0)
+        self.assertIn("ya no coincide", tampered.stderr)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

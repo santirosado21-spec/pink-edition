@@ -1,5 +1,6 @@
 import type { Style, Theme } from "./edit";
 import catalog from "../style/catalog-v1.json";
+import {checkEditorialDirection, type EditorialDirection} from './editorialDirection';
 export { catalog };
 
 // Lo que el creador contesta una vez en el cuestionario de estilo. Viaja copiado en
@@ -11,6 +12,7 @@ export const SFX = ["full", "soft", "none"] as const;
 export const CAPTION_PRESETS = ["pink", "keyword", "karaoke"] as const;
 export type CaptionPreset = (typeof CAPTION_PRESETS)[number];
 export type Preferences = {
+  editorial?: EditorialDirection;
   editorialFamilyId?: "umbral" | "bitacora" | "estampa" | "pulso" | "enlace";
   topic: string;
   vibe: (typeof VIBES)[number];
@@ -67,8 +69,9 @@ export const checkPreferences = (value: unknown): string[] => {
   const prefs = value as Record<string, unknown>;
   const errors: string[] = [];
   if (prefs.editorialFamilyId !== undefined && !["umbral", "bitacora", "estampa", "pulso", "enlace"].includes(prefs.editorialFamilyId as string)) errors.push("Familia editorial desconocida.");
-  const unknown = Object.keys(prefs).filter((key) => !Object.prototype.hasOwnProperty.call(DEFAULT_PREFERENCES, key) && key !== "captions");
+  const unknown = Object.keys(prefs).filter((key) => !Object.prototype.hasOwnProperty.call(DEFAULT_PREFERENCES, key) && key !== "captions" && key !== "editorial");
   if (unknown.length > 0) errors.push(`Preferencias desconocidas: ${unknown.join(", ")}.`);
+  if (prefs.editorial !== undefined) errors.push(...checkEditorialDirection(prefs.editorial));
   if (typeof prefs.topic !== "string" || prefs.topic.length > MAX_TOPIC) errors.push(`El tema admite hasta ${MAX_TOPIC} caracteres.`);
   if (typeof prefs.notes !== "string" || prefs.notes.length > MAX_NOTES) errors.push(`La nota admite hasta ${MAX_NOTES} caracteres.`);
   if (!VIBES.includes(prefs.vibe as Preferences["vibe"])) errors.push("Estilo de edición desconocido.");

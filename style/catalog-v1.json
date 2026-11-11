@@ -36,30 +36,39 @@
       "title": "Anton · impacto",
       "family": "CutkindAnton",
       "file": "fonts/Anton-Regular.ttf",
-      "description": "Trazo grueso y compacto para frases contundentes.",
+      "description": "Anton en títulos · Manrope en subtítulos.",
       "size": 94,
       "weight": 400,
-      "tracking": 0
+      "tracking": 0,
+      "captionFamily": "Manrope",
+      "captionFile": "fonts/Manrope[wght].ttf",
+      "captionWeight": 600
     },
     {
       "id": "montserrat",
       "title": "Montserrat · geométrica",
       "family": "CutkindMontserrat",
       "file": "fonts/Montserrat-Variable.ttf",
-      "description": "Geometría marcada, cercana a los subtítulos de reels.",
+      "description": "Montserrat en títulos y subtítulos con peso diferenciado.",
       "size": 88,
       "weight": 800,
-      "tracking": 0
+      "tracking": 0,
+      "captionFamily": "Montserrat",
+      "captionFile": "fonts/Montserrat-Variable.ttf",
+      "captionWeight": 600
     },
     {
       "id": "bebas",
       "title": "Bebas Neue · póster",
       "family": "CutkindBebas",
       "file": "fonts/BebasNeue-Regular.ttf",
-      "description": "Alta y estrecha, con carácter de cartel en mayúsculas.",
+      "description": "Bebas Neue en títulos · Manrope en subtítulos.",
       "size": 100,
       "weight": 400,
-      "tracking": 0
+      "tracking": 0,
+      "captionFamily": "Manrope",
+      "captionFile": "fonts/Manrope[wght].ttf",
+      "captionWeight": 600
     },
     {
       "id": "editorial",

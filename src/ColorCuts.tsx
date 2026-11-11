@@ -2,7 +2,7 @@ import { Sequence, useCurrentFrame, useVideoConfig } from "remotion";
 import { useEdit } from "./edit";
 
 // Corte a pantalla completa: tapa el video y deja sólo la frase que se está diciendo.
-const Cut: React.FC<{ from: number; firstId: string; lastId: string; look: { background: string; ink: string; muted: string } }> = ({ from, firstId, lastId, look }) => {
+const Cut: React.FC<{ from: number; firstId: string; lastId: string; look: { background: string; ink: string; muted: string; shadow?: string } }> = ({ from, firstId, lastId, look }) => {
   const frame = useCurrentFrame() + from;
   const { style, wordsBetween } = useEdit();
   const captions = style.captions;
@@ -26,7 +26,7 @@ const Cut: React.FC<{ from: number; firstId: string; lastId: string; look: { bac
         }}
       >
         {words.map((word, index) => (
-          <span key={word.id} style={{ color: index === current ? look.ink : look.muted }}>
+          <span key={word.id} style={{ color: index === current ? look.ink : look.muted, textShadow: look.shadow }}>
             {word.text.replace(/[.,:;!?]/g, "")}
           </span>
         ))}
@@ -47,7 +47,8 @@ export const ColorCuts: React.FC = () => {
         // El color del corte sigue el tema: fondo de color o papel con tinta de color.
         const look =
           event.style === "solid"
-            ? { ...settings.solid, background: `linear-gradient(150deg, ${theme.dark} 0%, ${theme.accent} 55%, ${theme.light} 100%)`, ink: theme.on ?? settings.solid.ink, muted: theme.on_muted ?? settings.solid.muted }
+            // Sombra suave: levanta la tinta sobre el tramo claro del degradado sin cambiar la paleta.
+            ? { ...settings.solid, background: `linear-gradient(150deg, ${theme.dark} 0%, ${theme.accent} 55%, ${theme.light} 100%)`, ink: theme.on ?? settings.solid.ink, muted: theme.on_muted ?? settings.solid.muted, shadow: "0 2px 10px rgba(0,0,0,0.35)" }
             : { ...settings.paper, ink: theme.ink ?? theme.accent };
         return (
           <Sequence key={event.id} name={`Corte de color: ${event.label}`} from={from} durationInFrames={event.duration_frames} premountFor={fps}>

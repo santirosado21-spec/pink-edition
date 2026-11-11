@@ -1,5 +1,11 @@
 # Reglas para agentes y colaboradores
 
+## Marca y referencias — 2 de noviembre de 2026
+
+- El logo cargado sirve para extraer y proponer colores de marca. No colocarlo en el video salvo petición explícita del usuario en el cuestionario.
+- La referencia anterior es material de aprendizaje, nunca una toma para editar. Mostrar observaciones con procedencia y tiempos; recordar solo patrones elegidos por el usuario y disponibles en el motor.
+- Conservar la marca localmente y permitir recordar su selección para futuros encargos. Congelar una copia de las decisiones al confirmar cada encargo; los cambios posteriores no modifican sesiones anteriores.
+
 ## Clasificación de fuentes — 27 de octubre de 2026
 
 - Antes de editar, clasificar cada original con Sol: crudo, editado o dudoso. Los editados son referencias de aprendizaje; los dudosos y las mezclas se bloquean hasta revisar. No usarlos como pruebas de edición de crudo.

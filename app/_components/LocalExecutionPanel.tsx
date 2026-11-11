@@ -3,6 +3,7 @@ import { useEffect, useState, useRef } from 'react';
 import { Player, type PlayerRef } from '@remotion/player';
 import { OneShotVideo } from '../../src/OneShotVideo';
 import type { LocalRun, OneShotEdit } from '../../src/oneShotEdit';
+import {EditorialReviewPanel} from './EditorialReviewPanel';
 export function LocalExecutionPanel({ sessionId, sources, onBusy }: { sessionId: string; sources: { id: string; name: string }[]; onBusy: (busy: boolean) => void }) {
   const player = useRef<PlayerRef>(null);
   const [order, setOrder] = useState<string[]>([...sources].sort((a,b)=>a.name.localeCompare(b.name,undefined,{numeric:true})).map(s => s.id));
@@ -55,13 +56,21 @@ export function LocalExecutionPanel({ sessionId, sources, onBusy }: { sessionId:
       {sources.some(s => !edit.scenes.some(scene => scene.id === s.id)) && <p role="alert">Faltan tomas en esta edición. Vuelve a generarla antes de exportar.</p>}
       <ol>{edit.scenes.map(scene => <li key={scene.id}><button type="button" className="button" onClick={() => { player.current?.seekTo(scene.from); player.current?.play(); }}>Ver {scene.name} · {(scene.from / edit.fps).toFixed(1)}–{((scene.from + scene.frames) / edit.fps).toFixed(1)} s</button></li>)}</ol>
       <p>Duración: {(edit.frames / edit.fps).toFixed(1)} s. Se recortan márgenes y pausas internas largas sin voz, conservando las palabras y las pausas breves.</p>
-      <p>{edit.beats.filter(b=>b.kind==='card').length} tarjetas · {edit.beats.filter(b=>b.kind==='steps'||b.kind==='compare').length} gráficos · {edit.beats.filter(b=>b.kind==='broll' && b.mediaType!=='image').length} clips B-roll · {edit.beats.filter(b=>b.mediaType==='image').length} imágenes · Música {edit.music ? 'incluida' : 'pendiente'}</p>
+      <p>{edit.beats.filter(b=>b.kind==='card').length} tarjetas · {edit.beats.filter(b=>b.kind==='steps'||b.kind==='compare').length} gráficos · {edit.beats.filter(b=>b.kind==='broll' && b.mediaType!=='image').length} clips B-roll · {edit.beats.filter(b=>b.mediaType==='image').length} imágenes · {edit.music ? 'Música incluida' : 'Sin música: se agrega al publicar'}</p>
+      <EditorialReviewPanel edit={edit}/>
       {edit.editorialNotes?.length ? <ul>{edit.editorialNotes.map(note=><li key={note}>{note}</li>)}</ul> : null}
       {edit.issues.length>0 && <ul>{edit.issues.map(issue=><li key={issue}>{issue}</li>)}</ul>}
       <details><summary>Decisiones y procedencia de recursos</summary><ul>{edit.beats.map(beat=><li key={beat.id}>{(beat.from/edit.fps).toFixed(1)} s · {beat.kind}: {beat.reason}<br/>«{beat.quote}»</li>)}</ul><ul>{edit.assets.map(asset=><li key={asset.file}>{asset.author} · {asset.license} · {asset.source.startsWith('https://') ? <a href={asset.source} target="_blank" rel="noreferrer">Fuente</a> : asset.source}</li>)}</ul></details>
       <p className="muted">Los controles verifican recursos y separación del rostro. Revisa la pertinencia y los subtítulos antes de exportar.</p>
       <button type="button" className="button primary" disabled={busy || edit.issues.length>0 || sources.some(s => !edit.scenes.some(scene => scene.id === s.id))} onClick={()=>void execute('export')}>Exportar MP4</button>
       {run?.state==='exported' && <a className="button primary" href={`${base}&asset=final.mp4&download=1`}>Descargar video editado</a>}
+      {run?.quality && <section aria-label="Revisión técnica del MP4">
+        <h3>Revisión técnica del MP4</h3>
+        <p>{run.quality.state === 'pass' ? 'Sin incidencias en las mediciones de imagen y sonido.' : run.quality.state === 'fail' ? 'Hay un problema que impide completar la exportación.' : 'Hay instantes o niveles de sonido que conviene revisar.'}</p>
+        {run.quality.audio.integratedLufs != null && <p>Audio: {run.quality.audio.integratedLufs.toFixed(1)} LUFS · Pico: {run.quality.audio.truePeakDbtp?.toFixed(1)} dBTP.</p>}
+        <ul>{[...run.quality.errors, ...run.quality.warnings].map((item, index) => <li key={index}>{item.message}{item.seconds != null && <button type="button" className="button" onClick={() => { player.current?.seekTo(Math.round(item.seconds! * edit.fps)); player.current?.pause(); }}>Ver {item.seconds.toFixed(2)} s</button>}</li>)}</ul>
+        <p className="muted">Son comprobaciones técnicas. Escucha el MP4 y revisa el resultado antes de publicarlo.</p>
+      </section>}
     </>}
   </section>;
 }

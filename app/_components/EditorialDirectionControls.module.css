@@ -1,0 +1,27 @@
+.controls,.legacy {color:var(--text);max-width:100%;min-width:0}
+.intro {max-width:68ch;margin:0 0 24px;line-height:1.55;color:var(--muted);font-size:14px}
+.group {min-width:0;margin:0;padding:22px 0 26px;border:0;border-bottom:1px solid var(--line)}
+.group legend {float:left;width:100%;padding:0;margin:0 0 8px;font-size:18px;font-weight:650;letter-spacing:-.02em}
+.group::after {display:block;clear:both;content:''}
+.help {clear:both;max-width:76ch;font-size:13px;line-height:1.55;color:var(--muted);margin:0 0 14px}
+.group > .help:last-child {margin:12px 0 0}
+.choices {clear:both;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.choice {min-width:0;display:flex;flex-direction:column;padding:6px 6px 13px;text-align:left;background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:10px;font:inherit;cursor:pointer}
+.choice[aria-pressed=true] {border-color:var(--accent-text);box-shadow:inset 0 0 0 1px var(--accent-text)}
+.choice:disabled {opacity:.55;cursor:default}
+.choice:focus-visible,.reference:focus-within {outline:2px solid var(--accent-text);outline-offset:4px}
+.sample {display:block;width:100%;height:auto;max-height:132px;border-radius:5px;background:#efede6}
+.label {display:flex;justify-content:space-between;align-items:baseline;gap:6px;font-size:14px;font-weight:650;line-height:1.35;margin:11px 6px 6px}
+.check {flex:none;color:var(--accent-text);min-width:1em}
+.description {margin:0 6px;line-height:1.45;font-size:12px;color:var(--muted);max-width:33ch}
+.references {clear:both;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.reference {display:block;min-width:0;border:1px solid var(--line);border-radius:10px;padding:6px;background:var(--panel);font-size:13px;cursor:pointer}
+.reference > span {display:flex;align-items:center;gap:8px;padding:10px 3px 5px}
+.reference input {accent-color:var(--accent-text);width:17px;height:17px;margin:0}
+.reference:has(input:checked) {border-color:var(--accent-text)}
+.reference:has(input:disabled) {opacity:.55;cursor:default}
+.legacy {padding:18px;background:var(--panel-2);border-radius:10px;margin-bottom:24px}
+.legacy h2 {margin:0 0 10px;font-size:19px}
+.legacy p {max-width:68ch;font-size:14px;line-height:1.55}
+@media(max-width:650px) {.choices{grid-template-columns:repeat(2,minmax(0,1fr))}.references{grid-template-columns:repeat(2,minmax(0,1fr))}.group legend{font-size:17px}.description{font-size:12px}}
+@media(max-width:380px) {.choices{grid-template-columns:1fr}.choice{display:grid;grid-template-columns:110px 1fr;column-gap:7px;padding:6px}.sample{grid-row:span 2}.label{margin:5px 3px}.description{margin:0 3px 6px}}

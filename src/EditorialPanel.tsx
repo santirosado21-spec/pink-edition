@@ -5,9 +5,12 @@ import {Img, useCurrentFrame, interpolate} from 'remotion';
 import type {EditBeat, OneShotEdit} from './oneShotEdit';
 import {editorialFamily, editorialVariant} from './editorialRecipes';
 import {editorFont} from './editorFonts';
+import {EditorialScene} from './EditorialScene';
 
 export function EditorialPanel({beat, edit, mediaBase}: {beat: EditBeat; edit: OneShotEdit; mediaBase: string}) {
-  const frame=useCurrentFrame(), family=editorialFamily(edit.preferences), variant=editorialVariant(beat,edit.preferences);
+  const frame=useCurrentFrame();
+  if (edit.editorialVersion === 1) return <EditorialScene beat={beat} edit={edit} mediaBase={mediaBase}/>;
+  const family=editorialFamily(edit.preferences), variant=editorialVariant(beat,edit.preferences);
   const horizontal=edit.width>edit.height, accent=edit.preferences.brand_color;
   const progress=interpolate(frame,[10,family?.id==='pulso'?19:32],[0,1],{extrapolateLeft:'clamp',extrapolateRight:'clamp'});
   const exit=interpolate(frame,[beat.frames-18,beat.frames-10],[1,0],{extrapolateLeft:'clamp',extrapolateRight:'clamp'});

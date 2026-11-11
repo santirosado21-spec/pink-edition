@@ -15,6 +15,7 @@ import sys
 from collections import Counter
 from typing import Any
 from urllib.parse import urlparse
+import re
 
 
 MAX_PER_SPLIT = 6
@@ -28,6 +29,7 @@ ALLOWED_LICENSES = {
     "pixabay",
     "autorizado-por-escrito",
 }
+SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 
 
 class CorpusError(Exception):
@@ -103,21 +105,24 @@ def fraction_to_fps(value: str | None) -> float | None:
         return None
 
 
+PROBE_ENTRIES = (
+    "format=duration:stream=codec_type,width,height,avg_frame_rate,r_frame_rate:stream_tags=rotate"
+)
+
+
 def probe_media(path: Path) -> dict[str, Any]:
-    command = [
-        "ffprobe",
-        "-v",
-        "error",
-        "-show_entries",
-        "format=duration:stream=codec_type,width,height,avg_frame_rate,r_frame_rate:stream_tags=rotate:stream_side_data=rotation",
-        "-of",
-        "json",
-        str(path),
-    ]
-    try:
-        result = subprocess.run(command, capture_output=True, text=True, check=False)
-    except FileNotFoundError as error:
-        raise CorpusError("No se encontró ffprobe; es necesario para inspeccionar el clip.") from error
+    def run_probe(entries: str) -> subprocess.CompletedProcess[str]:
+        command = ["ffprobe", "-v", "error", "-show_entries", entries, "-of", "json", str(path)]
+        try:
+            return subprocess.run(command, capture_output=True, text=True, check=False)
+        except FileNotFoundError as error:
+            raise CorpusError("No se encontró ffprobe; es necesario para inspeccionar el clip.") from error
+
+    # ffprobe < 5 no conoce la sección stream_side_data: se reintenta sin ella y
+    # la rotación se lee sólo de la etiqueta rotate, si existe.
+    result = run_probe(f"{PROBE_ENTRIES}:stream_side_data=rotation")
+    if result.returncode != 0 and "side_data" in result.stderr:
+        result = run_probe(PROBE_ENTRIES)
     if result.returncode != 0:
         detail = result.stderr.strip() or "ffprobe no pudo leer el archivo."
         raise CorpusError(f"No se pudo inspeccionar el clip: {detail}")
@@ -224,6 +229,53 @@ def append_manifest(directory: Path, record: dict[str, Any]) -> None:
         os.fsync(handle.fileno())
 
 
+def verify_corpus() -> int:
+    """Comprueba la trazabilidad del corpus sin cambiar clips ni manifiesto."""
+    directory = corpus_dir().resolve()
+    rows = read_manifest(directory)
+    seen_hashes: set[str] = set()
+    seen_files: set[Path] = set()
+    counts: Counter[str] = Counter()
+    for number, row in enumerate(rows, 1):
+        digest = row.get("sha256")
+        if not isinstance(digest, str) or not SHA256_RE.fullmatch(digest):
+            raise CorpusError(f"Línea {number}: sha256 inválido.")
+        if digest in seen_hashes:
+            raise CorpusError(f"Línea {number}: sha256 duplicado en el manifiesto.")
+        seen_hashes.add(digest)
+        source = row.get("source")
+        license_id = row.get("license")
+        split = row.get("split")
+        if not isinstance(source, str):
+            raise CorpusError(f"Línea {number}: fuente inválida.")
+        if not isinstance(license_id, str):
+            raise CorpusError(f"Línea {number}: licencia inválida.")
+        validate_source(source)
+        validate_license(license_id)
+        if split not in {"dev", "holdout"}:
+            raise CorpusError(f"Línea {number}: split inválido; use dev u holdout.")
+        counts[split] += 1
+        if counts[split] > MAX_PER_SPLIT:
+            raise CorpusError(f"Línea {number}: el split {split} supera su cupo de {MAX_PER_SPLIT} clips.")
+        relative = row.get("file")
+        if not isinstance(relative, str) or not relative:
+            raise CorpusError(f"Línea {number}: ruta del clip inválida.")
+        clip = (directory / relative).resolve()
+        try:
+            clip.relative_to(directory / "raw")
+        except ValueError as error:
+            raise CorpusError(f"Línea {number}: el clip debe vivir dentro de raw/.") from error
+        if clip in seen_files:
+            raise CorpusError(f"Línea {number}: ruta de clip duplicada en el manifiesto.")
+        seen_files.add(clip)
+        if not clip.is_file():
+            raise CorpusError(f"Línea {number}: falta el clip copiado {relative}.")
+        if sha256_file(clip) != digest:
+            raise CorpusError(f"Línea {number}: el hash de {relative} ya no coincide con el manifiesto.")
+    print(f"Corpus verificado: {len(rows)} clips · dev={counts['dev']} · holdout={counts['holdout']}.")
+    return 0
+
+
 def add_clip(args: argparse.Namespace) -> int:
     original = Path(args.file).expanduser()
     if not original.is_file():
@@ -307,7 +359,7 @@ def list_corpus() -> int:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Registra clips crudos en el corpus local.")
-    parser.add_argument("file", nargs="?", help="Clip que se registrará, o «list».")
+    parser.add_argument("file", nargs="?", help="Clip que se registrará, o «list»/«verify».")
     parser.add_argument("--source", help="URL http(s) de origen o «propio».")
     parser.add_argument("--license", dest="license", help="Identificador de licencia.")
     parser.add_argument("--topic", help="Tema explícito del clip.")
@@ -324,6 +376,10 @@ def main(argv: list[str] | None = None) -> int:
             if any((args.source, args.license, args.topic, args.transcript, args.split)):
                 raise CorpusError("El comando list no acepta opciones de alta.")
             return list_corpus()
+        if args.file == "verify":
+            if any((args.source, args.license, args.topic, args.transcript, args.split)):
+                raise CorpusError("El comando verify no acepta opciones de alta.")
+            return verify_corpus()
         if not args.file:
             raise CorpusError("Indique un archivo o use «list».")
         if args.source is None or args.license is None:

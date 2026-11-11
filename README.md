@@ -134,6 +134,18 @@ La entrega objetivo es 1080 × 1920, 30 fps, H.264/AAC, −14 LUFS y pico de
 decodificación; la aprobación visual y auditiva es independiente.
 La revisión extrae una muestra por caption y fondo temático, y tres por tarjeta.
 
+El flujo «Pedir un cambio» del editor tiene QA visual repetible:
+
+```sh
+npm run web:build && npm run qa:editor
+```
+
+`scripts/qa_editor_revise.mjs` levanta la web con un trabajo sintético propio y
+recorre en Chrome headless los estados del input (sin Sol, habilitado, en
+vuelo, éxito y error), con capturas en `out/editor-qa/`. Sustituye el conector
+de Sol por un stub local durante la captura y lo restaura siempre; no llama a
+ningún modelo ni toca trabajos ni credenciales reales.
+
 `PINK_AI.md` describe la evolución a plataforma. `supabase/migrations/` contiene
 las migraciones de datos. No añadir footage, transcripts, credenciales ni renders
 a Git; trabajar en una rama propia y preservar los cambios de otros.

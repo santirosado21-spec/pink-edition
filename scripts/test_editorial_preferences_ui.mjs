@@ -1,0 +1,90 @@
+import assert from 'node:assert/strict';
+import path from 'node:path';
+import {renderToStaticMarkup} from 'react-dom/server';
+import {loader,plain,root} from './test_support/load_ts.mjs';
+const css=new Proxy({}, {get:(_,key)=>String(key)});
+const mocks={react:{useId:()=> 'editorial-example'},[path.join(root,'app/_components/EditorialDirectionControls.module.css')]:css};
+const load=loader(mocks);
+const {EditorialDirectionControls}=load('app/_components/EditorialDirectionControls.tsx');
+const {quickPreferences}=load('src/intakePresets.ts');
+function all(node,predicate) {
+  if(!node || typeof node!=='object') return [];
+  if(Array.isArray(node)) return node.flatMap(item=>all(item,predicate));
+  return [...(predicate(node)?[node]:[]),...all(node.props?.children,predicate)];
+}
+function text(node) {
+  if(node==null || typeof node==='boolean') return '';
+  if(typeof node==='string'||typeof node==='number') return String(node);
+  return Array.isArray(node)?node.map(text).join(''):text(node.props?.children);
+}
+let value=quickPreferences();
+const change=patch=>{value={...value,...patch};};
+const draw=(referenceName)=>EditorialDirectionControls({value,onChange:change,referenceName});
+let tree=draw();
+assert.equal(all(tree,node=>node.type==='fieldset').length,7,'six directions plus caption intent');
+assert.equal(all(tree,node=>node.type==='input').every(node=>node.props.disabled),true);
+let markup=renderToStaticMarkup(tree);
+assert.ok(markup.includes('No hay una referencia activa'));
+assert.ok(!/<(?:video|audio|iframe)\b/.test(markup),'questionnaire only renders static examples');
+assert.ok(markup.includes('<svg'));
+const choose=(label)=>{
+  const button=all(draw('Referencia de prueba'),node=>node.type==='button').find(node=>text(node).startsWith(label));
+  assert.ok(button,label);button.props.onClick();
+};
+const font=value.font,brand=value.brand_color;
+choose('Persona y titular');assert.equal(value.editorial.emphasisStyle,'composed');assert.equal(value.emphasis_mode,'overlay');
+choose('Pantalla completa');assert.equal(value.editorial.emphasisStyle,'fullscreen');assert.equal(value.emphasis_mode,'fullscreen');
+choose('Fijo');assert.equal(value.editorial.framingStyle,'stable');
+choose('Ideas clave');assert.equal(value.editorial.captionIntent,'key-ideas');
+assert.equal(value.font,font);assert.equal(value.brand_color,brand,'direction cannot replace chosen typography or colors');
+const reference=all(draw('Referencia de prueba'),node=>node.type==='input')[0];
+reference.props.onChange({target:{checked:true}});
+assert.deepEqual(plain(value.editorial.referenceAspects),['rhythm']);
+const withoutReference=renderToStaticMarkup(draw());
+assert.ok(withoutReference.includes('Elegir estos aspectos no aprueba patrones'));
+assert.ok(withoutReference.includes('disabled=""'),'stored choices do not claim an active reference');
+value={...value,graphics:'none',graphic_kinds:[],support_media:'none',emphasis_mode:'none'};
+tree=draw();
+const emphasis=all(tree,node=>node.type==='fieldset').find(node=>text(node).includes('Cómo destacar ideas clave'));
+assert.ok(all(emphasis,node=>node.type==='button').every(node=>node.props.disabled),'excluded emphasis cannot be re-enabled by intent controls');
+choose('Clips reales');assert.equal(value.support_media,'none');assert.equal(value.graphics,'none');
+assert.ok(text(draw()).includes('Excluiste clips y gráficos'));
+delete value.editorial;
+tree=draw();assert.ok(text(tree).includes('Tu estilo anterior se conserva'));
+assert.equal(value.editorial,undefined,'render does not silently upgrade');
+all(tree,node=>node.type==='button')[0].props.onClick();
+assert.equal(value.editorial.version,1);assert.equal(value.emphasis_mode,'none');
+
+// Exercise the production intake's preset/custom/reset/confirmation callbacks with local React state.
+let states=[],cursor=0;
+const hooks={useState:initial=>{
+  const index=cursor++;
+  if(index>=states.length) states[index]=typeof initial==='function'?initial():initial;
+  return [states[index],patch=>{states[index]=typeof patch==='function'?patch(states[index]):patch;}];
+},useEffect:()=>{},useCallback:callback=>callback,useRef:initial=>({current:initial})};
+const intakeMocks={react:hooks,[path.join(root,'app/_components/StylePreview.module.css')]:css};
+for(const name of ['BrandIdentity','LocalExecutionPanel','StyleQuestionnaire','Brand','ThemePicker','ResourceSample']) intakeMocks[path.join(root,`app/_components/${name}`)]={[name]:name};
+const {LocalIntake}=loader(intakeMocks,{window:{scrollTo:()=>{}}})('app/_components/LocalIntake.tsx');
+const intake=(initial=null)=>{cursor=0;return LocalIntake({initial});};
+tree=intake();
+assert.ok(text(tree).includes('Afinar estilo (opcional)'));
+let questionnaire=all(tree,node=>node.type==='StyleQuestionnaire')[0];
+questionnaire.props.onChange({editorial:{...questionnaire.props.value.editorial,readingPace:'calm'}});
+tree=intake();assert.ok(text(tree).includes('Personalizado.'));
+let reset=all(tree,node=>node.type==='button').find(node=>text(node)==='Volver a Explicativo');assert.ok(reset);
+reset.props.onClick();tree=intake();
+questionnaire=all(tree,node=>node.type==='StyleQuestionnaire')[0];
+assert.equal(questionnaire.props.value.editorial.readingPace,'balanced');
+assert.ok(!text(tree).includes('Personalizado.'));
+const impact=all(tree,node=>node.type==='button').find(node=>text(node).startsWith('Impacto'));
+impact.props.onClick();tree=intake();
+questionnaire=all(tree,node=>node.type==='StyleQuestionnaire')[0];
+assert.equal(questionnaire.props.value.editorial.emphasisStyle,'fullscreen');
+questionnaire.props.onChange({editorial:{...questionnaire.props.value.editorial,readingPace:'calm'}});
+tree=intake();reset=all(tree,node=>node.type==='button').find(node=>text(node)==='Volver a Impacto');assert.ok(reset);
+const form=all(tree,node=>node.type==='form')[0];form.props.onSubmit({preventDefault:()=>{}});
+tree=intake();assert.ok(text(tree).includes('Este es el encargo'));assert.ok(text(tree).includes('Pausada'));
+assert.ok(text(tree).includes('Texto a pantalla completa'));
+states=[];tree=intake({...quickPreferences(),editorial:undefined});
+questionnaire=all(tree,node=>node.type==='StyleQuestionnaire')[0];assert.equal(questionnaire.props.value.editorial,undefined);
+console.log('PASS editorial UI: static samples, explicit upgrade, exclusions, references, custom/reset and two-step confirmation.');

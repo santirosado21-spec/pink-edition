@@ -1,5 +1,15 @@
 """Explicit questionnaire choices constrain editorial proposals before stock lookup."""
 def allowed_event(kind, preferences):
+    editorial = preferences.get('editorial') or {}
+    if editorial.get('version') == 1:
+        if kind == 'card' and editorial.get('captionIntent', 'both') == 'literal':
+            return False
+        if kind == 'broll' and editorial.get('resourceStyle') == 'diagram':
+            return False
+        if kind in ('compare', 'steps', 'icon') and editorial.get('resourceStyle') == 'real':
+            return False
+    if kind == 'icon':
+        return editorial.get('version') == 1 and preferences.get('graphics') != 'none'
     if kind == 'card':
         return preferences.get('emphasis_mode') != 'none'
     if kind == 'broll':

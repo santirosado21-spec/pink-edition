@@ -11,7 +11,7 @@ import { BackgroundEffects } from "./BackgroundEffects";
 import { ColorCuts } from "./ColorCuts";
 import { EditorialGraphics } from "./EditorialGraphics";
 import { SoundDesign } from "./SoundDesign";
-import { EditContext, asset, buildEdit, useEdit, type CaptionPage, type EditProps } from "./edit";
+import { EditContext, asset, buildEdit, highlightInk, useEdit, type CaptionPage, type EditProps } from "./edit";
 import { pictureTransform } from "./zooms";
 
 // Estilos «keyword» y «karaoke»: mismo tamaño, fuente y paginación que «pink»; sólo
@@ -19,7 +19,7 @@ import { pictureTransform } from "./zooms";
 const PresetCaptions: React.FC<{ page: CaptionPage; frame: number }> = ({ page, frame }) => {
   const { style, captionPreset, emphasis, themeOf } = useEdit();
   const settings = style.captions;
-  const accent = themeOf("base").accent;
+  const ink = highlightInk(themeOf("base"));
   const words = page.lines.flat();
   const active = words.reduce<string | null>((found, word) => (word.source_start_frame <= frame ? word.id : found), null);
   const ease = { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.bezier(0.22, 1, 0.36, 1) } as const;
@@ -52,7 +52,11 @@ const PresetCaptions: React.FC<{ page: CaptionPage; frame: number }> = ({ page, 
                 key={word.id}
                 style={{
                   letterSpacing: `${settings.letter_spacing_em}em`,
-                  color: highlighted ? accent : settings.color,
+                  color: highlighted ? ink.color : settings.color,
+                  background: highlighted ? ink.backplate : undefined,
+                  borderRadius: highlighted ? 14 : undefined,
+                  padding: highlighted ? "0 14px" : undefined,
+                  margin: highlighted ? "0 3px" : undefined,
                   opacity: karaoke ? (word.source_start_frame <= frame ? 1 : 0.45) : interpolate(frame, reveal, [0, 1], ease),
                   translate: karaoke ? undefined : interpolate(frame, reveal, [`0px ${settings.lift_pixels}px`, "0px 0px"], ease),
                   scale: !karaoke && highlighted ? "1.08" : undefined,

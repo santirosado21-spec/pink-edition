@@ -39,12 +39,24 @@ def probe(path):
     return data["streams"][0]
 
 
+def probe_geometry(source):
+    """Dimensiones del primer stream de video, con la rotación si ffprobe la ofrece."""
+    def run(entries):
+        return subprocess.run(
+            ["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries",
+             entries, "-of", "json", str(source)], check=False, text=True, capture_output=True)
+    # ffprobe < 5 no conoce la sección stream_side_data: se reintenta sin ella.
+    result = run("stream=width,height:stream_side_data=rotation")
+    if result.returncode != 0 and "side_data" in result.stderr:
+        result = run("stream=width,height")
+    if result.returncode != 0:
+        raise SystemExit(f"ffprobe no pudo leer el video: {result.stderr.strip()}")
+    return json.loads(result.stdout)["streams"][0]
+
+
 def check_limits(source, style):
     """Un video horizontal o más largo que el máximo se rechaza antes de gastar cómputo."""
-    video = json.loads(subprocess.run(
-        ["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries",
-         "stream=width,height:stream_side_data=rotation", "-of", "json", str(source)],
-        check=True, text=True, capture_output=True).stdout)["streams"][0]
+    video = probe_geometry(source)
     width, height = video["width"], video["height"]
     # Los celulares guardan el giro aparte: cuenta cómo se ve, no cómo está almacenado.
     if any(abs(int(data.get("rotation", 0))) % 180 == 90 for data in video.get("side_data_list", [])):

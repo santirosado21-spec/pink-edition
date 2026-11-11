@@ -43,6 +43,11 @@ GATES = [
     ('política de recursos', ['node', 'scripts/test_resource_policy.mjs']),
     ('catálogo de marca', ['node', 'scripts/test_brand_catalog.mjs']),
     ('loop de evaluación', [sys.executable, 'scripts/test_pink_loop.py']),
+    ('notas de ronda', [sys.executable, 'scripts/test_round_notes.py']),
+    ('tinta del resaltado', ['node', 'scripts/test_caption_ink.mjs']),
+    ('revisión por instrucción', ['node', 'scripts/test_revise.mjs']),
+    ('cola del procesador', [sys.executable, 'scripts/test_worker_queue.py']),
+    ('temas money y tech', ['node', 'scripts/test_themes.mjs']),
 ]
 DIMENSIONS = [
     ('editorial', 'qué apoyo eligió y en qué momento'),
@@ -261,12 +266,16 @@ def next_config(name=None):
     notes = []
     ignored_holdout = 0
     dev_feedback = 0
+    unreviewed_dev = []
     for target, q, feedback, _, _ in video_rows(folder):
         scores = feedback.get('scores') or {}
-        if not scores:
+        split = split_for(folder, target, q, config)
+        if split == 'holdout':
+            if scores:
+                ignored_holdout += 1
             continue
-        if split_for(folder, target, q, config) == 'holdout':
-            ignored_holdout += 1
+        if not scores:
+            unreviewed_dev.append(target.name)
             continue
         dev_feedback += 1
         low = [k for k, v in scores.items() if v <= 3]
@@ -276,6 +285,9 @@ def next_config(name=None):
         if parts:
             notes.append(f"{q.get('title') or target.name}: " + '; '.join(parts))
     print(f'Se ignoraron {ignored_holdout} feedback de holdout.')
+    if unreviewed_dev:
+        pending = ', '.join(unreviewed_dev)
+        raise SystemExit(f'Falta el veredicto del dueño para {pending}; usa `review` antes de generar la siguiente ronda.')
     if not dev_feedback and ignored_holdout:
         raise SystemExit('Sólo hay feedback de holdout; no se generó next-config.json.')
     if not notes:

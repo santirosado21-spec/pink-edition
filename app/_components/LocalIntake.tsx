@@ -1,5 +1,7 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { BrandIdentity } from './BrandIdentity';
+import type { BrandKit } from '../../src/brandKit';
 import { LocalExecutionPanel } from "./LocalExecutionPanel";
 import {editorialFamily} from "../../src/editorialRecipes";
 import {StyleQuestionnaire} from "./StyleQuestionnaire";
@@ -10,24 +12,28 @@ import { ThemePicker } from "./ThemePicker";
 import { catalog, type Preferences } from "../../src/preferences";
 import { checkOneShotBrief, type OneShotBrief } from "../../src/oneShotBrief";
 
-import {INTAKE_PRESETS, quickPreferences, QUICK_OBJECTIVE, QUICK_AUDIENCE} from '../../src/intakePresets';
+import {INTAKE_PRESETS, quickPreferences, initialIntakePreferences, copyPreferencePatch, matchesIntakePreset, QUICK_OBJECTIVE, QUICK_AUDIENCE} from '../../src/intakePresets';
 import {ResourceSample} from './ResourceSample';
 import labStyles from './StylePreview.module.css';
 
 type Readiness = { ready: boolean; missing: string[]; error: string; uploadAllowed: boolean; sessionId: string; expiresAt: number };
-const moods = { calm: "Tranquila", energetic: "Energética", documentary: "Documental", cinematic: "Cinematográfica" };
+const moods = { none: "Sin música", calm: "Tranquila", energetic: "Energética", documentary: "Documental", cinematic: "Cinematográfica" };
 export function LocalIntake({ initial }: { initial: Preferences | null }) {
   const [step, setStep] = useState(0);
-  const [prefs, setPrefs] = useState<Preferences>({...quickPreferences(),...initial,topic:initial?.topic || quickPreferences().topic,transition:initial?.transition && initial.transition!=='none'?initial.transition:'punch'});
+  const [prefs, setPrefs] = useState<Preferences>(()=>initialIntakePreferences(initial));
+  const [lastPreset, setLastPreset] = useState(()=>INTAKE_PRESETS.find(preset=>matchesIntakePreset(initialIntakePreferences(initial),preset,preset.musicMood))?.id ?? 'explain');
   const [objective, setObjective] = useState(QUICK_OBJECTIVE);
   const [audience, setAudience] = useState(QUICK_AUDIENCE);
-  const [musicMood, setMusicMood] = useState<OneShotBrief["musicMood"]>('documentary');
+  const [musicMood, setMusicMood] = useState<OneShotBrief["musicMood"]>('none');
   const [musicSource, setMusicSource] = useState<OneShotBrief["musicSource"]>('licensed-library');
   const [brollSource, setBrollSource] = useState<OneShotBrief["brollSource"]>('licensed-library');
   const [resourcePolicy, setResourcePolicy] = useState<NonNullable<OneShotBrief["resourcePolicy"]>>("relevant-only");
   const [notes, setNotes] = useState("");
   const [executing, setExecuting] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [brand, setBrand] = useState<BrandKit | null>(null);
+  const [brandBusy, setBrandBusy] = useState(false);
+  const setBrandColor = useCallback((brand_color: string) => setPrefs(previous => ({ ...previous, brand_color })), []);
   const [error, setError] = useState("");
   const [readiness, setReadiness] = useState<Readiness | null>(null);
   useEffect(() => { if (readiness && !readiness.sessionId) setReadiness(null); }, [readiness]);
@@ -45,6 +51,7 @@ export function LocalIntake({ initial }: { initial: Preferences | null }) {
     const search = new URL(window.location.href).search;
     if (new URLSearchParams(search).get('new') === '1') {
       setPrefs(quickPreferences());
+      setLastPreset('explain');
       return; // Start a new questionnaire without resuming or deleting the previous session.
     }
     const choice = readStyleSelection(search);
@@ -57,12 +64,20 @@ export function LocalIntake({ initial }: { initial: Preferences | null }) {
       const brief = session.brief;
       setObjective(brief.objective); setAudience(brief.audience); setPrefs(brief.preferences);
       setMusicMood(brief.musicMood); setMusicSource(brief.musicSource); setBrollSource(brief.brollSource); setNotes(brief.resourceNotes); setResourcePolicy(brief.resourcePolicy ?? "showcase");
+      const restoredPreset = INTAKE_PRESETS.find(preset=>matchesIntakePreset(brief.preferences,preset,brief.musicMood));
+      if (restoredPreset) setLastPreset(restoredPreset.id);
       setReceived((session.sources ?? []).map((source: { id: string; name: string; seconds: number })=>({...source,preview:''})));
       setReadiness({ ready:true, missing:[], error:'', uploadAllowed:true, sessionId:id, expiresAt:session.expiresAt }); setStep(3);
     }).catch(()=>{});
     return () => { stopped = true; };
   }, []);
   const set = (value: Partial<Preferences>) => setPrefs(p => ({ ...p, ...value }));
+  const choosePreset = (preset: (typeof INTAKE_PRESETS)[number]) => {
+    set(copyPreferencePatch(preset.preferences)); setLastPreset(preset.id); setMusicMood(preset.musicMood);
+    setResourcePolicy('relevant-only');setMusicSource('licensed-library');setBrollSource('licensed-library');
+  };
+  const selectedPreset = INTAKE_PRESETS.find(preset=>matchesIntakePreset(prefs,preset,musicMood));
+  const resetPreset = INTAKE_PRESETS.find(preset=>preset.id===lastPreset) ?? INTAKE_PRESETS[1];
   const discard = async () => {
     if (readiness) {
       const response = await fetch("/api/local-intake", { method: "DELETE", headers: { "x-cutkind-session": readiness.sessionId } });
@@ -113,10 +128,10 @@ export function LocalIntake({ initial }: { initial: Preferences | null }) {
     }
   };
   const submit = async () => {
-    if (busy) return;
+    if (busy || brandBusy) return;
     setError("");
     
-    const brief = { version: 1, objective, audience, preferences: prefs, musicMood, musicSource, brollSource: prefs.support_media === 'none' ? 'licensed-library' : brollSource, resourceNotes: notes, resourcePolicy, confirmed: true };
+    const brief = { version: 1, objective, audience, preferences: prefs, musicMood, musicSource, brollSource: prefs.support_media === 'none' ? 'licensed-library' : brollSource, resourceNotes: notes, resourcePolicy, confirmed: true, ...(brand ? {brandKitId: brand.id} : {}) };
     const errors = checkOneShotBrief(brief);
     if (errors.length) return setError(errors.join(" "));
     if (step === 0) { setStep(3); window.scrollTo(0, 0); return; }
@@ -140,14 +155,15 @@ export function LocalIntake({ initial }: { initial: Preferences | null }) {
         <p className="lead">Elige un estilo y confirma. Puedes continuar con la selección actual; escribir es opcional.</p>
         <div className={labStyles.presetGrid} aria-label="Ediciones predeterminadas">
           {INTAKE_PRESETS.map(preset => {
-            const selected=Object.entries(preset.preferences).every(([key,value])=>JSON.stringify(prefs[key as keyof Preferences])===JSON.stringify(value)) && musicMood===preset.musicMood;
-            return <div key={preset.id}><button type="button" className={labStyles.presetChoice} aria-pressed={selected} onClick={()=>{set(preset.preferences);setMusicMood(preset.musicMood);setResourcePolicy('relevant-only');setMusicSource('licensed-library');setBrollSource('licensed-library');}}><strong>{preset.title}{preset.id==='explain'?' · Recomendado':''}</strong><span>{preset.description}</span></button>
+            const selected=selectedPreset?.id===preset.id;
+            return <div key={preset.id}><button type="button" className={labStyles.presetChoice} aria-pressed={selected} onClick={()=>choosePreset(preset)}><strong>{preset.title}{preset.id==='explain'?' · Recomendado':''}</strong><span>{preset.description}</span></button>
               <details className={labStyles.optionalPreview}><summary>Ver imagen: {preset.title}</summary><ResourceSample value={{...prefs,...preset.preferences}} kind={preset.id==='clean'?'captions':preset.id==='impact'?'fullscreen':'compare'}/></details></div>;
           })}
         </div>
-        <p className="muted">Siempre conservamos toda tu voz, el orden y el fondo original. La música instrumental está incluida. Los apoyos son máximos por video, nunca cuotas.</p>
-        <p><button className="button primary" type="submit" disabled={busy}>Revisar mis elecciones →</button></p>
-        <details className={labStyles.optionalPreview}><summary>Personalizar letras, gráficos y efectos</summary><StyleQuestionnaire value={prefs} onChange={set}/></details>
+        {!selectedPreset && <p role="status">Personalizado. <button type="button" className="button" onClick={()=>choosePreset(resetPreset)}>Volver a {resetPreset.title}</button></p>}
+        <p className="muted">Siempre conservamos toda tu voz, el orden y el fondo original. Sin música de fondo: la agregas tú al publicar. Los apoyos son máximos por video, nunca cuotas.</p>
+        <BrandIdentity kit={brand} onChange={setBrand} color={prefs.brand_color} onColor={setBrandColor} onBusy={setBrandBusy} />
+        <details className={labStyles.optionalPreview}><summary>Afinar estilo (opcional)</summary><StyleQuestionnaire value={prefs} onChange={set} hideColor referenceName={brand?.reference?.name}/></details>
         <details className={labStyles.optionalPreview}><summary>Ajustar música y recursos</summary>
         <label className="field-label">Carácter de la música<select className="field" value={musicMood} onChange={e=>setMusicMood(e.target.value as OneShotBrief['musicMood'])}>{Object.entries(moods).map(([id,title])=><option key={id} value={id}>{title}</option>)}</select></label>
         <label className="field-label">Efectos de sonido<select className="field" value={prefs.sfx} onChange={e=>set({sfx:e.target.value as Preferences['sfx']})}><option value="soft">Suaves</option><option value="full">Presentes</option><option value="none">Sin efectos; conservar música</option></select></label>
@@ -175,13 +191,24 @@ export function LocalIntake({ initial }: { initial: Preferences | null }) {
           <div><dt>Énfasis de palabras</dt><dd>{{overlay:'Sobre la grabación',fullscreen:'Pantalla completa, voz continua',none:'Solo subtítulos'}[prefs.emphasis_mode ?? 'overlay']}</dd></div>
           <div><dt>Fondo de la persona</dt><dd>Conservar el original</dd></div>
           <div><dt>Familia editorial</dt><dd>{editorialFamily(prefs)?.title}</dd></div>
+          <div><dt>Color</dt><dd>{prefs.brand_color}</dd></div>
+          {prefs.editorial && <>
+            <div><dt>Presencia</dt><dd>{{presenter:'Siempre protagonista',balanced:'Equilibrado',visual:'Más apoyo visual'}[prefs.editorial.presence]}</dd></div>
+            <div><dt>Lectura y composición</dt><dd>{{calm:'Pausada',balanced:'Normal',brisk:'Ágil'}[prefs.editorial.readingPace]} · {{overlay:'Titular sobre tu toma',composed:'Persona y titular',fullscreen:'Texto a pantalla completa'}[prefs.editorial.emphasisStyle]}{prefs.emphasis_mode==='none'?' (sin titulares: solo subtítulos)':''}</dd></div>
+            <div><dt>Preferencia de recursos</dt><dd>{{real:'Clips reales',diagram:'Iconos y diagramas',mixed:'Combinar ambos'}[prefs.editorial.resourceStyle]} · Se respetan las exclusiones</dd></div>
+            <div><dt>Movimiento</dt><dd>{prefs.editorial.framingStyle==='stable'?'Fijo':'Suave'}</dd></div>
+            <div><dt>Intención del texto</dt><dd>{{literal:'Subtítulos literales','key-ideas':'Ideas clave',both:'Subtítulos e ideas clave'}[prefs.editorial.captionIntent]}</dd></div>
+            <div><dt>Aspectos de referencia</dt><dd>{brand?.reference ? prefs.editorial.referenceAspects.map(aspect=>({rhythm:'Ritmo',typography:'Tipografía',composition:'Composición',resources:'Recursos'}[aspect])).join(' · ') || 'Ninguno seleccionado' : 'Sin referencia activa'} · Solo patrones observados y elegidos</dd></div>
+          </>}
+          {brand?.logo && <div><dt>Logo de referencia</dt><dd>{brand.logo.name} · Solo para reconocer tus colores; no se añade al video</dd></div>}
+          {brand?.reference && <div><dt>Aprendizaje de estilo</dt><dd>{brand.reference.name} · {brand.selected.length} patrones elegidos</dd></div>}
           <div><dt>Subtítulos</dt><dd>{prefs.captions=== "karaoke"?"Karaoke":prefs.captions==="keyword"?"Palabra clave":"Frases blancas"}</dd></div>
           <div><dt>Tipografía</dt><dd>{editorFont(prefs.font).title}</dd></div>
           <div><dt>Sonidos</dt><dd>{prefs.sfx==="none"?"Sin efectos":`${prefs.sfx==="soft"?"Suaves":"Presentes"} · ${catalog.sounds.find(pack=>pack.id===prefs.sound_pack)?.title ?? "Discreto"}`}</dd></div>
           <div><dt>Frecuencia de apoyos</dt><dd>{prefs.vibe === "clean" ? "Separados al menos 12 s" : prefs.vibe === "dynamic" ? "Separados al menos 6 s" : "Separados al menos 8 s"}</dd></div>
-          <div><dt>Música</dt><dd>{musicMood ? moods[musicMood] : "Pendiente"} · {musicSource === "own" ? "Tu pista" : "Música instrumental incluida"}</dd></div>
+          <div><dt>Música</dt><dd>{!musicMood || musicMood === "none" ? "Sin música (se agrega al publicar)" : `${moods[musicMood]} · ${musicSource === "own" ? "Tu pista" : "Música instrumental incluida"}`}</dd></div>
         </dl>
-        <ul><li>Música de fondo y voz íntegra.</li>{resourcePolicy === "showcase" ? <><li>Al menos dos énfasis con texto de tu discurso.</li><li>Al menos dos gráficos distintos que expliquen ideas.</li><li>Al menos dos clips B-roll pertinentes.</li></> : <><li>Solo los recursos que permitiste, cuando aporten a lo que dices.</li><li>Tu imagen permanece si no encontramos un recurso pertinente.</li></>}<li>Transiciones entre escenas, sin cortar palabras.</li></ul>
+        <ul><li>{!musicMood || musicMood === "none" ? "Voz íntegra; la música se agrega al publicar." : "Música de fondo y voz íntegra."}</li>{resourcePolicy === "showcase" ? <><li>Al menos dos énfasis con texto de tu discurso.</li><li>Al menos dos gráficos distintos que expliquen ideas.</li><li>Al menos dos clips B-roll pertinentes.</li></> : <><li>Solo los recursos que permitiste, cuando aporten a lo que dices.</li><li>Tu imagen permanece si no encontramos un recurso pertinente.</li></>}<li>Transiciones entre escenas, sin cortar palabras.</li></ul>
         <p>{resourcePolicy === "showcase" ? "Énfasis y gráficos se cuentan por separado. Si falta un recurso exigido, el resultado queda incompleto." : "Se priorizan claridad, legibilidad y relación con tu discurso. No hay una cuota mínima de imágenes."}</p>
         <p className="muted">La grabación se recibe en una sesión temporal de una hora, fuera de tu biblioteca. Puedes descartarla antes; no se conserva como proyecto.</p>
       </section>}
@@ -207,10 +234,10 @@ export function LocalIntake({ initial }: { initial: Preferences | null }) {
         {received.length > 0 && progress === null && <LocalExecutionPanel sessionId={readiness.sessionId} sources={received} onBusy={setExecuting} />}
         <p className="muted">Los temporales se eliminan al descartarlos o tras una hora desde la última subida completada. Una transferencia activa mantiene sus temporales. Si el servidor está apagado, se limpian al volver a utilizarlo.</p>
       </section>}
-      <nav className="quiz-nav" style={{ position: "static", marginTop: 32 }}><div>
+      {!readiness && <nav className="flow-next" aria-label="Pasos para subir el video"><div>
         {step > 0 && !received.length && <button type="button" className="button" disabled={busy || progress !== null || executing} onClick={() => void back()}>← Atrás</button>}
-        {step > 0 && !readiness && <button className="button primary" type="submit" disabled={busy}>{busy ? "Comprobando…" : step < 3 ? "Revisar mis elecciones →" : "Confirmar encargo"}</button>}
-      </div></nav>
+        <button className="button primary" type="submit" disabled={busy || brandBusy}>{busy ? "Comprobando…" : brandBusy ? "Preparando tu marca…" : step === 0 ? "Siguiente →" : "Confirmar y subir videos →"}</button>
+      </div></nav>}
     </form>
   </main>;
 }

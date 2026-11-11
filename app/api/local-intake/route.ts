@@ -3,7 +3,8 @@ import { sameOrigin } from "../../_lib/request-security";
 import { oneShotReadiness } from "../../_lib/oneShotReadiness";
 import { checkOneShotBrief } from "../../../src/oneShotBrief";
 import type { OneShotBrief } from "../../../src/oneShotBrief";
-import { createUploadSession, discardSession, SessionError } from "../../_lib/localUploadSession";
+import { createUploadSession, discardSession, sessionDir, SessionError, writeUploadReceipt } from "../../_lib/localUploadSession";
+import { snapshotBrand } from '../../_lib/brandKit';
 
 export const runtime = "nodejs";
 export async function POST(request: Request) {
@@ -27,9 +28,16 @@ export async function POST(request: Request) {
   if (errors.length) return Response.json({ error: errors.join(" ") }, { status: 422 });
   try {
     const session = await createUploadSession(brief as OneShotBrief);
+    try {
+      session.referenceScope = 'brand-only';
+      if (session.brief.brandKitId) {
+        session.brand = await snapshotBrand(session.brief.brandKitId, sessionDir(session.id), session.brief.preferences.editorial);
+      }
+      await writeUploadReceipt(session);
+    } catch (error) { await discardSession(session.id); throw error; }
     return Response.json({ briefValid: true, uploadAllowed: true, sessionId: session.id, expiresAt: session.expiresAt,
       ...oneShotReadiness() }, { headers: { "Cache-Control": "no-store" } });
-  } catch { return Response.json({ error: "No se pudo preparar la sesión temporal. Inténtalo de nuevo." }, { status: 503 }); }
+  } catch (error) { return Response.json({ error: error instanceof SessionError ? error.message : "No se pudo preparar la sesión temporal. Inténtalo de nuevo." }, { status: error instanceof SessionError ? error.status : 503 }); }
 }
 
 export async function DELETE(request: Request) {

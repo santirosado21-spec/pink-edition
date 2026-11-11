@@ -28,7 +28,7 @@ const ZOOM_SCALES = [1.1, 1.15, 1.2, 1.3];
 const TRANSITIONS: Record<TakeTransition, string> = { none: "Ninguna", punch: "Punch (zoom breve)", flash: "Destello" };
 type Word = { id: string; text: string; frame: number; clip: number; until: number };
 
-const THEMES: Record<string, string> = { base: "Base (color de marca)", health: "Salud (verde)", stress: "Estrés (rojo)" };
+const THEMES: Record<string, string> = { base: "Base (color de marca)", health: "Salud (verde)", stress: "Estrés (rojo)", money: "Dinero (ámbar)", tech: "Tecnología (violeta)" };
 const KINDS: Record<string, string> = {
   patients: "Proporción: uno entre varios",
   emergency: "Alerta y columna que sube",
@@ -82,6 +82,7 @@ export const Editor: React.FC<{ initial: Job }> = ({ initial }) => {
   const [profileError, setProfileError] = useState<string | null>(null);
   const [proposalReport, setProposalReport] = useState<ProposalReport | null>(null);
   const [aiStatus, setAiStatus] = useState<EditorAiStatus | null>(null);
+  const [askText, setAskText] = useState("");
   const [comparison, setComparison] = useState<{ candidate: Candidate; baseline: boolean } | null>(null);
   useEffect(() => { setComparison(null); }, [plan]);
   useEffect(() => {
@@ -442,12 +443,32 @@ export const Editor: React.FC<{ initial: Job }> = ({ initial }) => {
     finally { proposalPending.current = false; setBusy(null); }
   };
 
+  const askChange = async () => {
+    const instruction = askText.trim();
+    if (!instruction || proposalPending.current) return;
+    proposalPending.current = true;
+    const submitted = planRef.current;
+    setBusy("Pidiendo cambio…");
+    setProposalReport(null);
+    try {
+      const response = await fetch(`/api/jobs/${id}/revise`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ plan: submitted, instruction }) });
+      const body = await response.json();
+      if (!response.ok) return setToast(body.error);
+      if (planRef.current !== submitted) return setToast("Seguiste editando mientras llegaba el cambio. Conservamos tus cambios; vuelve a pedirlo cuando termines.");
+      change(body.plan);
+      setProposalReport(body.report ?? null);
+      setAskText("");
+      setToast(`Cambio conservado en el historial, sin cambiar la versión activa. ${body.notes ?? ""}`);
+    } catch { setToast("No se pudo recibir el cambio. Tus cambios siguen intactos; inténtalo de nuevo."); }
+    finally { proposalPending.current = false; setBusy(null); }
+  };
+
   const props = useMemo(() => ({ style, plan, timeline, media }), [style, plan, timeline, media]);
   const previewProps = comparison ? { style: comparison.candidate.style, timeline: comparison.candidate.timeline,
     plan: comparison.baseline ? comparison.candidate.base : comparison.candidate.plan, media } : props;
   // Las marcas del editor usan el color de marca del video, como el render.
   const brand = plan.preferences?.brand_color;
-  const brandMarks = (brand ? { "--base": brand, ...(plan.preferences?.context_colors ? {} : { "--health": brand, "--stress": brand }) } : undefined) as React.CSSProperties | undefined;
+  const brandMarks = (brand ? { "--base": brand, ...(plan.preferences?.context_colors ? {} : { "--health": brand, "--stress": brand, "--money": brand, "--tech": brand }) } : undefined) as React.CSSProperties | undefined;
   const outdated = profile !== null && JSON.stringify(profile) !== JSON.stringify(plan.preferences ?? null);
   const running = status.state === "running";
   const emphasized = useMemo(() => new Set(plan.emphasis_word_ids ?? []), [plan.emphasis_word_ids]);
@@ -648,9 +669,16 @@ export const Editor: React.FC<{ initial: Job }> = ({ initial }) => {
             </div>
           ))}
           <h3 className="section">Pedir un cambio</h3>
-          <div className="ask" aria-disabled="true">
-            <input disabled placeholder="«Baja los efectos de sonido», «quita ese gráfico»…" aria-label="Pedir un cambio con tus palabras" />
-            <span className="chip">Próximamente</span>
+          <div className="ask">
+            <input
+              value={askText}
+              onChange={(event) => setAskText(event.target.value)}
+              onKeyDown={(event) => { if (event.key === "Enter") askChange(); }}
+              placeholder="«Baja los efectos de sonido», «quita ese gráfico»…"
+              aria-label="Pedir un cambio con tus palabras"
+              disabled={comparison !== null || running || busy !== null || !aiStatus?.ready}
+            />
+            <button className="button ghost" onClick={askChange} disabled={comparison !== null || running || busy !== null || !aiStatus?.ready || !askText.trim()}>Pedir</button>
           </div>
           {qc && (
             <>

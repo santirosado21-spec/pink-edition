@@ -102,9 +102,10 @@ Nube y VPS, pagos, app con Capacitor, generación de video por IA y música. Nad
 | W1 | Hecha. Codex construyó, Claude inspeccionó y pidió una ronda de correcciones: la review a ciegas se filtraba vía `status` y había un mensaje engañoso en `next`. Hay 7 pruebas y un gate «loop de evaluación». |
 | W2 | Hecha. Codex construyó y Claude inspeccionó. 6 pruebas, más una prueba real con Gemma que etiquetó bien el tema. |
 | W3 | Hecha. Codex construyó y Claude inspeccionó. `run --split dev --preset explain [--dry-run]`; el brief sale de `src/intakePresets.ts` y el holdout exige `--holdout-cycle`. 12 pruebas. |
+| W4 | Hecha (10 nov 2026). `scripts/round_notes.py` escribe `notes.md` con hasta 5 viñetas (fallos, avisos, tiempos). El resumidor (`localllm` o `PINK_NOTES_CMD`) sólo redacta: cada número y título citado se verifica contra los hechos extraídos del quality.json y lo no verificable se descarta; sin resumidor hay resumen determinista. 6 pruebas y puerta «notas de ronda». |
 | Push | Hay commits locales en `claude/plataforma-v2`. Están retenidos porque el repo de GitHub es **público** y el dueño debe decidir la visibilidad. |
 
-Pregunta abierta para el dueño: los presets del 28 de octubre llevan `musicMood`, y eso choca con la decisión del 10 de octubre de no poner música en el producto.
+~~Pregunta abierta para el dueño: los presets del 28 de octubre llevan `musicMood`, y eso choca con la decisión del 10 de octubre de no poner música en el producto.~~ Resuelta (10 nov 2026): se conserva la decisión del 10 de octubre. Nada en el pipeline asigna música al render (`music: null` siempre); `musicMood` pasa a admitir y usar `none` por defecto en el brief, los presets y el cuestionario, y la fuente de música sólo se exige si algún día se elige un carácter. Los caracteres quedan disponibles pero inertes.
 
 ## Próximo paso
 

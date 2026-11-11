@@ -15,7 +15,7 @@ briefs=json.load(sys.stdin)
 events=[{'kind':k,'sentence':i} for i in range(5) for k in ['card','compare','steps','broll']]
 print(json.dumps([{'limits':event_limits(b),'events':constrain_events(events,b),'context':director_input(b,[],[])} for b in briefs]))
 `],{cwd:root,input:JSON.stringify(briefs),encoding:'utf8'}));
-assert.deepEqual(result[0].limits,[{card:0,compare:0,steps:0,broll:0},360]);
+assert.deepEqual(result[0].limits,[{card:0,compare:0,steps:0,broll:0,icon:0},360]);
 assert.deepEqual(result[0].events,[]);
 for(const [index,clipLimit,gap] of [[1,2,240],[2,4,180]]) {
  assert.equal(result[index].limits[0].broll,clipLimit);

@@ -37,6 +37,32 @@ def interpolate_framing(keys, frame):
     return result
 
 
+def scene_framing(samples, frames, style='stable'):
+    """One conservative scene pose; a detector miss cannot toggle the caption shelf."""
+    reliable = bool(samples) and all(row.get('faces') and not row.get('error') for row in samples)
+    faces = [face for row in samples for face in row.get('faces', [])]
+    pose = framing_for_faces(faces) if reliable else framing_for_faces([])
+    pose['measured'] = pose['measured'] and reliable
+    if not pose['measured']:
+        pose['captionTop'] = None
+    end = dict(pose)
+    if style == 'gentle' and pose['measured']:
+        # A two-percent ease across a whole scene, only if BOTH endpoints protect
+        # the union of every observed face. Linear interpolation stays in bounds.
+        ratio = max(1, pose['scale'] - .02) / pose['scale']
+        end.update(scale=pose['scale'] * ratio, x=pose['x'] * ratio, y=pose['y'] * ratio)
+        safe = all(end['scale'] * max(0,face['top']-.07) + end['y'] >= .025 and
+                   end['scale'] * face['bottom'] + end['y'] <= .76 and
+                   end['scale'] * max(0,face['left']-.025) + end['x'] >= .02 and
+                   end['scale'] * min(1,face['right']+.025) + end['x'] <= .98 for face in faces)
+        if not safe:
+            end = dict(pose)
+        bottom = max(end['scale'] * face['bottom'] + end['y'] for face in faces)
+        caption_top = max(pose['captionTop'], max(.46, bottom + .075)) if pose['captionTop'] is not None and bottom + .075 <= .64 else None
+        pose['captionTop'] = end['captionTop'] = caption_top
+    return [{**pose,'frame':0},{**end,'frame':max(0,frames-1)}]
+
+
 def prepare_portrait_framing(folder, edit, binary):
     out = folder/'analysis/portrait-framing';out.mkdir(parents=True,exist_ok=True)
     reports=[]
@@ -47,13 +73,16 @@ def prepare_portrait_framing(folder, edit, binary):
         paths=sorted(target.glob('*.jpg'))
         samples=json.loads(subprocess.check_output([str(binary),*map(str,paths)],timeout=120))
         keys=[]
-        for i,sample in enumerate(samples):
-            neighbors=samples[max(0,i-1):i+2]
-            reliable=all(row.get('faces') and not row.get('error') for row in neighbors)
-            faces=[face for row in neighbors for face in row['faces']] if reliable else []
-            key=framing_for_faces(faces)
-            key['frame']=min(scene['frames']-1,i*10)
-            keys.append(key)
+        if edit.get('editorialVersion') == 1:
+            keys = scene_framing(samples, scene['frames'], edit['preferences']['editorial']['framingStyle'])
+        else:
+            for i,sample in enumerate(samples):
+                neighbors=samples[max(0,i-1):i+2]
+                reliable=all(row.get('faces') and not row.get('error') for row in neighbors)
+                faces=[face for row in neighbors for face in row['faces']] if reliable else []
+                key=framing_for_faces(faces)
+                key['frame']=min(scene['frames']-1,i*10)
+                keys.append(key)
         if keys:
             keys.append({**keys[-1],'frame':scene['frames']-1}) if keys[-1]['frame'] != scene['frames']-1 else None
         scene['framing']=keys
@@ -61,4 +90,5 @@ def prepare_portrait_framing(folder, edit, binary):
         for path in paths:path.unlink(missing_ok=True)
     edit['visualLayoutVersion']=3
     edit['captionLayoutVersion']=3
-    (out/'evidence.json').write_text(json.dumps({'method':'Apple Vision at 3fps; neighbor union with hair margin; missing evidence reserves caption shelf. Frame interpolation is not proof of unmeasured motion.','scenes':reports},indent=2))
+    method = 'Apple Vision at 3fps; whole-scene union and stable caption shelf; missing evidence marks whole scene unmeasured' if edit.get('editorialVersion') == 1 else 'Apple Vision at 3fps; neighbor union with hair margin; missing evidence reserves caption shelf'
+    (out/'evidence.json').write_text(json.dumps({'method':method + '. Frame interpolation is not proof of unmeasured motion.','scenes':reports},indent=2))

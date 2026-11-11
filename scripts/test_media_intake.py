@@ -3,7 +3,7 @@ from pathlib import Path
 import unittest
 from unittest.mock import patch
 from media_intake import route
-from fran_loop import preflight, main
+from fran_loop import preflight, main, validate_corpus_config
 import json
 from one_shot_worker import main as worker_main
 import media_intake
@@ -15,6 +15,13 @@ def analysis(kind, confidence=.99, signal='no-editorial-overlays'):
 
 
 class MediaIntakeTest(unittest.TestCase):
+    def test_corpus_round_cannot_mix_splits_or_repeat_a_clip(self):
+        base = {'corpusSha256': 'a' * 64, 'split': 'dev'}
+        with self.assertRaisesRegex(ValueError, 'único split'):
+            validate_corpus_config({'videos': [base, {**base, 'corpusSha256': 'b' * 64, 'split': 'holdout'}]})
+        with self.assertRaisesRegex(ValueError, 'repetir'):
+            validate_corpus_config({'videos': [base, dict(base)]})
+
     def test_raw_and_edited_routes(self):
         self.assertEqual(route(analysis('raw'), 12), 'edit')
         self.assertEqual(route(analysis('edited', signal='burned-captions'), 12), 'reference')
@@ -28,6 +35,34 @@ class MediaIntakeTest(unittest.TestCase):
         for signal in ('physical-text', 'watermark', 'shot-change'):
             self.assertEqual(route(analysis('edited', signal=signal), 12), 'review')
         self.assertEqual(route(analysis('raw', signal='physical-text'), 12), 'edit')
+
+    def test_raw_camera_turn_does_not_block_a_clean_take(self):
+        value = analysis('raw', .98)
+        value['observations'].append({'sample': 3, 'signal': 'shot-change'})
+        self.assertEqual(route(value, 12), 'edit')
+        # A camera change never overrides actual editorial evidence/uncertainty.
+        for signal in ('burned-captions', 'editorial-graphics', 'unclear'):
+            mixed = {**value, 'observations': [*value['observations'], {'sample': 4, 'signal': signal}]}
+            self.assertEqual(route(mixed, 12), 'review')
+        self.assertEqual(route({**value, 'classification': 'uncertain'}, 12), 'review')
+
+    def test_cached_raw_verdict_is_rerouted_without_another_model_call(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            source = root / 'camera.mov'
+            source.write_bytes(b'fixture')
+            sha = media_intake.digest(source)
+            cache = root / 'cache'
+            folder = cache / sha
+            folder.mkdir(parents=True)
+            value = analysis('raw', .98)
+            value['observations'].append({'sample': 3, 'signal': 'shot-change'})
+            (folder / 'classification.json').write_text(json.dumps({'version': media_intake.VERSION,
+                'model': media_intake.MODEL, 'revision': media_intake.REVISION, 'sha256': sha,
+                'route': 'review', 'samples': list(range(12)), 'analysis': value}))
+            with patch('media_intake.CACHE', cache), patch('media_intake.request') as model:
+                self.assertEqual(media_intake.inspect(source)['route'], 'edit')
+                model.assert_not_called()
 
     def test_invalid_or_single_frame_evidence_is_blocked(self):
         value = analysis('edited', signal='editorial-graphics')
@@ -67,7 +102,7 @@ class MediaIntakeTest(unittest.TestCase):
             folder = Path(temp)
             (folder/'input.json').write_text(json.dumps({'brief': {'preferences': {}}, 'sources': [{'id': 'fixture'}]}))
             with patch('one_shot_worker.assert_ready'), patch('one_shot_worker.inspect_media', return_value={'route': 'reference', 'patterns': []}), patch('one_shot_worker.command') as asr, patch('one_shot_worker.editorial_model') as director:
-                with self.assertRaisesRegex(ValueError, 'editado o dudoso'):
+                with self.assertRaisesRegex(ValueError, 'fixture: ya tiene edición'):
                     worker_main(folder)
                 asr.assert_not_called()
                 director.assert_not_called()

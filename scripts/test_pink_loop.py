@@ -148,9 +148,21 @@ class PinkLoopTests(unittest.TestCase):
         empty_state = self.root / 'empty-state'
         done = self.execute('next', no_feedback.name, state=empty_state)
         self.assertNotEqual(done.returncode, 0)
-        self.assertIn('No hay feedback que trasladar', done.stdout + done.stderr)
+        self.assertIn('Falta el veredicto del dueño', done.stdout + done.stderr)
         self.assertNotIn('Sólo hay feedback de holdout', done.stdout + done.stderr)
         self.assertFalse((empty_state / 'next-config.json').exists())
+
+    def test_next_requires_a_review_for_every_dev_clip(self):
+        feedback = {'scores': {'editorial': 4, 'visual': 4, 'ritmo': 4, 'publicable': 4},
+                    'nextRoundChanges': ['Mantener']}
+        folder = self.make_round('partially-reviewed', [
+            {'feedback': feedback},
+            {},
+        ])
+        done = self.execute('next', folder.name)
+        self.assertNotEqual(done.returncode, 0)
+        self.assertIn('Falta el veredicto del dueño', done.stdout + done.stderr)
+        self.assertFalse((self.state / 'next-config.json').exists())
 
     def test_history_separates_legacy_scores_and_hard_failures(self):
         first = self.make_round('old', [{

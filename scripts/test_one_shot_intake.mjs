@@ -12,6 +12,11 @@ const brief = { version: 1, objective: 'Explicar una idea', audience: 'Creadores
   topic: 'Video', graphics: 'many', transition: 'punch' }, musicMood: 'documentary', musicSource: 'licensed-library',
   brollSource: 'both', resourceNotes: '', confirmed: true };
 assert.deepEqual(plain(checkOneShotBrief(brief)), []);
+// Sin música (decisión del 10 de octubre): no exige carácter ni fuente.
+const silent = { ...brief, musicMood: 'none' };
+delete silent.musicSource;
+assert.deepEqual(plain(checkOneShotBrief(silent)), []);
+assert.ok(checkOneShotBrief({ ...silent, musicMood: '' }).length, 'el carácter sigue siendo obligatorio');
 for (const invalid of [null, {}, { ...brief, confirmed: false }, { ...brief, objective: ' ' }, { ...brief, musicMood: '' },
   { ...brief, requirements: { broll: 0 } }, { ...brief, preferences: { ...brief.preferences, graphics: 'none' } },
   { ...brief, preferences: { ...brief.preferences, transition: 'none' } }, { ...brief, musicSource: 'none' }]) {
