@@ -136,7 +136,7 @@ def render_output(args, work, stage, plan, timeline, source, person, style):
         stale.unlink(missing_ok=True)
     run(["npx", "remotion", "render", "PinkEdit", render, f"--props={props}",
          "--codec=h264", "--audio-codec=aac", "--crf=18", "--timeout=120000",
-         "--concurrency=3"])
+         f"--concurrency={min(3, os.cpu_count() or 1)}"])
     stage("finish")
     run([TOOLS_PYTHON, SCRIPTS / "finish_full_demo.py", "--input", render,
          "--output", final, "--timeline", timeline, "--style", args.style,

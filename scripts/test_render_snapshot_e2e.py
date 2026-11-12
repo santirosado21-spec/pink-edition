@@ -18,7 +18,7 @@ def main():
     work, media = ROOT / "work" / job, ROOT / "public/work" / job
     evidence = ROOT / "work/ollama-pilot/versioning-smoke" / run_id
     evidence.mkdir(parents=True)
-    media.mkdir()
+    media.mkdir(parents=True)
     inputs = work / "renders" / run_id / "input"
     inputs.mkdir(parents=True)
     try:
