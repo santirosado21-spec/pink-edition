@@ -13,12 +13,7 @@ OVERLAY_BOX = {'x': .04, 'y': .04, 'width': .82, 'height': .23}
 # Fixed clearance between the card and the worst measured face top. It pays for detector
 # jitter, hair above the face box and head motion between samples; a miss falls back to reserved.
 FACE_SLACK = .03
-# Caption clearance between the support band and the measured band start.
-CAPTION_MARGIN = .065
 SAMPLE_STEP = 6  # frames between face samples (5 per second at 30 fps)
-# Method note recorded in session evidence; derived from the constants so it cannot drift.
-EVIDENCE_METHOD = ('Apple Vision, one sample every %d frames + interval end; %.1f%% margin; '
-                   'face motion between samples remains unmeasured') % (SAMPLE_STEP, (CAPTION_MARGIN + FACE_SLACK) * 100)
 
 
 def layout_sample_frames(start, frames):
@@ -81,7 +76,7 @@ def editorial_layout(samples, owners, frames, gentle=False):
                 worst = min(worst, .5 + (base_top - .5) * factor)
         if pose['measured'] and not gentle:
             worst = pose['y'] + pose['scale'] * base_top
-        if worst < upper_bottom + CAPTION_MARGIN + FACE_SLACK:
+        if worst < upper_bottom + .065 + FACE_SLACK:
             return 'reserved', dict(RESERVED_BOX), 'Measured face/caption space cannot fit upper support band'
     return 'overlay', dict(OVERLAY_BOX), 'Upper support band clear in all measured samples; motion between samples remains unmeasured'
 
@@ -94,7 +89,7 @@ def reserve_editorial_layout(edit, reason):
         beat['presentation'] = 'inset' if beat.get('presentation') == 'inset' else 'reserved'
         beat['layoutBox'] = dict(RESERVED_BOX)
         explanation = ('Requested ' + requested + ' overridden by ' + beat['presentation'] + ': ' if requested != beat['presentation'] else 'Applied reserved composition: ') + reason
-        edit.setdefault('editorialReview', {}).setdefault('warnings', []).append({'beatId':beat['id'],'from':beat['from'],'frames':beat['frames'],'reason':explanation})
+        edit.get('editorialReview', {}).setdefault('warnings', []).append({'beatId':beat['id'],'from':beat['from'],'frames':beat['frames'],'reason':explanation})
 
 
 def unmeasured_editorial_layout(edit, reason):
@@ -171,7 +166,7 @@ def prepare_native_layout(folder, edit):
             evidence.append({'beatId':beat['id'],'presentation':'intentional-fullscreen-text','voicePreserved':True,'displayedRange':[beat['from'],beat['from']+beat['frames']]})
             continue
         paths, owners, sampled_frames = [], [], []
-        # SAMPLE_STEP frames between samples (5 per second at 30 fps), including the interval end.
+        # Two samples per second, including the end of the overlay interval.
         frames = layout_sample_frames(beat['from'], beat['frames'])
         for frame in frames:
             scene = next((s for s in edit['scenes'] if s['from'] <= frame < s['from'] + s['frames']), None)
@@ -245,4 +240,4 @@ def prepare_native_layout(folder, edit):
         if not edit['checks'][check]:
             edit['issues'].append('Requisito pendiente tras medir el rostro: ' + check)
     edit['visualLayoutVersion'] = 3
-    (out / 'evidence.json').write_text(json.dumps({'method': EVIDENCE_METHOD, 'beats': evidence}, indent=2))
+    (out / 'evidence.json').write_text(json.dumps({'method': 'Apple Vision, 2fps + interval end; 6.5% margin; face motion between samples remains unmeasured', 'beats': evidence}, indent=2))

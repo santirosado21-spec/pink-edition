@@ -20,6 +20,26 @@ from media_intake import inspect as inspect_media
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 
 
+def validate_corpus_config(config):
+    """Impide que una ronda generada desde el corpus mezcle dev y holdout."""
+    videos = config.get('videos')
+    if not isinstance(videos, list):
+        raise ValueError('La configuración no contiene una lista de videos válida.')
+    corpus_videos = [video for video in videos if isinstance(video, dict) and video.get('corpusSha256')]
+    if not corpus_videos:
+        return
+    if len(corpus_videos) != len(videos):
+        raise ValueError('Una ronda del corpus no puede mezclar clips del corpus y clips manuales.')
+    splits = {video.get('split') for video in corpus_videos}
+    if not splits <= {'dev', 'holdout'} or len(splits) != 1:
+        raise ValueError('Una ronda del corpus debe usar un único split: dev o holdout.')
+    hashes = [video.get('corpusSha256') for video in corpus_videos]
+    if any(not isinstance(digest, str) or len(digest) != 64 for digest in hashes):
+        raise ValueError('Una ronda del corpus requiere un sha256 válido por clip.')
+    if len(set(hashes)) != len(hashes):
+        raise ValueError('Una ronda del corpus no puede repetir el mismo clip.')
+
+
 def sha256(file):
     with file.open('rb') as stream:
         return hashlib.file_digest(stream, 'sha256').hexdigest()
@@ -107,7 +127,7 @@ def gallery(public, results):
             issues = '<li>Patrones candidatos; falta tu feedback sobre qué conservar.</li>' if role == 'reference' else '<li>Confirmar el tipo de material antes de editar.</li>'
         label = 'Referencia editada' if role == 'reference' else 'Revisión de origen' if role == 'review' else 'Borrador'
         cards.append(f'<article><h2>{title} · {label}</h2><p>{summary}</p>{video}<ul>{patterns}</ul><p>Pendientes del motor:</p><ul>{issues}</ul><details><summary>Controles técnicos y procedencia</summary><pre>{html.escape(json.dumps(entry, ensure_ascii=False, indent=2))}</pre></details></article>')
-    document = ('<!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Pruebas de Fran</title><style>body{font:17px system-ui;margin:32px auto;padding:0 20px;max-width:1100px;background:#111;color:#eee}video{width:360px;max-width:100%;max-height:75vh}pre{white-space:pre-wrap;overflow-wrap:anywhere}article{margin:24px 0;padding:24px;border:1px solid #555;border-radius:16px}main{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,400px),1fr));gap:20px}summary{cursor:pointer}h1{font-size:32px}</style><h1>Pruebas locales de Fran</h1><p>Dos direcciones de edición para comparar. Son borradores: aún tienen pendientes editoriales.</p><p>Para la siguiente ronda, dime en el chat el video, el segundo y lo que cambiarías: ritmo, tamaño de Fran, letra, subtítulos, música o recursos.</p><main>' + ''.join(cards) + '</main></html>')
+    document = ('<!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Pruebas de video</title><style>body{font:17px system-ui;margin:32px auto;padding:0 20px;max-width:1100px;background:#111;color:#eee}video{width:360px;max-width:100%;max-height:75vh}pre{white-space:pre-wrap;overflow-wrap:anywhere}article{margin:24px 0;padding:24px;border:1px solid #555;border-radius:16px}main{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,400px),1fr));gap:20px}summary{cursor:pointer}h1{font-size:32px}</style><h1>Pruebas locales de video</h1><p>Dos direcciones de edición para comparar. Son borradores: aún tienen pendientes editoriales.</p><p>Para la siguiente ronda, dime en el chat el video, el segundo y lo que cambiarías: ritmo, tamaño del presentador, letra, subtítulos, música o recursos.</p><main>' + ''.join(cards) + '</main></html>')
 
     if any(row.get('role') in ('reference', 'review') for row in results):
         document = document.replace('Dos direcciones de edición para comparar. Son borradores: aún tienen pendientes editoriales.', 'Los editados se estudian como referencias; los dudosos se revisan antes de editar. Las adaptaciones se prueban sobre material crudo.')
@@ -122,6 +142,7 @@ def main():
     config = json.loads(args.config.read_text())
     if not isinstance(config.get('videos'), list) or not config['videos']:
         raise ValueError('Indica los proyectos candidatos; las referencias no cuentan como videos a editar.')
+    validate_corpus_config(config)
     origin = config.get('origin', 'http://localhost:3001').rstrip('/')
     url = urllib.parse.urlparse(origin)
     if url.hostname not in ('localhost', '127.0.0.1', '::1') or url.scheme != 'http':

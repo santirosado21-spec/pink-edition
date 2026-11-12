@@ -34,12 +34,11 @@ jobs:
       # test_pink_loop invoca utilidades node que importan de node_modules.
       - run: npm ci
       # Lista explícita: discover recogería utilidades que no son pruebas.
-      # test_media_intake queda fuera: necesita los originales del piloto local,
-      # ausentes en un checkout limpio; se reincorpora cuando estén en el repo.
       - run: |
           for test in test_source_coverage test_speech_cuts test_editorial_recipes \
             test_editorial_controls test_personalization_contract test_pink_loop \
             test_round_notes test_worker_queue test_director_controls \
-            test_sound_events test_stock_queries test_stock_relevance; do
+            test_sound_events test_stock_queries test_stock_relevance \
+            test_media_intake; do
             python "scripts/$test.py" || exit 1
           done

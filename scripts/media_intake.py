@@ -8,16 +8,6 @@ import subprocess
 
 from sol_model import MODEL, REVISION, request
 
-def _sha256_stream(stream):
-    if hasattr(hashlib, 'file_digest'):
-        return _sha256_stream(stream)
-    digest = hashlib.sha256()
-    for chunk in iter(lambda: stream.read(1 << 20), b''):
-        digest.update(chunk)
-    return digest.hexdigest()
-
-
-
 ROOT = Path(__file__).resolve().parents[1]
 VERSION = 1
 CACHE = ROOT / 'work/fran-loop/source-intake'
@@ -35,7 +25,7 @@ EDITORIAL_ADAPTATIONS = {'headline-scenes': 'typography', 'semantic-icons': 'res
 
 def digest(source):
     with Path(source).open('rb') as stream:
-        return _sha256_stream(stream)
+        return hashlib.file_digest(stream, 'sha256').hexdigest()
 
 
 def write(path, value):
