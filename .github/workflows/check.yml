@@ -35,10 +35,17 @@ jobs:
       - run: npm ci
       # Lista explícita: discover recogería utilidades que no son pruebas.
       - run: |
+          # test_native_layout/test_one_shot_music/test_editorial_eval/test_media_evidence
+          # se incorporan tras la regresion del piloto (99581cb) para que la
+          # decision de musica, el layout nativo y el hashing queden cubiertos.
+          # Quedan fuera test_local_image_media y test_render_snapshot_e2e:
+          # requieren fixtures locales ausentes del repo (fallos de entorno
+          # documentados, no verdes disfrazados).
           for test in test_source_coverage test_speech_cuts test_editorial_recipes \
             test_editorial_controls test_personalization_contract test_pink_loop \
             test_round_notes test_worker_queue test_director_controls \
             test_sound_events test_stock_queries test_stock_relevance \
-            test_media_intake; do
+            test_media_intake test_native_layout test_one_shot_music \
+            test_editorial_eval test_media_evidence; do
             python "scripts/$test.py" || exit 1
           done
