@@ -17,7 +17,7 @@ import tempfile
 
 def _sha256_stream(stream):
     if hasattr(hashlib, 'file_digest'):
-        return _sha256_stream(stream)
+        return hashlib.file_digest(stream, 'sha256').hexdigest()
     digest = hashlib.sha256()
     for chunk in iter(lambda: stream.read(1 << 20), b''):
         digest.update(chunk)

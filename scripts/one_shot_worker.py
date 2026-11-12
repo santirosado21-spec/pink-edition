@@ -49,6 +49,17 @@ def music(folder, mood):
 
 def clean(text): return html.unescape(re.sub('<[^>]+>', '', str(text)))
 
+def select_music(folder, brief, assets, issues):
+    """Attach the chosen instrumental score; 'none' means the user adds music when publishing."""
+    if brief['musicMood']=='none':
+        return None, 1
+    if brief.get('musicSource','licensed-library')!='licensed-library':
+        issues.append('Falta la pista propia solicitada; no se sustituyó sin autorización.')
+        return None, 1
+    assets.append(music(folder,brief['musicMood']))
+    return 'music.wav', round(60/{'energetic':112,'calm':76,'documentary':88,'cinematic':80}[brief['musicMood']]*32*30)
+
+
 def stock_queries(query):
     """Bounded lexical variants of the same filmable action, never unrelated quota filler."""
     if not isinstance(query, str) or not re.fullmatch(STOCK_QUERY_PATTERN, query):
@@ -404,18 +415,16 @@ def main(folder):
         beats.append(beat)
         decision.update(status='accepted',reason=event.get('reason') or 'Literal support accepted within temporal and questionnaire limits',beatId=beat['id'])
     status(folder,'Preparando música y comprobando la composición')
-    music_file=None
-    if brief['musicSource']=='licensed-library': assets.append(music(folder,brief['musicMood']));music_file='music.wav'
-    else: issues.append('Falta la pista propia solicitada; no se sustituyó sin autorización.')
+    music_file,music_frames=select_music(folder,brief,assets,issues)
     transitions=decorate(beats,scenes,captions,prefs)
     transitions=[{('from' if key=='from_' else key):value for key,value in event.items()} for event in transitions]
     counts={kind:sum(b['kind']==kind for b in beats) for kind in ['card','steps','compare','broll']}
-    checks={'music':music_file is not None,'cards':relevant or counts['card']>=2,'graphics':relevant or (counts['steps']>=1 and counts['compare']>=1),'broll':relevant or counts['broll']>=2,'transitions':len(scenes)<2 or len(transitions)>=1,'speechPreserved':True,'faceSafeLayout':True}
+    checks={'music':brief['musicMood']=='none' or music_file is not None,'cards':relevant or counts['card']>=2,'graphics':relevant or (counts['steps']>=1 and counts['compare']>=1),'broll':relevant or counts['broll']>=2,'transitions':len(scenes)<2 or len(transitions)>=1,'speechPreserved':True,'faceSafeLayout':True}
     for key,valid in checks.items():
         if not valid: issues.append('Requisito pendiente: '+key)
     horizontal=scenes[0]['width']>=scenes[0]['height']
     portrait_width=1080 if all(scene['width']>=1080 for scene in scenes) else 720
-    edit=dict(resourcePolicy=brief.get('resourcePolicy','showcase'),captionLayoutVersion=2,captionAdaptations=sorted({p['adaptation'] for p in directions}),referencePatterns=directions,ai={'provider':'OpenAI','model':MODEL,'transport':'codex-chatgpt','revision':REVISION},transitions=transitions,fps=30,width=1280 if horizontal else portrait_width,height=720 if horizontal else portrait_width*16//9,frames=offset,preferences=prefs,scenes=scenes,captions=captions,beats=beats,music=music_file,musicFrames=round(60/{'energetic':112,'calm':76,'documentary':88,'cinematic':80}[brief['musicMood']]*32*30),issues=list(dict.fromkeys(issues)),assets=assets,checks=checks)
+    edit=dict(resourcePolicy=brief.get('resourcePolicy','showcase'),captionLayoutVersion=2,captionAdaptations=sorted({p['adaptation'] for p in directions}),referencePatterns=directions,ai={'provider':'OpenAI','model':MODEL,'transport':'codex-chatgpt','revision':REVISION},transitions=transitions,fps=30,width=1280 if horizontal else portrait_width,height=720 if horizontal else portrait_width*16//9,frames=offset,preferences=prefs,scenes=scenes,captions=captions,beats=beats,music=music_file,musicFrames=music_frames,issues=list(dict.fromkeys(issues)),assets=assets,checks=checks)
     if editorial:
         edit['editorialVersion'] = 1
         edit['editorialReview'] = review
