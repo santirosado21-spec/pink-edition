@@ -138,4 +138,14 @@ export const highlightInk = (theme: Theme): { color: string; backplate: string }
     backplate: dark ? "rgba(255,255,255,.94)" : "rgba(16,16,20,.78)",
   };
 };
+// Placa de karaoke: la insignia conserva el color de marca y la tinta se elige
+// por la mayor relación de contraste WCAG, para que la palabra activa se lea
+// tanto con acentos claros como con un color de marca oscuro (pendiente
+// estético anotado en docs/estrategia/06-pocs-y-plan.md, POC 2).
+const contrastRatio = (a: number, b: number) => (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+export const karaokeInk = (brandColor: string): { background: string; color: string } => {
+  const luminance = relativeLuminance(brandColor);
+  const darkInk = relativeLuminance("#171717");
+  return { background: brandColor, color: contrastRatio(luminance, 1) > contrastRatio(luminance, darkInk) ? "#ffffff" : "#171717" };
+};
 export const useTheme = () => useContext(ThemeContext);

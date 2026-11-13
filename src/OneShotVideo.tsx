@@ -9,6 +9,7 @@ import { captionIndex, captionPage, captionPhrasePage } from './captionPages';
 import {EDITORIAL_CAPTION_TOP, editorialBeatVisible, editorialHidesCaptions, editorialPresentation, editorialPresenterBox, editorialPresenterScale, editorialTextBeat, lerpBox} from './editorialSceneTiming';
 export type OneShotVideoProps = { edit: OneShotEdit; mediaBase: string; onMediaError?: (message: string) => void };
 import {editorMedia as url} from './editorMedia';
+import {karaokeInk} from './edit';
 export function OneShotVideo(props: OneShotVideoProps) {
   return <LoadedOneShotVideo key={`${props.edit.preferences.font}:${props.mediaBase}`} {...props} />;
 }
@@ -93,7 +94,8 @@ function LoadedOneShotVideo({ edit, mediaBase, onMediaError }: OneShotVideoProps
       {words.map((word, i) => {
         const on = frame / fps * 1000 >= word.startMs && frame / fps * 1000 < word.endMs;
         const accent = modernCaptions && (!edit.captionAdaptations || edit.captionAdaptations.includes('keyword-emphasis')) && on && edit.preferences.captions === 'keyword';
-        return <span data-caption-active={on ? 'true' : 'false'} key={`${word.startMs}-${i}`} style={{ padding: editorialV1 ? (on && edit.preferences.captions === 'karaoke' ? '2px 8px' : '0 2px') : '2px 4px', maxWidth: modernCaptions ? '100%' : undefined, overflowWrap: modernCaptions ? 'anywhere' : undefined, borderRadius: 6, background: on && edit.preferences.captions === 'karaoke' ? (edit.preferences.brand_color || '#ccce83') : 'transparent', color: on && edit.preferences.captions === 'karaoke' ? '#171717' : isPaperBackground ? '#20211f' : '#fff', textDecoration: accent ? 'underline' : undefined, textDecorationColor: accent ? edit.preferences.brand_color : undefined, textDecorationThickness: accent ? '4px' : undefined, textUnderlineOffset: accent ? '6px' : undefined }}>{editorialV1 && i > 0 ? ' ' : ''}{word.text.trim()}</span>;
+        const plate = on && edit.preferences.captions === 'karaoke' ? karaokeInk(edit.preferences.brand_color || '#ccce83') : null;
+        return <span data-caption-active={on ? 'true' : 'false'} key={`${word.startMs}-${i}`} style={{ padding: editorialV1 ? (on && edit.preferences.captions === 'karaoke' ? '2px 8px' : '0 2px') : '2px 4px', maxWidth: modernCaptions ? '100%' : undefined, overflowWrap: modernCaptions ? 'anywhere' : undefined, borderRadius: 6, background: plate ? plate.background : 'transparent', color: plate ? plate.color : isPaperBackground ? '#20211f' : '#fff', textDecoration: accent ? 'underline' : undefined, textDecorationColor: accent ? edit.preferences.brand_color : undefined, textDecorationThickness: accent ? '4px' : undefined, textUnderlineOffset: accent ? '6px' : undefined }}>{editorialV1 && i > 0 ? ' ' : ''}{word.text.trim()}</span>;
       })}
       </div>
     </div>
