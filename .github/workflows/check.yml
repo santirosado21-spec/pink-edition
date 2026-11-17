@@ -11,6 +11,8 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run typecheck
+      # test_one_shot_intake invoca ffmpeg para sus fixtures; el runner no lo trae.
+      - run: sudo apt-get update && sudo apt-get install -y ffmpeg
       # Pruebas de lógica pura: corren con npm ci solamente, sin servidor de
       # desarrollo, navegador, render, fuentes remotas, assets de marca locales
       # ni config de la Mac. Las 14 restantes de scripts/test_*.mjs dependen de
