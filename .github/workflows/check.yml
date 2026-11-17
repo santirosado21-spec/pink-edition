@@ -63,6 +63,6 @@ jobs:
             test_round_notes test_worker_queue test_director_controls \
             test_sound_events test_stock_queries test_stock_relevance \
             test_media_intake test_native_layout test_one_shot_music \
-            test_editorial_eval test_media_evidence; do
+            test_editorial_eval test_media_evidence test_render_smoke_contract; do
             python "scripts/$test.py" || exit 1
           done

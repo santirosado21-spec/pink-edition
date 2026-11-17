@@ -1,4 +1,6 @@
 """Smoke opt-in: render real de 3s sintéticos, sin IA ni grabaciones privadas."""
+import argparse
+import os
 import hashlib
 import json
 import shutil
@@ -12,7 +14,14 @@ ROOT = Path(__file__).resolve().parents[1]
 def digest(file):
     return hashlib.sha256(file.read_bytes()).hexdigest()
 
+def render_environment():
+    """Respeta el Python elegido; por defecto usa el que ejecuta esta prueba."""
+    return {**os.environ, "PINK_TOOLS_PYTHON": os.environ.get("PINK_TOOLS_PYTHON", sys.executable)}
+
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--keep-video", action="store_true", help="Conserva sólo el MP4 sintético como evidencia local.")
+    args = parser.parse_args()
     run_id = str(uuid.uuid4())
     job = f"qa-snapshot-{run_id[:8]}"
     work, media = ROOT / "work" / job, ROOT / "public/work" / job
@@ -49,21 +58,30 @@ def main():
             subprocess.run([sys.executable, "scripts/pink_edit.py", str(media / "source.mp4"),
                 "--id", job, "--execution-id", run_id, "--plan", str(inputs / "plan.json"),
                 "--timeline-from", str(inputs / "timeline.json"), "--style", str(inputs / "style.json")],
-                cwd=ROOT, stdout=log, stderr=subprocess.STDOUT, check=True)
+                cwd=ROOT, stdout=log, stderr=subprocess.STDOUT, check=True,
+                env=render_environment())
         assert all(digest(Path(f)) == value for f, value in before.items()), "Source or frozen inputs changed"
         render = inputs.parent
         assert json.loads((render / "plan.json").read_text()) == plan
         assert json.loads((render / "timeline.json").read_text()) == timeline
         qc = json.loads((render / "out/QC.json").read_text())
         assert qc["status"] == "pass", qc["checks"]
-        # No conservar videos de prueba: sólo informe y fotograma de diagnóstico.
+        # Por defecto sólo informe/fotograma; el MP4 sintético requiere opt-in.
         shutil.copyfile(render / "out/QC.json", evidence / "QC.json")
         output = render / "out" / f"{job}.mp4"
         subprocess.run(["ffmpeg", "-v", "error", "-ss", "1.7", "-i", str(output),
                         "-frames:v", "1", str(evidence / "frame.png")], check=True)
+        if args.keep_video:
+            shutil.copyfile(output, evidence / "synthetic-render.mp4")
         (evidence / "verification.json").write_text(json.dumps({"status": "pass", "unchanged_inputs": before,
             "qc": qc["checks"], "limitations": "Synthetic geometry, tone and fixture captions. Does not evaluate voice preservation, face detection or editorial quality."}, indent=2))
         print(f"PASS: frozen render and technical QC. Evidence: {evidence}")
+    except Exception as exc:
+        (evidence / "verification.json").write_text(json.dumps({
+            "status": "failed", "error_type": type(exc).__name__, "error": str(exc),
+            "limitations": "Synthetic test only. No production or editorial validation."}, indent=2))
+        print(f"FAIL: evidence retained at {evidence}", file=sys.stderr)
+        raise
     finally:
         shutil.rmtree(work, ignore_errors=True)
         shutil.rmtree(media, ignore_errors=True)
