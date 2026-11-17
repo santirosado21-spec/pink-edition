@@ -23,9 +23,18 @@ EDITORIAL_ADAPTATIONS = {'headline-scenes': 'typography', 'semantic-icons': 'res
                         'contextual-broll': 'resources'}
 
 
+def _sha256_stream(stream):
+    if hasattr(hashlib, 'file_digest'):
+        return hashlib.file_digest(stream, 'sha256').hexdigest()
+    digest = hashlib.sha256()
+    for chunk in iter(lambda: stream.read(1 << 20), b''):
+        digest.update(chunk)
+    return digest.hexdigest()
+
+
 def digest(source):
     with Path(source).open('rb') as stream:
-        return hashlib.file_digest(stream, 'sha256').hexdigest()
+        return _sha256_stream(stream)
 
 
 def write(path, value):
