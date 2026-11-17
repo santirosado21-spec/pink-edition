@@ -24,7 +24,7 @@ class SolModelTests(unittest.TestCase):
     def runner(self, args, **kwargs):
         if args[1:3] == ['login', 'status']:
             return SimpleNamespace(returncode=0, stdout='', stderr='Logged in using ChatGPT')
-        self.assertEqual(args[args.index('--model') + 1], 'gpt-5.6-sol')
+        self.assertEqual(args[args.index('--model') + 1], 'gpt-6.2-sol')
         self.assertIn('--ignore-user-config', args)
         self.assertIn('--ephemeral', args)
         self.assertNotIn('OPENAI_API_KEY', kwargs['env'])
@@ -47,7 +47,7 @@ class SolModelTests(unittest.TestCase):
         receipts = list((self.root/'work/_editor-ai/sol').glob('*.json'))
         self.assertEqual(len(receipts), 1)
         receipt = json.loads(receipts[0].read_text())
-        self.assertEqual(receipt['model'], 'gpt-5.6-sol')
+        self.assertEqual(receipt['model'], 'gpt-6.2-sol')
         self.assertEqual(receipt['usage']['output_tokens'], 3)
         self.assertNotIn('synthetic private marker', receipts[0].read_text())
 

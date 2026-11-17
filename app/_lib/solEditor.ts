@@ -3,7 +3,7 @@ import path from 'node:path';
 import { spawn } from 'node:child_process';
 import { EditorAiError, type EditorAiStatus } from './editorAi';
 
-export const SOL_EDITOR_MODEL = 'gpt-5.6-sol';
+export const SOL_EDITOR_MODEL = 'gpt-6.2-sol';
 type EditorialRequest = { system: string; messages: { role: 'user'; content: string; images?: string[] }[] };
 
 function invoke(payload?: unknown): Promise<string> {

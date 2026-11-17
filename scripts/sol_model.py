@@ -10,8 +10,8 @@ import subprocess
 import tempfile
 import time
 
-MODEL = 'gpt-5.6-sol'
-REVISION = 'sol-codex-v1'
+MODEL = 'gpt-6.2-sol'
+REVISION = 'sol-codex-v2'
 ROOT = Path(__file__).resolve().parents[1]
 
 

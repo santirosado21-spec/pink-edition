@@ -98,7 +98,7 @@ const cleanFixture = () => {
 // --- Stub del conector (restauración garantizada) ---------------------------
 const STUB = `import json, os, sys, time
 if '--status' in sys.argv:
-    print(json.dumps({'model': 'gpt-5.6-sol', 'ready': True}))
+    print(json.dumps({'model': 'gpt-6.2-sol', 'ready': True}))
     sys.exit(0)
 sys.stdin.read()
 if os.path.exists(${JSON.stringify(FAIL_MARK)}):

@@ -4,9 +4,9 @@ import path from 'node:path';
 import { loader, root } from './test_support/load_ts.mjs';
 let calls = 0;
 const load = loader({ [path.join(root, 'app/_lib/solEditor')]: {
-  SOL_EDITOR_MODEL: 'gpt-5.6-sol',
+  SOL_EDITOR_MODEL: 'gpt-6.2-sol',
   requestSolProposal: async () => { calls++; throw new Error('Sol unavailable'); },
-  solEditorStatus: async () => ({ ready: false, provider: 'OpenAI', model: 'gpt-5.6-sol' }),
+  solEditorStatus: async () => ({ ready: false, provider: 'OpenAI', model: 'gpt-6.2-sol' }),
 }});
 const legacy = load('app/_lib/ollamaEditor.ts');
 assert.equal(legacy.editorProvider(), 'sol');

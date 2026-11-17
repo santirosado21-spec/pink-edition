@@ -15,7 +15,7 @@
 ## Decisiones del usuario — 26 de octubre de 2026
 
 - Toda inferencia editorial del motor debe usar la familia Sol: dirección, selección de recursos y revisión visual. No cambiar de modelo/proveedor ni de facturación automáticamente.
-- El catálogo comprobado de Codex en este equipo ofrece `gpt-5.6-sol`; `gpt-6.1-sol` fue rechazado con `model_not_found`. Usar el modelo disponible explícito y registrar cualquier cambio futuro.
+- 17 de noviembre de 2026: el usuario eligió el nuevo Sol `gpt-6.2-sol` (respuesta "Nuevo sol" por WhatsApp, wamid.HBgNNTIxNTU0ODU1ODk4MBUCABIYFDNBRTUxRTdENDAyRjlCQjk3RDlEAA==), disponible en el catálogo Codex confirmado por el operador ese día. El motor usa ese modelo en `scripts/sol_model.py` y `app/_lib/solEditor.ts` (recibos con revisión `sol-codex-v2`). Si una sesión ChatGPT aún no ofrece `gpt-6.2-sol`, la llamada falla con `model_not_found` y el error lo indica sin cambiar de modelo ni de facturación; el regreso es restaurar `gpt-5.6-sol` en esos dos archivos. Registro anterior: el catálogo comprobado en este equipo ofrecía `gpt-5.6-sol` y `gpt-6.1-sol` fue rechazado. Usar siempre el modelo explícito decidido por el usuario y registrar cualquier cambio futuro.
 - Las pruebas, interfaz, preparación, almacenamiento y render se ejecutan localmente hasta validar un producto que justifique rentar servidor. Las consultas a Sol usan OpenAI mediante la sesión ChatGPT de Codex.
 - Investigar patrones de otras aplicaciones con REA sobre objetivos identificados por el usuario. Documentar evidencia, límites y comportamiento observado antes de afirmar que un estilo fue extraído o implementado.
 - Mantener la elección previa de tipografías, familia editorial, ritmo y recursos en el brief de cada video.
