@@ -26,7 +26,7 @@ jobs:
       # (test_brand_catalog) y venv de herramientas (test_photo_contract).
       - run: |
           for test in test_editor_ai test_personalization_contract \
-            test_editorial_step test_resource_policy test_revise \
+            test_editorial_step test_resource_policy test_revise test_one_shot_render_retry \
             test_billing test_candidate_versions test_caption_ink \
             test_caption_pages test_commons_photos test_contextual_proposal \
             test_editorial_preferences test_editorial_preferences_ui \

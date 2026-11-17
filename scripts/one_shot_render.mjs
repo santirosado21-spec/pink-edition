@@ -3,6 +3,7 @@ import path from 'node:path';
 import { bundle } from '@remotion/bundler';
 import { selectComposition, renderMedia } from '@remotion/renderer';
 import { execFileSync } from 'node:child_process';
+import { isTransientCompositorError } from './one_shot_render_retry.mjs';
 const [folder, origin] = process.argv.slice(2);
 const write = async (file, data) => { await fs.writeFile(path.join(folder, file+'.tmp'), JSON.stringify(data)); await fs.rename(path.join(folder,file+'.tmp'),path.join(folder,file)); };
 let statusQueue = Promise.resolve();
@@ -14,10 +15,22 @@ try {
   if (edit.issues.length || !Object.values(edit.checks).every(Boolean)) throw Error('La edición tiene requisitos pendientes.');
   await status('exporting','Preparando exportación');
   const inputProps={ edit, mediaBase:`${origin}/api/local-intake/media?session=${path.basename(folder)}` };
-  const serveUrl=await bundle({entryPoint:path.resolve('src/oneShotEntry.tsx'),outDir:path.join(folder,'bundle'),publicDir:null});
-  const composition=await selectComposition({serveUrl,id:'OneShot',inputProps});
-  let last=0;
-  await renderMedia({composition,serveUrl,inputProps,codec:'h264',audioCodec:'aac',outputLocation:path.join(folder,'final.mp4'),concurrency:2,crf:20,onProgress:({progress})=>{const now=Date.now();if(now-last>2000){last=now;void status('exporting',`Exportando ${Math.round(progress*100)}%`);}}});
+  // En arranques fríos el compositor puede fallar al extraer fotogramas aunque
+  // la ruta de medios responda 200; un único reintento lo resuelve (observado
+  // el 17 nov 2026 en 4.0.534 y 4.0.544). Otros errores no se reintentan.
+  let rendered=false;
+  for (let attempt=1; attempt<=2 && !rendered; attempt++) {
+    try {
+      const serveUrl=await bundle({entryPoint:path.resolve('src/oneShotEntry.tsx'),outDir:path.join(folder,'bundle'),publicDir:null});
+      const composition=await selectComposition({serveUrl,id:'OneShot',inputProps});
+      let last=0;
+      await renderMedia({composition,serveUrl,inputProps,codec:'h264',audioCodec:'aac',outputLocation:path.join(folder,'final.mp4'),concurrency:2,crf:20,onProgress:({progress})=>{const now=Date.now();if(now-last>2000){last=now;void status('exporting',`Exportando ${Math.round(progress*100)}%`);}}});
+      rendered=true;
+    } catch (error) {
+      if (attempt===1 && isTransientCompositorError(error?.message)) { await status('exporting','Reintentando tras fallo transitorio del compositor'); continue; }
+      throw error;
+    }
+  }
   const probe=JSON.parse(execFileSync('ffprobe',['-v','error','-show_streams','-show_format','-of','json',path.join(folder,'final.mp4')],{encoding:'utf8'}));
   if (!probe.streams.some(s=>s.codec_type==='audio') || Math.abs(Number(probe.format.duration)-edit.frames/edit.fps)>.2) throw Error('La validación de audio o duración del MP4 falló.');
   await status('exporting','Verificando la voz de cada toma en el MP4');
