@@ -199,18 +199,26 @@ def orientation(folder, source):
     cache=folder/'analysis'/f"{source['id']}-orientation.json"
     if cache.exists(): return json.loads(cache.read_text())['degrees']
     binary=folder/'analysis'/'orientation-tool'
-    if not binary.exists(): command(['swiftc',ROOT/'scripts/detect_orientation.swift','-o',binary],120)
-    images=[]
-    for i, fraction in enumerate([.25,.5,.75]):
-        image=folder/'analysis'/f"{source['id']}-orientation-{i}.jpg"
-        command(['ffmpeg','-v','error','-y','-ss',str(source['seconds']*fraction),'-i',folder/source['id'],'-frames:v','1','-vf','scale=640:-2',image],30);images.append(image)
-    results=json.loads(subprocess.check_output([str(binary),*[str(p) for p in images]],timeout=30))
-    scores={degree:sum(next(s['score'] for s in r['scores'] if s['degrees']==degree) for r in results) for degree in [0,90,180,270]}
-    best=sorted(scores,key=scores.get,reverse=True)
-    degrees=best[0] if scores[best[0]]>.015 and scores[best[0]]>scores[best[1]]*1.7 else 0
-    atomic(cache,dict(degrees=degrees,scores=scores,method='Apple Vision face roll, three samples; preserve if ambiguous'))
-    for image in images: image.unlink(missing_ok=True)
-    return degrees
+    try:
+        if not binary.exists(): command(['swiftc',ROOT/'scripts/detect_orientation.swift','-o',binary],120)
+        images=[]
+        for i, fraction in enumerate([.25,.5,.75]):
+            image=folder/'analysis'/f"{source['id']}-orientation-{i}.jpg"
+            command(['ffmpeg','-v','error','-y','-ss',str(source['seconds']*fraction),'-i',folder/source['id'],'-frames:v','1','-vf','scale=640:-2',image],30);images.append(image)
+        results=json.loads(subprocess.check_output([str(binary),*[str(p) for p in images]],timeout=30))
+        scores={degree:sum(next(s['score'] for s in r['scores'] if s['degrees']==degree) for r in results) for degree in [0,90,180,270]}
+        best=sorted(scores,key=scores.get,reverse=True)
+        degrees=best[0] if scores[best[0]]>.015 and scores[best[0]]>scores[best[1]]*1.7 else 0
+        atomic(cache,dict(degrees=degrees,scores=scores,method='Apple Vision face roll, three samples; preserve if ambiguous'))
+        for image in images: image.unlink(missing_ok=True)
+        return degrees
+    except (OSError, ValueError, subprocess.SubprocessError) as error:
+        # No detector on this platform (Apple Vision is macOS-only): assume upright without
+        # claiming a measurement. ffmpeg decode still applies container rotation metadata;
+        # this only skips detecting roll inside the picture. Not cached, so a later run on a
+        # machine with the toolchain measures for real.
+        print('Orientation measurement unavailable ('+type(error).__name__+'); assuming upright',flush=True)
+        return 0
 
 def prepare_sound_events(folder, edit):
     prefs=edit['preferences']
