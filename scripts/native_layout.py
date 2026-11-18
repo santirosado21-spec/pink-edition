@@ -135,6 +135,30 @@ def longest_safe_run(frames, tops, minimum=60):
             begin=None
     return max(runs,key=lambda pair:frames[pair[1]]-frames[pair[0]]) if runs else None
 
+def refresh_support_checks(edit):
+    relevant = edit.get('resourcePolicy') == 'relevant-only'
+    for kind, check, minimum in [('card', 'cards', 0 if relevant else 2), ('broll', 'broll', 0 if relevant else 2)]:
+        edit['checks'][check] = sum(b['kind'] == kind and (kind != 'broll' or b.get('mediaType') != 'image') for b in edit['beats']) >= minimum
+    edit['checks']['graphics'] = relevant or all(any(b['kind'] == kind for b in edit['beats']) for kind in ['compare', 'steps'])
+    for check in ['cards', 'broll', 'graphics']:
+        if not edit['checks'][check]:
+            edit['issues'].append('Requisito pendiente tras medir el rostro: ' + check)
+
+
+def withhold_overlays_without_measurement(edit, reason):
+    """Non-editorial portrait edit without face measurement: withhold every overlay.
+
+    Footage, voice and captions stay unchanged; each support beat is blocked exactly as when no
+    safe band is measured, and refresh_support_checks keeps a showcase shortfall explicit instead
+    of letting an unmeasured overlay cover a face. Never infer a face position here."""
+    blocked = list(edit['beats'])
+    edit['beats'] = []
+    edit['layoutReview'] = {'blockedBeatIds': [beat['id'] for beat in blocked],
+                            'reason': 'No measured free band below all detected faces; keep original footage without that overlay. ' + reason}
+    refresh_support_checks(edit)
+    edit['visualLayoutVersion'] = 3
+
+
 def prepare_native_layout(folder, edit):
     if edit['width'] >= edit['height']:
         if edit.get('editorialVersion') == 1:
@@ -152,11 +176,14 @@ def prepare_native_layout(folder, edit):
             subprocess.run(['swiftc', str(source), '-o', str(binary)], check=True, capture_output=True, timeout=120)
         prepare_portrait_framing(folder, edit, binary)
     except (OSError, ValueError, subprocess.SubprocessError) as error:
-        if edit.get('editorialVersion') != 1:
-            raise
-        reason = 'Face measurement unavailable (' + type(error).__name__ + '); reserved composition without measured-safety claim'
-        unmeasured_editorial_layout(edit, reason)
-        (out / 'evidence.json').write_text(json.dumps({'method':'Measurement unavailable; source/audio timing unchanged','reason':reason,'beats':edit['beats']},indent=2))
+        if edit.get('editorialVersion') == 1:
+            reason = 'Face measurement unavailable (' + type(error).__name__ + '); reserved composition without measured-safety claim'
+            unmeasured_editorial_layout(edit, reason)
+            (out / 'evidence.json').write_text(json.dumps({'method':'Measurement unavailable; source/audio timing unchanged','reason':reason,'beats':edit['beats']},indent=2))
+            return
+        reason = 'Face measurement unavailable (' + type(error).__name__ + '); overlays withheld without measured-safety claim'
+        withhold_overlays_without_measurement(edit, reason)
+        (out / 'evidence.json').write_text(json.dumps({'method':'Measurement unavailable; source/audio timing unchanged','reason':reason,'beats':[{'beatId': beat_id, 'fallback': True} for beat_id in edit['layoutReview']['blockedBeatIds']]},indent=2))
         return
     for beat in edit['beats']:
         if edit.get('editorialVersion') == 1 and beat.get('presentation') in ('fullscreen', 'reserved', 'inset'):
@@ -237,12 +264,6 @@ def prepare_native_layout(folder, edit):
                                 'measuredOverlayBeatIds':[b['id'] for b in edit['beats'] if b.get('presentation') == 'overlay'],
                                 'reason':'Measured upper bands or reserved composition; no measurement claim for reserved regions'}
     edit['beats'] = [b for b in edit['beats'] if b not in blocked]
-    relevant = edit.get('resourcePolicy') == 'relevant-only'
-    for kind, check, minimum in [('card', 'cards', 0 if relevant else 2), ('broll', 'broll', 0 if relevant else 2)]:
-        edit['checks'][check] = sum(b['kind'] == kind and (kind != 'broll' or b.get('mediaType') != 'image') for b in edit['beats']) >= minimum
-    edit['checks']['graphics'] = relevant or all(any(b['kind'] == kind for b in edit['beats']) for kind in ['compare', 'steps'])
-    for check in ['cards', 'broll', 'graphics']:
-        if not edit['checks'][check]:
-            edit['issues'].append('Requisito pendiente tras medir el rostro: ' + check)
+    refresh_support_checks(edit)
     edit['visualLayoutVersion'] = 3
     (out / 'evidence.json').write_text(json.dumps({'method': EVIDENCE_METHOD, 'beats': evidence}, indent=2))

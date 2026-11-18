@@ -113,4 +113,33 @@ class EditorialLayoutTest(unittest.TestCase):
   self.assertFalse(edit['layoutReview']['measuredFreeBand'])
   self.assertEqual(len(edit['editorialReview']['warnings']),1)
   self.assertIn('Face measurement unavailable',evidence['reason'])
+ def test_prepare_portrait_non_editorial_detector_failure_withholds_overlays(self):
+  edit={'width':720,'height':1280,'resourcePolicy':'relevant-only','preferences':{},
+        'beats':[{'id':'c1','kind':'card','from':0,'frames':90},{'id':'b1','kind':'broll','from':100,'frames':120}],
+        'scenes':[{'from':0,'frames':300,'asset':'a.mp4'}],
+        'checks':{'cards':True,'broll':True,'graphics':True},'issues':[]}
+  with tempfile.TemporaryDirectory() as folder, patch('native_layout.subprocess.run',side_effect=PermissionError(13,'Permission denied','swiftc')):
+   prepare_native_layout(Path(folder),edit)
+   evidence=json.loads((Path(folder)/'analysis/native-layout/evidence.json').read_text())
+  self.assertEqual(edit['beats'],[])
+  self.assertEqual(edit['layoutReview']['blockedBeatIds'],['c1','b1'])
+  self.assertIn('overlays withheld',edit['layoutReview']['reason'])
+  self.assertTrue(edit['checks']['cards'])
+  self.assertTrue(edit['checks']['broll'])
+  self.assertEqual(edit['issues'],[])
+  self.assertEqual(edit['visualLayoutVersion'],3)
+  self.assertIn('overlays withheld',evidence['reason'])
+  self.assertEqual([b['beatId'] for b in evidence['beats']],['c1','b1'])
+ def test_prepare_portrait_non_editorial_showcase_shortfall_stays_loud(self):
+  edit={'width':720,'height':1280,'resourcePolicy':'showcase','preferences':{},
+        'beats':[{'id':'c1','kind':'card','from':0,'frames':90}],
+        'scenes':[{'from':0,'frames':300,'asset':'a.mp4'}],
+        'checks':{'cards':True,'broll':True,'graphics':True},'issues':[]}
+  with tempfile.TemporaryDirectory() as folder, patch('native_layout.subprocess.run',side_effect=PermissionError(13,'Permission denied','swiftc')):
+   prepare_native_layout(Path(folder),edit)
+  self.assertEqual(edit['beats'],[])
+  self.assertFalse(edit['checks']['cards'])
+  self.assertFalse(edit['checks']['broll'])
+  self.assertFalse(edit['checks']['graphics'])
+  self.assertEqual(edit['issues'],['Requisito pendiente tras medir el rostro: '+c for c in ['cards','broll','graphics']])
 if __name__=='__main__':unittest.main()
