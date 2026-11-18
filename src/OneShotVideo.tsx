@@ -5,7 +5,7 @@ import {FullScreenWords} from './FullScreenWords';
 import {EditorialPanel} from './EditorialPanel';
 import type { OneShotEdit } from './oneShotEdit';
 import {portraitFraming} from './portraitFraming';
-import { captionIndex, captionPage, captionPhrasePage } from './captionPages';
+import { captionIndex, captionLegacyWindow, captionPage, captionPhrasePage } from './captionPages';
 import {EDITORIAL_CAPTION_TOP, editorialBeatVisible, editorialHidesCaptions, editorialPresentation, editorialPresenterBox, editorialPresenterScale, editorialTextBeat, lerpBox} from './editorialSceneTiming';
 export type OneShotVideoProps = { edit: OneShotEdit; mediaBase: string; onMediaError?: (message: string) => void };
 import {editorMedia as url} from './editorMedia';
@@ -50,7 +50,7 @@ function LoadedOneShotVideo({ edit, mediaBase, onMediaError }: OneShotVideoProps
   const modernCaptions = (edit.captionLayoutVersion ?? 0) >= 2;
   const shortPages = modernCaptions && (!edit.captionAdaptations || edit.captionAdaptations.includes('short-caption-pages'));
   const activeWord = modernCaptions ? captionIndex(edit.captions, frame / fps * 1000) : edit.captions.findIndex(c => frame / fps * 1000 >= c.startMs && frame / fps * 1000 < c.endMs);
-  const words = shortPages ? (nativeV3 ? captionPhrasePage : captionPage)(edit.captions, activeWord) : activeWord < 0 ? [] : edit.captions.slice(Math.floor(activeWord / 6) * 6, Math.floor(activeWord / 6) * 6 + 6);
+  const words = shortPages ? (nativeV3 ? captionPhrasePage : captionPage)(edit.captions, activeWord) : activeWord < 0 ? [] : captionLegacyWindow(edit.captions, activeWord);
   const fullScreenWords = !editorialV1 && edit.preferences.emphasis_mode === 'fullscreen' && activeBeat?.kind === 'card';
   const screenWords = fullScreenWords ? captionPhrasePage(edit.captions,activeWord).map(word=>word.text.trim()) : [];
   const showFullScreenWords = fullScreenWords && screenWords.length > 0;

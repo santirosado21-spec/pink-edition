@@ -33,3 +33,17 @@ for(let i=0;i<phraseCaptions.length;){
 }
 assert.deepEqual(phraseSeen,phraseCaptions,'Phrase grouping preserves every token and timestamp');
 console.log('PASS grammatical boundaries and literal timestamp coverage');
+// Scene cuts: pageBreakAfter keeps every take's text inside its own scene.
+const {captionLegacyWindow}=await import('../src/captionPages.ts');
+const sceneA=['primera','toma','termina','aquí.'].map((text,i)=>({text,startMs:i*200,endMs:i*200+150}));
+const sceneB=['segunda','toma','empieza','ahora'].map((text,i)=>({text,startMs:800+i*200,endMs:800+i*200+150}));
+sceneA[3].pageBreakAfter=true;
+const cut=[...sceneA,...sceneB];
+assert.equal(captionIndex(cut,775),-1,'A scene cut is not bridged even under 450ms');
+for(let j=4;j<8;j++){const p=cut&&captionPage(cut,j);assert.ok(p.length&&p.every(w=>sceneB.includes(w)),'captionPage clips at scene cut');}
+const cutSeen=[];for(let i=0;i<cut.length;){const p=captionPage(cut,i);assert.ok(p.length);cutSeen.push(...p);i+=p.length;}
+assert.deepEqual(cutSeen,cut,'Scene-clipped pages preserve every token and timestamp');
+const wB=captionLegacyWindow(cut,4);assert.ok(wB.length&&wB.every(w=>sceneB.includes(w)),'legacy window excludes the previous take');
+assert.deepEqual(captionLegacyWindow(cut,3),sceneA,'legacy window ends at the cut');
+for(let j=4;j<8;j++){const p=captionPhrasePage(cut,j);assert.ok(p.length&&p.every(w=>sceneB.includes(w)),'phrase page clips at scene cut');}
+console.log('PASS scene cuts never mix takes in any caption route');

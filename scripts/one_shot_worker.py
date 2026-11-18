@@ -328,6 +328,7 @@ def main(folder):
                 start=map_time(float(word['start']),intervals); end=map_time(float(word['end']),intervals)
                 item=dict(text=text,start=offset+round(start*30),end=offset+round(end*30),id=len(words));words.append(item);scene_words.append(item)
                 captions.append(dict(text=' '+text,startMs=(offset/30+start)*1000,endMs=(offset/30+end)*1000,timestampMs=None,confidence=None))
+        if scene_words: captions[-1]['pageBreakAfter']=True # Scene cut: no caption page may drag text from the previous take.
         scenes.append(dict(id=source['id'],name=source['name'],asset=proxy,from_=offset,frames=duration,trimStart=begin,sourceSegments=intervals,internalRemovedSeconds=bounds['internalRemovedSeconds'],originalSeconds=source['seconds'],width=source['height'] if degrees in [90,270] else source['width'],height=source['width'] if degrees in [90,270] else source['height']))
         scenes[-1]['from']=scenes[-1].pop('from_'); offset+=duration
     if not words: raise ValueError('No se detectó habla legible. Revisa el audio de las grabaciones.')

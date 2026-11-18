@@ -4,7 +4,8 @@ export function captionIndex(captions: Caption[], timeMs: number): number {
   const active = captions.findIndex(word => timeMs >= word.startMs && timeMs < word.endMs);
   if (active >= 0) return active;
   for (let i = captions.length - 2; i >= 0; i--) {
-    if (timeMs >= captions[i].endMs && timeMs < captions[i + 1].startMs &&
+    // A scene cut (pageBreakAfter) is never bridged: no stale text from the previous take.
+    if (!captions[i].pageBreakAfter && timeMs >= captions[i].endMs && timeMs < captions[i + 1].startMs &&
         captions[i + 1].startMs - captions[i].endMs <= 450) return i;
   }
   return -1;
@@ -20,7 +21,7 @@ export function captionPage(captions: Caption[], active: number): Caption[] {
     while (end < captions.length && end - start < 4) {
       const next = captions[end];
       const size = length + 1 + next.text.trim().length;
-      if (size > 36 || next.startMs - captions[end - 1].endMs > 450) break;
+      if (size > 36 || next.startMs - captions[end - 1].endMs > 450 || captions[end - 1].pageBreakAfter) break;
       length = size;
       end++;
     }
@@ -28,6 +29,22 @@ export function captionPage(captions: Caption[], active: number): Caption[] {
     start = end;
   }
   return [];
+}
+
+// Legacy fixed window of six words, clipped at scene cuts: a page never mixes takes.
+export function captionLegacyWindow(captions: Caption[], active: number): Caption[] {
+  if (active < 0 || active >= captions.length) return [];
+  const from = Math.floor(active / 6) * 6;
+  const window = captions.slice(from, from + 6);
+  let start = 0;
+  for (let i = 0; i < window.length && from + i < active; i++) {
+    if (window[i].pageBreakAfter) start = i + 1;
+  }
+  let end = window.length;
+  for (let i = start; i < window.length; i++) {
+    if (window[i].pageBreakAfter && from + i >= active) { end = i + 1; break; }
+  }
+  return window.slice(start, end);
 }
 
 const hangingWords = new Set('a al de del el la los las un una unos unas en por para con sin y o que me te se lo le les mi tu su como si estos estas este esta'.split(' '));
