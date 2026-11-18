@@ -41,6 +41,17 @@ Cada resultado importado lleva `packageSha256`, `model`, `edit` y, opcionalmente
 
 El paquete contiene información privada del encargo: se conserva en `work/`, fuera de Git; el script no lo publica ni lo envía. El smoke test compara el control consigo mismo para validar el arnés; **no es una comparación Sol/Opus**. Sol sigue siendo el modelo del producto.
 
+## Comparación contra un modelo externo (baseline)
+
+Para contrastar Cutkind con otro modelo sobre el MISMO encargo:
+
+1. Genera el paquete con `package` sobre el edit real de Cutkind. El paquete fija escenas, captions, preferencias, contrato de renderer y sha256 de cada recurso: es el insumo idéntico que recibe el baseline.
+2. El modelo externo recibe el paquete y debe devolver un JSON con `packageSha256` (el mismo), `model`, `edit` (su propuesta bajo el mismo contrato de renderer) y, opcionalmente, `usage` + `rates` para el estimado declarado de API. Sin `edit` bajo el contrato no hay comparación válida.
+3. `compare` verifica lo automatable: misma línea de voz y escenas, citas y etiquetas ancladas a palabras reales en su tiempo, recursos verificados por hash. Lo que no pasa el contrato ya no necesita revisión humana para descartarse.
+4. Lo estético lo decide el dueño a ciegas sobre los dos MP4 renderizados del mismo paquete (`winner` queda `null` hasta entonces), con la rúbrica: lectura, continuidad, pertinencia, composición, cercanía a referencia y minutos de corrección.
+
+La mejora real se afirma solo con ese veredicto ciego y los costos completos por video aceptado; ninguna métrica automática declara superioridad por sí sola.
+
 ## Comprobaciones y límites
 
 Se prueban contratos de preferencias, límites, fuentes, snapshots, esquemas reales de Sol, biblioteca curada y estados del renderer. El test con MP4 de pantalla completa combina pruebas estructurales con medición de cuatro esquinas por frame; esa medida no reconoce la zona central ni sustituye revisión humana. El QC de audio compara muestras por toma y niveles, no escucha semántica completa.
