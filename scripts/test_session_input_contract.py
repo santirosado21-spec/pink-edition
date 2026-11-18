@@ -48,3 +48,27 @@ class SessionInputContractTests(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class SourceVoiceContractTests(unittest.TestCase):
+    def test_source_with_words_passes(self):
+        from one_shot_worker import assert_source_voice
+        assert_source_voice({'id': 'a', 'name': 'voz.mp4'},
+                            {'segments': [{'words': [{'word': ' hola', 'start': 0, 'end': 1}]}]})
+
+    def test_voiceless_source_is_named(self):
+        from one_shot_worker import assert_source_voice
+        with self.assertRaisesRegex(ValueError, 'timelapse.webm'):
+            assert_source_voice({'id': 'b', 'name': 'timelapse.webm'}, {'segments': []})
+
+    def test_blank_words_and_missing_words_key_count_as_voiceless(self):
+        from one_shot_worker import assert_source_voice
+        for transcript in ({'segments': [{'words': [{'word': '   ', 'start': 0, 'end': 1}]}]},
+                           {'segments': [{}]}, {}):
+            with self.assertRaisesRegex(ValueError, 'No se detectó habla legible en c.mp4'):
+                assert_source_voice({'id': 'c', 'name': 'c.mp4'}, transcript)
+
+    def test_source_without_name_falls_back_to_id(self):
+        from one_shot_worker import assert_source_voice
+        with self.assertRaisesRegex(ValueError, 'clip-9'):
+            assert_source_voice({'id': 'clip-9'}, {'segments': []})

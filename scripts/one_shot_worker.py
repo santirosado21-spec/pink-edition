@@ -247,6 +247,19 @@ def session_directions(data):
     return reference_directions()
 
 
+def assert_source_voice(source, transcript):
+    """Fail fast with the file name when one source has no legible speech.
+
+    Without this, a voiceless source passes bounds (VAD keeps the full clip as one
+    interval), reaches export and dies in check_one_shot_audio with a raw traceback
+    (observed 17 nov 2026 with a speech-free CC BY 3.0 timelapse: correlation 0.0).
+    """
+    words = [w for s in transcript.get('segments', []) for w in s.get('words', [])
+             if str(w.get('word', '')).strip()]
+    if not words:
+        name = source.get('name') or source['id']
+        raise ValueError(f'No se detectó habla legible en {name}. Revisa el audio de esa grabación o retírala del encargo.')
+
 def validate_input(data):
     """Fail fast with a clear message when the session input lacks required fields."""
     if not isinstance(data.get('sources'), list) or not data['sources']:
@@ -288,6 +301,7 @@ def main(folder):
         if not transcript.exists():
             command([ROOT/'.venv-asr/bin/python',ROOT/'scripts/transcribe.py','--source',folder/source['id'],'--output',transcript,'--language',prefs.get('language','mixed'),'--vocabulary',', '.join(filter(None,[prefs.get('brand_name'),prefs.get('vocabulary')]))])
         result=json.loads(transcript.read_text())
+        assert_source_voice(source, result)
         bounds_file=folder/'analysis'/f"{source['id']}-bounds-v3.json"
         if not bounds_file.exists(): command([ROOT/'.venv-asr/bin/python',ROOT/'scripts/one_shot_bounds.py',folder/source['id'],transcript,bounds_file])
         bounds=json.loads(bounds_file.read_text()); intervals=bounds['intervals']; begin=bounds['start']; length=sum(v['end']-v['start'] for v in intervals)
