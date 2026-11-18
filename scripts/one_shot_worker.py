@@ -239,9 +239,24 @@ def session_directions(data):
     return reference_directions()
 
 
+def validate_input(data):
+    """Fail fast with a clear message when the session input lacks required fields."""
+    if not isinstance(data.get('sources'), list) or not data['sources']:
+        raise ValueError('La sesión no tiene archivos de video. Vuelve a subir los archivos.')
+    missing=[]
+    for index, source in enumerate(data['sources']):
+        for field in ('id','name','seconds','width','height'):
+            if field not in source:
+                missing.append(f"{source.get('name') or f'archivo {index+1}'}: falta {field}")
+    if missing:
+        raise ValueError('La sesión está incompleta (' + '; '.join(missing[:4]) + '). Vuelve a subir los archivos.')
+    brief=data.get('brief') or {}
+    if not isinstance(brief.get('preferences'), dict):
+        raise ValueError('La sesión no tiene las preferencias del cuestionario. Vuelve a subir los archivos.')
+
 def main(folder):
     assert_ready()
-    data=json.loads((folder/'input.json').read_text()); brief=data['brief']; prefs=brief['preferences']; relevant=brief.get('resourcePolicy')=='relevant-only'; scenes=[]; captions=[]; words=[]; offset=0
+    data=json.loads((folder/'input.json').read_text()); validate_input(data); brief=data['brief']; prefs=brief['preferences']; relevant=brief.get('resourcePolicy')=='relevant-only'; scenes=[]; captions=[]; words=[]; offset=0
     (folder/'analysis').mkdir(exist_ok=True)
     status(folder, 'Clasificando originales y referencias con Sol')
     intake = [dict(id=source['id'], **inspect_media(folder/source['id'])) for source in data['sources']]

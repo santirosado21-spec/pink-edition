@@ -100,9 +100,9 @@ class MediaIntakeTest(unittest.TestCase):
     def test_worker_also_blocks_direct_calls_before_transcription(self):
         with tempfile.TemporaryDirectory() as temp:
             folder = Path(temp)
-            (folder/'input.json').write_text(json.dumps({'brief': {'preferences': {}}, 'sources': [{'id': 'fixture'}]}))
+            (folder/'input.json').write_text(json.dumps({'brief': {'preferences': {}}, 'sources': [{'id': 'fixture', 'name': 'fixture.mp4', 'seconds': 1, 'width': 360, 'height': 640}]}))
             with patch('one_shot_worker.assert_ready'), patch('one_shot_worker.inspect_media', return_value={'route': 'reference', 'patterns': []}), patch('one_shot_worker.command') as asr, patch('one_shot_worker.editorial_model') as director:
-                with self.assertRaisesRegex(ValueError, 'fixture: ya tiene edición'):
+                with self.assertRaisesRegex(ValueError, 'fixture.mp4: ya tiene edición'):
                     worker_main(folder)
                 asr.assert_not_called()
                 director.assert_not_called()
