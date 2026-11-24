@@ -9,7 +9,7 @@ const font = {id: 'fixture', family: 'sans-serif', fontStyle: 'normal', weight: 
 // Real component markup, with media/font/network and React lifecycle explicitly
 // doubled. These assertions verify frame contracts, not raster/font aesthetics.
 const load = loader({
-  react: {useEffect: () => {}, useState: initial => [typeof initial === 'function' ? initial() : initial === false ? true : initial, () => {}]},
+  react: {useEffect: () => {}, useState: initial => [typeof initial === 'function' ? initial() : initial === false ? true : initial, () => {}], createContext: value => ({value}), useContext: context => context?.value ?? null},
   remotion: {Sequence, AbsoluteFill: 'absolute-fill', Audio: 'audio', Loop: 'loop', Img: 'image', OffthreadVideo: 'source-video', interpolate, useCurrentFrame: () => currentFrame, useVideoConfig: () => ({fps: 30}), delayRender: () => 1, continueRender: () => {}, cancelRender: error => {throw error;}, getRemotionEnvironment: () => ({isRendering: false})},
   '@remotion/media': {Video: 'media-video'},
   [path.resolve('src/editorFonts')]: {editorFont: () => font, loadEditorFont: async () => {}},
